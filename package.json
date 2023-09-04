@@ -11,8 +11,12 @@
     "lint": "eslint . --report-unused-disable-directives",
     "test": "echo yolo"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "data annotation",
+    "typescript",
+    "mongodb"
+  ],
+  "author": "Minh Tri Pham",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"
