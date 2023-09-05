@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  nginx:
+    ports:
+      - 3000:80
+
+  node-app:
+    build:
+      context: .
+      args:
+        - NODE_ENV=test
+    environment:
+      - NODE_ENV=test
+    command: npm test
+    volumes:
+      - ./:/app:ro
+      - ./src/static:/app/src/static
+    container_name: data-annotation-test

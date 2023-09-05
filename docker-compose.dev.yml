@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  nginx:
+    ports:
+      - 3000:80
+
+  node-app:
+    build:
+      context: .
+      args:
+        - NODE_ENV=dev
+    environment:
+      - NODE_ENV=dev
+    command: npm run dev
+    volumes:
+      - ./:/app:ro
+      - ./src/static:/app/src/static
+    container_name: data-annotation-dev

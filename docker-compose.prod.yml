@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  nginx:
+    ports:
+      - 80:80
+
+  node-app:
+    build:
+      context: .
+      args:
+        - NODE_ENV=prod
+    environment:
+      - NODE_ENV=prod
+    command: bash -c "npm run build && npm start"
