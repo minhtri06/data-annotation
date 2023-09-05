@@ -15,5 +15,4 @@ services:
     command: npm run dev
     volumes:
       - ./:/app:ro
-      - ./src/static:/app/src/static
     container_name: data-annotation-dev
