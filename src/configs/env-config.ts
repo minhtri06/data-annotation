@@ -5,14 +5,17 @@ dotenv.config()
 
 class EnvConfig {
   NODE_ENV: 'dev' | 'test' | 'prod'
-  MONGODB_URL: string
   PORT: number
+  CLIENT_URL: string
+
+  MONGODB_URL: string
 
   constructor() {
     const envSchema = Joi.object<EnvConfig>({
       NODE_ENV: Joi.string().valid('dev', 'test', 'prod').required(),
-      MONGODB_URL: Joi.string().required(),
       PORT: Joi.number().integer().required(),
+      CLIENT_URL: Joi.string().required(),
+      MONGODB_URL: Joi.string().required(),
     }).unknown()
 
     const validation = envSchema.validate(process.env)
@@ -21,9 +24,10 @@ class EnvConfig {
     }
 
     const value = validation.value
-    this.MONGODB_URL = value.MONGODB_URL
     this.NODE_ENV = value.NODE_ENV
     this.PORT = value.PORT
+    this.CLIENT_URL = value.CLIENT_URL
+    this.MONGODB_URL = value.MONGODB_URL
   }
 }
 
