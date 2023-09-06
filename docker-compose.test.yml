@@ -12,7 +12,7 @@ services:
         - NODE_ENV=test
     environment:
       - NODE_ENV=test
-      - MONGODB_URL=mongodb://root:password123@mongo:27017/data-annotation-test?authSource=admin
+      - MONGODB_URL=mongodb://root:password123@mongodb:27017/data-annotation-test?authSource=admin
     command: npm test
     volumes:
       - ./:/app:ro

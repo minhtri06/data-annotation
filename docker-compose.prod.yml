@@ -12,5 +12,5 @@ services:
         - NODE_ENV=prod
     environment:
       - NODE_ENV=prod
-      - MONGODB_URL=mongodb://root:password123@mongo:27017/data-annotation?authSource=admin
+      - MONGODB_URL=mongodb://root:password123@mongodb:27017/data-annotation?authSource=admin
     command: bash -c "npm run build && npm start"

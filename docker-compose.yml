@@ -11,10 +11,10 @@ services:
     depends_on:
       - mongo
 
-  mongo:
+  mongodb:
     image: mongo
     volumes:
-      - mongo-db:/data/db
+      - mongodb:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password123
@@ -25,5 +25,5 @@ services:
       - 'redis:/data'
 
 volumes:
-  mongo-db:
+  mongodb:
   redis:
