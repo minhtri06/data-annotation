@@ -1,4 +1,7 @@
 import Joi from 'joi'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 class EnvConfig {
   NODE_ENV: 'dev' | 'test' | 'prod'
