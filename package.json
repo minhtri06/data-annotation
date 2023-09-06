@@ -12,8 +12,8 @@
     "test": "echo yolo"
   },
   "keywords": [
-    "data annotation",
-    "typescript",
+    "express-typescript",
+    "data-annotation",
     "mongodb"
   ],
   "author": "Minh Tri Pham",
