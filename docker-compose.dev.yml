@@ -3,7 +3,7 @@ version: '3'
 services:
   nginx:
     ports:
-      - 3000:80
+      - 8000:80
 
   node-app:
     build:
@@ -15,5 +15,5 @@ services:
       - MONGODB_URL=mongodb://root:password123@mongodb:27017/data-annotation-dev?authSource=admin
     command: npm run dev
     volumes:
-      - ./:/app:ro
+      - ./:/app
     container_name: data-annotation-dev
