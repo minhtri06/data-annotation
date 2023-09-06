@@ -10,6 +10,8 @@ services:
     build: .
     depends_on:
       - mongo
+    environment:
+      - PORT=8000
 
   mongodb:
     image: mongo
