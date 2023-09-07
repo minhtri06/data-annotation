@@ -4,11 +4,13 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 class EnvConfig {
-  NODE_ENV: 'dev' | 'test' | 'prod'
-  PORT: number
-  CLIENT_URL: string
-
-  MONGODB_URL: string
+  NODE_ENV!: 'dev' | 'test' | 'prod'
+  PORT!: number
+  CLIENT_URL!: string
+  MONGODB_URL!: string
+  JWT_SECRET!: string
+  JWT_ACCESS_EXPIRATION_MINUTES!: number
+  JWT_REFRESH_EXPIRATION_DAYS!: number
 
   constructor() {
     const envSchema = Joi.object<EnvConfig>({
@@ -16,6 +18,9 @@ class EnvConfig {
       PORT: Joi.number().integer().required(),
       CLIENT_URL: Joi.string().required(),
       MONGODB_URL: Joi.string().required(),
+      JWT_SECRET: Joi.string().required(),
+      JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().integer().min(1),
+      JWT_REFRESH_EXPIRATION_DAYS: Joi.number().integer().min(1),
     }).unknown()
 
     const validation = envSchema.validate(process.env)
@@ -23,11 +28,7 @@ class EnvConfig {
       throw new Error('Config validation error: ' + validation.error.message)
     }
 
-    const value = validation.value
-    this.NODE_ENV = value.NODE_ENV
-    this.PORT = value.PORT
-    this.CLIENT_URL = value.CLIENT_URL
-    this.MONGODB_URL = value.MONGODB_URL
+    Object.assign(this, validation.value)
   }
 }
 
