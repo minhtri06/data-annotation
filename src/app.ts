@@ -7,6 +7,7 @@ import morgan from 'morgan'
 import compression from 'compression'
 
 import router from './routes'
+import { GeneralMiddleware } from './middlewares'
 import envConfig from './configs/env-config'
 
 const app = express()
@@ -28,6 +29,9 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/v1', router)
 
 // handle error
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+app.use(GeneralMiddleware.handleNotFound)
+app.use(GeneralMiddleware.handleException)
 
 app.listen(envConfig.PORT, () =>
   console.log('app is listening on port ' + envConfig.PORT),
