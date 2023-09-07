@@ -8,9 +8,3 @@ export type RequestHandler = (
   res: Response,
   next?: NextFunction,
 ) => Promise<Response | void> | Response | void
-
-type myFunc = (a: number, b?: string) => void
-
-const yolo: myFunc = () => {}
-
-yolo(1)
