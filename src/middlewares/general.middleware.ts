@@ -73,8 +73,11 @@ class GeneralMiddleware {
           role: Role
         }
       } catch (error) {
-        if (!required) return next()
-        else throw unauthorizedError
+        if (!required) {
+          return next()
+        } else {
+          throw unauthorizedError
+        }
       }
       if (requiredPrivileges.length !== 0) {
         const userPrivileges = rolePrivileges[payload.role]
@@ -85,7 +88,7 @@ class GeneralMiddleware {
         }
       }
       req.user
-      next()
+      return next()
     }
   }
 }
