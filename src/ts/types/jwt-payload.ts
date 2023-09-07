@@ -1,3 +1,5 @@
 import { Role } from './roles'
 
-export type JwtPayload = { sub: string; role: Role }
+type JwtPayload = { sub: string; role: Role }
+
+export default JwtPayload

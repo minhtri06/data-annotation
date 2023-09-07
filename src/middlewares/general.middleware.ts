@@ -6,9 +6,7 @@ import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
 import rolePrivileges from '../configs/role-config'
-import { RequestHandler } from '../ts/types/request-handler'
-import { Privilege } from '../ts/types/roles'
-import { JwtPayload } from '../ts/types/jwt-payload'
+import { JwtPayload, Privilege, RequestHandler } from '../ts/types'
 
 class GeneralMiddleware {
   public static handleNotFound: RequestHandler = (req, res) => {
