@@ -7,7 +7,8 @@ import jwt from 'jsonwebtoken'
 import envConfig from '../configs/env-config'
 import rolePrivileges from '../configs/role-config'
 import { RequestHandler } from '../ts/types/request-handler'
-import { Privilege, Role } from '../ts/types/roles'
+import { Privilege } from '../ts/types/roles'
+import { JwtPayload } from '../ts/types/jwt-payload'
 
 class GeneralMiddleware {
   public static handleNotFound: RequestHandler = (req, res) => {
@@ -69,9 +70,7 @@ class GeneralMiddleware {
       }
       let payload
       try {
-        payload = jwt.verify(accessToken, envConfig.JWT_SECRET) as jwt.JwtPayload & {
-          role: Role
-        }
+        payload = jwt.verify(accessToken, envConfig.JWT_SECRET) as JwtPayload
       } catch (error) {
         if (!required) {
           return next()
