@@ -1,7 +1,5 @@
 import Joi from 'joi'
 
-export type Validator = {
-  body?: Joi.Schema
-  query?: Joi.Schema
-  params?: Joi.Schema
-}
+export type validatorProp = 'body' | 'query' | 'params'
+
+export type Validator = Record<validatorProp, Joi.Schema | undefined>
