@@ -6,7 +6,14 @@ import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
 import rolePrivileges from '../configs/role-config'
-import { JwtPayload, Privilege, RequestHandler } from '../ts/types'
+import {
+  EmptyObject,
+  JwtPayload,
+  Privilege,
+  RequestHandler,
+  Validator,
+} from '../ts/types'
+import Joi from 'joi'
 
 class GeneralMiddleware {
   public static handleNotFound: RequestHandler = (req, res) => {
@@ -85,6 +92,25 @@ class GeneralMiddleware {
         }
       }
       req.user
+      return next()
+    }
+  }
+
+  public static validate = (validator: Validator): RequestHandler => {
+    const emptySchema = Joi.object<EmptyObject>({})
+
+    return (req, res, next) => {
+      const validatorKeys: (keyof Validator)[] = ['body', 'params', 'query']
+      for (const key of validatorKeys) {
+        const schema = validator[key] || emptySchema
+        const validation = schema.validate(req[key], {
+          errors: { wrap: { label: '' } },
+        })
+        if (validation.error) {
+          return next(new createError.BadRequest(validation.error.message))
+        }
+        req[key] = validation.value
+      }
       return next()
     }
   }
