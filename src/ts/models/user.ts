@@ -1,4 +1,4 @@
-import { Role } from '../common/roles'
+import { Role } from '../types/roles'
 
 export interface IUser {
   _id: string
