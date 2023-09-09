@@ -6,8 +6,7 @@ import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
 import rolePrivileges from '../configs/role-config'
-import { EmptyObject, JwtPayload, Privilege, ReqHandler, ReqValidator } from '../ts/types'
-import Joi from 'joi'
+import { JwtPayload, Privilege, ReqHandler, ReqValidator } from '../ts/types'
 
 class GeneralMiddleware {
   public static handleNotFound: ReqHandler = (req, res) => {
@@ -91,20 +90,15 @@ class GeneralMiddleware {
   }
 
   public static validate = (validator: ReqValidator): ReqHandler => {
-    const emptySchema = Joi.object<EmptyObject>({})
-
     return (req, res, next) => {
-      const validatorKeys: (keyof ReqValidator)[] = ['body', 'params', 'query']
-      for (const key of validatorKeys) {
-        const schema = validator[key] || emptySchema
-        const validation = schema.validate(req[key], {
-          errors: { wrap: { label: '' } },
-        })
-        if (validation.error) {
-          return next(new createError.BadRequest(validation.error.message))
-        }
-        req[key] = validation.value
+      const validation = validator.unknown().validate(req)
+      if (validation.error) {
+        return next(new createError.BadRequest(validation.error.message))
       }
+      const value = validation.value
+      req.body = value.body || {}
+      req.query = value.query || {}
+      req.params = value.params || {}
       return next()
     }
   }

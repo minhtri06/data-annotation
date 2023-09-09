@@ -1,7 +1,7 @@
 import Joi from 'joi'
 
-export type ReqValidator<Body = object, Params = object, Query = object> = {
-  body?: Joi.ObjectSchema<Body>
-  params?: Joi.ObjectSchema<Params>
-  query?: Joi.ObjectSchema<Query>
-}
+export type ReqValidator = Joi.ObjectSchema<{
+  body?: object
+  query?: object
+  params?: object
+}>
