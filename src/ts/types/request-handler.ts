@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
-import { IUser } from '../interfaces/user'
+import { IUser } from '../models/user'
 
-interface CustomRequest<Body = object, Params = object, Query = object>
-  extends Request<Params, object, Body, Query> {
+type CustomRequest = Request<object, object, object, object> & {
   user?: IUser | Pick<IUser, '_id' | 'role'>
 }
 
-export type RequestHandler<Body = object, Params = object, Query = object> = (
-  req: CustomRequest<Body, Params, Query>,
+export type RequestHandler<ReqContext = object> = (
+  req: CustomRequest & ReqContext,
   res: Response,
   next: NextFunction,
 ) => Promise<Response | void> | Response | void
