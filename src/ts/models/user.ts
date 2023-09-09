@@ -10,4 +10,6 @@ export interface IUser {
   birthOfDate: Date
   phoneNumber: string
   address: string
+  createdAt: Date
+  updatedAt: Date
 }
