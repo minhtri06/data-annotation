@@ -33,6 +33,4 @@ app.use('/api/v1', router)
 app.use(GeneralMiddleware.handleNotFound)
 app.use(GeneralMiddleware.handleException)
 
-app.listen(envConfig.PORT, () =>
-  console.log('app is listening on port ' + envConfig.PORT),
-)
+export default app
