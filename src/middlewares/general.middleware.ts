@@ -91,7 +91,9 @@ class GeneralMiddleware {
 
   public static validate = (validator: ReqValidator): ReqHandler => {
     return (req, res, next) => {
-      const validation = validator.unknown().validate(req)
+      const validation = validator.unknown().validate(req, {
+        errors: { wrap: { label: '' } },
+      })
       if (validation.error) {
         return next(new createError.BadRequest(validation.error.message))
       }
