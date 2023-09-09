@@ -5,7 +5,7 @@ type CustomRequest = Request<object, object, object, object> & {
   user?: IUser | Pick<IUser, '_id' | 'role'>
 }
 
-export type RequestHandler<ReqContext = object> = (
+export type ReqHandler<ReqContext = object> = (
   req: CustomRequest & ReqContext,
   res: Response,
   next: NextFunction,

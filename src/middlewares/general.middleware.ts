@@ -6,17 +6,11 @@ import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
 import rolePrivileges from '../configs/role-config'
-import {
-  EmptyObject,
-  JwtPayload,
-  Privilege,
-  RequestHandler,
-  Validator,
-} from '../ts/types'
+import { EmptyObject, JwtPayload, Privilege, ReqHandler, ReqValidator } from '../ts/types'
 import Joi from 'joi'
 
 class GeneralMiddleware {
-  public static handleNotFound: RequestHandler = (req, res) => {
+  public static handleNotFound: ReqHandler = (req, res) => {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
@@ -61,7 +55,7 @@ class GeneralMiddleware {
   }: {
     requiredPrivileges?: Privilege[]
     required?: boolean
-  } = {}): RequestHandler => {
+  } = {}): ReqHandler => {
     return (req, res, next) => {
       const unauthorizedError = createError.Unauthorized('Unauthorized!')
       let accessToken = req.headers['authorization']
@@ -96,11 +90,11 @@ class GeneralMiddleware {
     }
   }
 
-  public static validate = (validator: Validator): RequestHandler => {
+  public static validate = (validator: ReqValidator): ReqHandler => {
     const emptySchema = Joi.object<EmptyObject>({})
 
     return (req, res, next) => {
-      const validatorKeys: (keyof Validator)[] = ['body', 'params', 'query']
+      const validatorKeys: (keyof ReqValidator)[] = ['body', 'params', 'query']
       for (const key of validatorKeys) {
         const schema = validator[key] || emptySchema
         const validation = schema.validate(req[key], {

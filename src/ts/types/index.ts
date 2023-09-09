@@ -1,5 +1,5 @@
 export { JwtPayload } from './jwt-payload'
-export { RequestHandler } from './request-handler'
+export { ReqHandler } from './req-handler'
 export { Role, Privilege } from './roles'
-export { Validator } from './validator'
+export { ReqValidator } from './req-validator'
 export { EmptyObject } from './util-types'
