@@ -1,1 +1,1 @@
-export { IUser } from './user'
+export { IUser } from './user-model'
