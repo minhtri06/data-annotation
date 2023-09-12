@@ -1,4 +1,5 @@
 export { JwtPayload } from './jwt-payload'
+export * from './mongoose'
 export { ReqHandler } from './req-handler'
 export { Role, Privilege } from './roles'
 export { ReqValidator } from './req-validator'
