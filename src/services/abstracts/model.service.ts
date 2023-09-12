@@ -1,6 +1,7 @@
 import createError from 'http-errors'
-import { FilterQuery, Model, ObjectId, Schema } from 'mongoose'
+import { FilterQuery, Model as MongooseModel, ObjectId, Schema } from 'mongoose'
 import { document } from '../../types'
+import { injectable } from 'inversify'
 
 export interface IModelService<T> {
   getOne(filter: FilterQuery<T>): Promise<document<T> | null>
@@ -12,8 +13,9 @@ export interface IModelService<T> {
   getOneByIdOrError(id: string | ObjectId): Promise<document<T>>
 }
 
+@injectable()
 export abstract class ModelService<T> implements IModelService<T> {
-  constructor(protected Model: Model<T>) {}
+  constructor(protected Model: MongooseModel<T>) {}
 
   async getOne(filter: FilterQuery<T>): Promise<document<T> | null> {
     return await this.Model.findOne(filter)

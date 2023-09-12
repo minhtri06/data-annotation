@@ -1,10 +1,13 @@
 import { IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
-import { Model } from 'mongoose'
 import { IUser } from '../models/interfaces'
+import { inject, injectable } from 'inversify'
+import { TYPES } from '../constants'
+import { Model as MongooseModel } from 'mongoose'
 
+@injectable()
 export class UserService extends ModelService<IUser> implements IUserService {
-  constructor(protected Model: Model<IUser>) {
+  constructor(@inject(TYPES.USER_MODEL) Model: MongooseModel<IUser>) {
     super(Model)
   }
 }
