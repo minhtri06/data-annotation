@@ -6,7 +6,6 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import compression from 'compression'
 
-import router from './routes'
 import { GeneralMiddleware } from './middlewares'
 import envConfig from './configs/env-config'
 
@@ -24,9 +23,6 @@ app.use(
 )
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-// setup routes
-app.use('/api/v1', router)
 
 // handle error
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
