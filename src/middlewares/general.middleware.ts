@@ -17,7 +17,10 @@ class GeneralMiddleware {
     err: Error & { code?: number; keyValue?: { [key: string]: string } },
     req,
     res,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next,
   ) => {
+    console.log('object')
     if (err instanceof createError.HttpError) {
       return res
         .status(err.statusCode)
