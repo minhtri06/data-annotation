@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { IUser } from '../ts/models'
+import { IUser } from './interfaces'
 import rolePrivileges from '../configs/role-config'
 
 const userSchema = new mongoose.Schema<IUser>(

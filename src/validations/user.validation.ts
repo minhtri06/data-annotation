@@ -1,7 +1,7 @@
 import Joi from 'joi'
 // import { Validator } from '../ts/common'
-import { GetUsers } from '../ts/req-schemas'
-import { ReqValidator } from '../ts/types'
+import { GetUsers } from '../controllers/req-schemas'
+import { ReqValidator } from '../types'
 
 export class UserValidator {
   static [prop: string]: ReqValidator

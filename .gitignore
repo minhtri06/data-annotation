@@ -2,5 +2,4 @@
 /dist
 /.env
 /.eslintcache
-/test.js
-/test.ts
+/sandbox.js

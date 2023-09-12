@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { IUser } from '../models/user'
+import { IUser } from '../models/interfaces'
 
 type CustomRequest = Request<object, object, object, object> & {
   user?: IUser | Pick<IUser, '_id' | 'role'>

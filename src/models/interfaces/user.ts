@@ -1,5 +1,5 @@
-import { Role } from '../types/roles'
 import mongoose from 'mongoose'
+import { Role } from '../../types'
 
 export interface IUser {
   _id: string | mongoose.Types.ObjectId

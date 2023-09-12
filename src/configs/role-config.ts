@@ -1,4 +1,4 @@
-import { Privilege, Role } from '../ts/types/roles'
+import { Privilege, Role } from '../types/types/roles'
 
 const rolePrivileges: Record<Role, Privilege[]> = {
   admin: ['get-users'],
