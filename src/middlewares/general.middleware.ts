@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
 import ROLE_PRIVILEGES from '../configs/role-config'
-import { JwtPayload, Privilege, ReqHandler, ReqValidator } from '../types'
+import { JwtPayload, Privilege, ReqHandler, RequestValidator } from '../types'
 
 class GeneralMiddleware {
   public static handleNotFound: ReqHandler = (req, res) => {
@@ -91,7 +91,7 @@ class GeneralMiddleware {
     }
   }
 
-  public static validate = (validator: ReqValidator): ReqHandler => {
+  public static validate = (validator: RequestValidator): ReqHandler => {
     return (req, res, next) => {
       const validation = validator.unknown().validate(req, {
         errors: { wrap: { label: '' } },
