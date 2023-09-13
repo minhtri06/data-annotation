@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "seed": "npx tsc & TZ='UTC' node dist/helpers/seed.js",
     "build": "npx tsc",
     "start": "TZ='UTC' node dist/index.js",
     "dev": "npx tsc --watch & TZ='UTC' nodemon dist/index.js",
