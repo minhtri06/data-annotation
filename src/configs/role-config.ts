@@ -1,6 +1,15 @@
-import { Privilege, Role } from '../types'
+export const ROLES = [
+  'admin',
+  'manager',
+  'level-1-annotator',
+  'level-2-annotator',
+] as const
 
-const ROLE_PRIVILEGES: Readonly<Record<Role, Privilege[]>> = {
+export const PRIVILEGES = ['get-users'] as const
+
+const ROLE_PRIVILEGES: Readonly<
+  Record<(typeof ROLES)[number], (typeof PRIVILEGES)[number][]>
+> = {
   admin: ['get-users'],
   manager: ['get-users'],
   'level-1-annotator': [],

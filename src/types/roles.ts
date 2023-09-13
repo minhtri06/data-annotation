@@ -1,2 +1,4 @@
-export type Role = 'admin' | 'manager' | 'level-1-annotator' | 'level-2-annotator'
-export type Privilege = 'get-users' | 'manage-user'
+import { PRIVILEGES, ROLES } from '../configs/role-config'
+
+export type Role = (typeof ROLES)[number]
+export type Privilege = (typeof PRIVILEGES)[number]
