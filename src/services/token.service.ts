@@ -1,18 +1,18 @@
 import createHttpError from 'http-errors'
-import { Model as MongooseModel } from 'mongoose'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
-import { inject } from 'inversify'
+import { inject, injectable } from 'inversify'
 
-import { IToken } from '../models/interfaces/token.interface'
+import { IToken, ITokenModel } from '../models/interfaces'
 import { ModelService } from './abstracts/model.service'
 import { ITokenService } from './interfaces'
 import { TYPES } from '../configs/constants'
 import { documentId, document, JwtPayload, Role } from '../types'
 import envConfig from '../configs/env-config'
 
+@injectable()
 export class TokenService extends ModelService<IToken> implements ITokenService {
-  constructor(@inject(TYPES.TOKEN_MODEL) Model: MongooseModel<IToken>) {
+  constructor(@inject(TYPES.TOKEN_MODEL) Model: ITokenModel) {
     super(Model)
   }
 

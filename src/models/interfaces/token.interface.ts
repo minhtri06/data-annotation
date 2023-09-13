@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { TOKEN_TYPES } from '../../configs/constants'
 
 export interface IToken {
@@ -19,6 +19,4 @@ export interface IToken {
   isBlacklisted: boolean
 }
 
-const ENV_CONFIG = { NODE_ENV: 'dev' }
-
-console.log(ENV_CONFIG.NODE_ENV)
+export interface ITokenModel extends Model<IToken> {}

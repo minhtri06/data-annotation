@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { Role } from '../../types'
 
 export interface IUser {
@@ -22,3 +22,5 @@ export interface IUser {
 
   updatedAt: Date
 }
+
+export interface IUserModel extends Model<IUser> {}
