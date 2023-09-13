@@ -1,5 +1,5 @@
 import { IToken } from '../models/interfaces/token.interface'
-import { documentId } from './mongoose'
+import { documentId } from './custom-mongoose'
 import { Role } from './roles'
 
 export type JwtPayload = {
