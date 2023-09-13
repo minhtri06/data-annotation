@@ -1,29 +1,17 @@
-import 'express-async-errors'
 import 'reflect-metadata'
 
-import express from 'express'
+import express, { ErrorRequestHandler } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import compression from 'compression'
 import { InversifyExpressServer } from 'inversify-express-utils'
-import { Container } from 'inversify'
 
 import envConfig from './configs/env-config'
 import { GeneralMiddleware } from './middlewares'
-import './controllers'
-import { IUserService } from './services/interfaces'
-import { TYPES } from './constants'
-import { UserService } from './services'
-import { IUser } from './models/interfaces'
-import { User } from './models'
-import { Model } from 'mongoose'
+import container from './configs/inversify-config'
 
-const container = new Container()
-container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
-container.bind<Model<IUser>>(TYPES.USER_MODEL).toConstantValue(User)
-
-const server = new InversifyExpressServer(container)
+const server = new InversifyExpressServer(container, null, { rootPath: '/api/v1' })
 
 server.setConfig((app) => {
   // setup middlewares
@@ -45,6 +33,10 @@ server.setErrorConfig((app) => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   app.use(GeneralMiddleware.handleNotFound)
   app.use(GeneralMiddleware.handleException)
+  app.use(((err, req, res) => {
+    res.send(':v')
+  }) as ErrorRequestHandler)
 })
 
-export default server
+const app = server.build()
+export default app

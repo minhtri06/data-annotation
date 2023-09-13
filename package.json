@@ -2,11 +2,11 @@
   "name": "data-annotation",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "TZ='UTC' node dist/server.js",
-    "dev": "npx tsc --watch & TZ='UTC' nodemon dist/server.js",
+    "start": "TZ='UTC' node dist/index.js",
+    "dev": "npx tsc --watch & TZ='UTC' nodemon dist/index.js",
     "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
     "lint": "eslint . --report-unused-disable-directives",
     "test": "echo yolo"

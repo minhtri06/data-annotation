@@ -1,4 +1,4 @@
-import server from './app'
+import app from './app'
 
 import { connectMongoDb, redisClient } from './helpers'
 import envConfig from './configs/env-config'
@@ -10,7 +10,7 @@ const start = async () => {
   await redisClient.connect()
   console.log('🍃 Connect Redis successfully')
 
-  server.build().listen(envConfig.PORT, () => {
+  app.listen(envConfig.PORT, () => {
     console.log('🍂 Server is running on port ' + envConfig.PORT)
   })
 }

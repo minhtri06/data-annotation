@@ -1,10 +1,8 @@
-import { inject } from 'inversify'
 import { controller, httpGet, response } from 'inversify-express-utils'
-import { TYPES } from '../constants'
-import { IUserService } from '../services/interfaces'
 import { Response } from 'express'
-
-console.log(TYPES)
+import { TYPES } from '../constants'
+import { inject } from 'inversify'
+import { IUserService } from '../services/interfaces'
 
 @controller('/users')
 export class UserController {
