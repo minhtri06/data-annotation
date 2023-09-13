@@ -1,4 +1,4 @@
-export * from './token'
+export * from './jwt-payload'
 export * from './custom-mongoose'
 export * from './custom-express'
 export * from './roles'
