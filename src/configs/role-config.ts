@@ -5,6 +5,6 @@ const rolePrivileges: Record<Role, Privilege[]> = {
   manager: ['get-users'],
   'level-1-annotator': [],
   'level-2-annotator': [],
-}
+} as const
 
 export default rolePrivileges

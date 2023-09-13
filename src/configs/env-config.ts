@@ -32,5 +32,5 @@ if (validation.error) {
   throw new Error('Config validation error: ' + validation.error.message)
 }
 
-const envConfig = validation.value
+const envConfig: IEnvSchema = { ...validation.value } as const
 export default envConfig
