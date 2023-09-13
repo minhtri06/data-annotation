@@ -1,16 +1,16 @@
 import createError from 'http-errors'
-import { FilterQuery, Model as MongooseModel, ObjectId, Schema } from 'mongoose'
-import { document } from '../../types'
+import { FilterQuery, Model as MongooseModel } from 'mongoose'
+import { document, documentId } from '../../types'
 import { injectable } from 'inversify'
 
 export interface IModelService<T> {
   getOne(filter: FilterQuery<T>): Promise<document<T> | null>
 
-  getOneById(id: string | ObjectId): Promise<document<T> | null>
+  getOneById(id: documentId): Promise<document<T> | null>
 
   getOneOrError(filter: FilterQuery<T>): Promise<document<T>>
 
-  getOneByIdOrError(id: string | ObjectId): Promise<document<T>>
+  getOneByIdOrError(id: documentId): Promise<document<T>>
 }
 
 @injectable()
@@ -21,7 +21,7 @@ export abstract class ModelService<T> implements IModelService<T> {
     return await this.Model.findOne(filter)
   }
 
-  async getOneById(id: string | Schema.Types.ObjectId): Promise<document<T> | null> {
+  async getOneById(id: documentId): Promise<document<T> | null> {
     return await this.getOne({ _id: id })
   }
 
@@ -33,7 +33,7 @@ export abstract class ModelService<T> implements IModelService<T> {
     return document
   }
 
-  async getOneByIdOrError(id: string | ObjectId): Promise<document<T>> {
+  async getOneByIdOrError(id: documentId): Promise<document<T>> {
     return await this.getOneOrError({ _id: id })
   }
 }
