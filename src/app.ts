@@ -7,7 +7,7 @@ import morgan from 'morgan'
 import compression from 'compression'
 import { InversifyExpressServer } from 'inversify-express-utils'
 
-import envConfig from './configs/env-config'
+import ENV_CONFIG from './configs/env-config'
 import { GeneralMiddleware } from './middlewares'
 import container from './configs/inversify-config'
 
@@ -20,7 +20,7 @@ server.setConfig((app) => {
   app.use(compression())
   app.use(
     cors({
-      origin: envConfig.CLIENT_URL,
+      origin: ENV_CONFIG.CLIENT_URL,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     }),
   )

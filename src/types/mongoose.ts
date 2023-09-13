@@ -1,8 +1,8 @@
-import { Document, ObjectId } from 'mongoose'
+import { Document, Types } from 'mongoose'
 import { EmptyObject } from './util-types'
 
-export type document<T> = Document<ObjectId, EmptyObject, T> &
+export type documentId = Types.ObjectId | string
+
+export type document<T> = Document<unknown, EmptyObject, T> &
   T &
-  Required<{
-    _id: string | ObjectId
-  }>
+  Required<{ _id: string | import('mongoose').Types.ObjectId }>

@@ -1,6 +1,6 @@
 import { controller, httpGet, response } from 'inversify-express-utils'
 import { Response } from 'express'
-import { TYPES } from '../constants'
+import { TYPES } from '../configs/constants'
 import { inject } from 'inversify'
 import { IUserService } from '../services/interfaces'
 

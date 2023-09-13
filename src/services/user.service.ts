@@ -2,7 +2,7 @@ import { IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IUser } from '../models/interfaces'
 import { inject, injectable } from 'inversify'
-import { TYPES } from '../constants'
+import { TYPES } from '../configs/constants'
 import { Model as MongooseModel } from 'mongoose'
 
 @injectable()

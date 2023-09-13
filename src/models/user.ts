@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { IUser } from './interfaces'
-import rolePrivileges from '../configs/role-config'
+import ROLE_PRIVILEGES from '../configs/role-config'
 
 const userSchema = new mongoose.Schema<IUser>(
   {
@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema<IUser>(
 
     role: {
       type: String,
-      enum: Object.keys(rolePrivileges),
+      enum: Object.keys(ROLE_PRIVILEGES),
       required: true,
     },
 

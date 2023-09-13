@@ -5,7 +5,7 @@ import { Error as MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 
 import envConfig from '../configs/env-config'
-import rolePrivileges from '../configs/role-config'
+import ROLE_PRIVILEGES from '../configs/role-config'
 import { JwtPayload, Privilege, ReqHandler, ReqValidator } from '../types'
 
 class GeneralMiddleware {
@@ -79,7 +79,7 @@ class GeneralMiddleware {
         }
       }
       if (requiredPrivileges.length !== 0) {
-        const userPrivileges = rolePrivileges[payload.role]
+        const userPrivileges = ROLE_PRIVILEGES[payload.role]
         if (
           !requiredPrivileges.every((privilege) => userPrivileges.includes(privilege))
         ) {

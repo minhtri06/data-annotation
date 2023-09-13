@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { TOKEN_TYPES } from '../constants'
+import { TOKEN_TYPES } from '../configs/constants'
 import { IToken } from './interfaces/token.interface'
 
 const tokenSchema = new Schema<IToken>(
@@ -8,7 +8,7 @@ const tokenSchema = new Schema<IToken>(
 
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    type: { type: String, enum: TOKEN_TYPES, required: true },
+    type: { type: String, enum: Object.keys(TOKEN_TYPES), required: true },
 
     expires: { type: Date, required: true },
 
@@ -21,4 +21,10 @@ const tokenSchema = new Schema<IToken>(
   { timestamps: true, optimisticConcurrency: true },
 )
 
-export const Token = mongoose.model('Token', tokenSchema)
+export const Token = mongoose.model<IToken>('Token', tokenSchema)
+
+const filter: mongoose.FilterQuery<IToken> | Partial<IToken> = {}
+filter.type = 'resh'
+Token.findOne(filter)
+  .then((token) => console.log(token))
+  .catch((err) => console.log(err))

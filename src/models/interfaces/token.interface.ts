@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { TOKEN_TYPES } from '../../constants'
+import { TOKEN_TYPES } from '../../configs/constants'
 
 export interface IToken {
   _id: string | mongoose.Types.ObjectId
@@ -8,7 +8,7 @@ export interface IToken {
 
   user: string | mongoose.Types.ObjectId
 
-  type: (typeof TOKEN_TYPES)[number]
+  type: (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES]
 
   expires: Date
 
@@ -18,3 +18,7 @@ export interface IToken {
 
   isBlacklisted: boolean
 }
+
+const ENV_CONFIG = { NODE_ENV: 'dev' }
+
+console.log(ENV_CONFIG.NODE_ENV)
