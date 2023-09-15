@@ -1,7 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { IAuthService, ITokenService, IUserService } from './interfaces'
-import { IUser } from '../models/interfaces'
-import { document } from '../types'
+import { IUserModel } from '../models/interfaces'
 import { TYPES } from '../configs/constants'
 import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
@@ -17,7 +16,7 @@ export class AuthService implements IAuthService {
     username: string,
     password: string,
   ): Promise<{
-    user: document<IUser>
+    user: InstanceType<IUserModel>
     authTokens: { accessToken: string; refreshToken: string }
   }> {
     const user = await this.userService.getOne({ username })

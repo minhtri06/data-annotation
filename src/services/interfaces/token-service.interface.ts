@@ -3,7 +3,7 @@ import { Moment } from 'moment'
 
 import { IToken, ITokenModel } from '../../models/interfaces/token.interface'
 import { IModelService } from '../abstracts/model.service'
-import { JwtPayload, Role, document, documentId } from '../../types'
+import { JwtPayload, Role, documentId } from '../../types'
 
 export interface ITokenService extends IModelService<IToken, ITokenModel> {
   generateToken(
@@ -15,7 +15,7 @@ export interface ITokenService extends IModelService<IToken, ITokenModel> {
 
   generateAccessToken(userId: documentId, role: Role): string
 
-  createRefreshToken(userId: documentId, role: Role): Promise<document<IToken>>
+  createRefreshToken(userId: documentId, role: Role): Promise<InstanceType<ITokenModel>>
 
   createAuthTokens(
     userId: documentId,

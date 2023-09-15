@@ -7,7 +7,7 @@ import { IToken, ITokenModel } from '../models/interfaces'
 import { ModelService } from './abstracts/model.service'
 import { ITokenService } from './interfaces'
 import { TYPES } from '../configs/constants'
-import { documentId, document, JwtPayload, Role } from '../types'
+import { documentId, JwtPayload, Role } from '../types'
 import envConfig from '../configs/env-config'
 
 @injectable()
@@ -40,7 +40,10 @@ export class TokenService
     return `Bearer ${this.generateToken(userId, role, expires, 'access-token')}`
   }
 
-  async createRefreshToken(userId: documentId, role: Role): Promise<document<IToken>> {
+  async createRefreshToken(
+    userId: documentId,
+    role: Role,
+  ): Promise<InstanceType<ITokenModel>> {
     const expires = moment().add(envConfig.JWT_REFRESH_EXPIRATION_DAYS, 'days')
     const token = this.generateToken(userId, role, expires, 'refresh-token')
     return await this.Model.create({
