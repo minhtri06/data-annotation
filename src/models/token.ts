@@ -22,9 +22,3 @@ const tokenSchema = new Schema<IToken>(
 )
 
 export const Token = mongoose.model<IToken>('Token', tokenSchema)
-
-const filter: mongoose.FilterQuery<IToken> | Partial<IToken> = {}
-filter.type = 'resh'
-Token.findOne(filter)
-  .then((token) => console.log(token))
-  .catch((err) => console.log(err))
