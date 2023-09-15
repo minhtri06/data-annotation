@@ -1,7 +1,5 @@
-import Joi from 'joi'
-
-export type RequestValidator = Joi.ObjectSchema<{
+export type RequestValidator = {
   body?: object
   query?: object
   params?: object
-}>
+}

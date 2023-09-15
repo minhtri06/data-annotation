@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken'
 import envConfig from '../configs/env-config'
 import ROLE_PRIVILEGES from '../configs/role-config'
 import { JwtPayload, Privilege, ReqHandler, RequestValidator } from '../types'
+import Joi from 'joi'
 
 class GeneralMiddleware {
   public static handleNotFound: ReqHandler = (req, res) => {
@@ -91,11 +92,15 @@ class GeneralMiddleware {
     }
   }
 
-  public static validate = (validator: RequestValidator): ReqHandler => {
+  public static validate = (
+    validator: Joi.StrictSchemaMap<RequestValidator>,
+  ): ReqHandler => {
     return (req, res, next) => {
-      const validation = validator.unknown().validate(req, {
-        errors: { wrap: { label: '' } },
-      })
+      const validation = Joi.object<RequestValidator, true>(validator)
+        .unknown()
+        .validate(req, {
+          errors: { wrap: { label: '' } },
+        })
       if (validation.error) {
         return next(new createError.BadRequest(validation.error.message))
       }
