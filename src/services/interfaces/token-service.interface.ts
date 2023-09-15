@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken'
 import { Moment } from 'moment'
 
-import { IToken } from '../../models/interfaces/token.interface'
+import { IToken, ITokenModel } from '../../models/interfaces/token.interface'
 import { IModelService } from '../abstracts/model.service'
 import { JwtPayload, Role, document, documentId } from '../../types'
 
-export interface ITokenService extends IModelService<IToken> {
+export interface ITokenService extends IModelService<IToken, ITokenModel> {
   generateToken(
     userId: documentId,
     role: Role,

@@ -11,7 +11,10 @@ import { documentId, document, JwtPayload, Role } from '../types'
 import envConfig from '../configs/env-config'
 
 @injectable()
-export class TokenService extends ModelService<IToken> implements ITokenService {
+export class TokenService
+  extends ModelService<IToken, ITokenModel>
+  implements ITokenService
+{
   constructor(@inject(TYPES.TOKEN_MODEL) Model: ITokenModel) {
     super(Model)
   }

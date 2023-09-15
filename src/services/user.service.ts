@@ -7,7 +7,7 @@ import { IUser, IUserModel } from '../models/interfaces'
 import { TYPES } from '../configs/constants'
 
 @injectable()
-export class UserService extends ModelService<IUser> implements IUserService {
+export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
   constructor(@inject(TYPES.USER_MODEL) Model: IUserModel) {
     super(Model)
   }
