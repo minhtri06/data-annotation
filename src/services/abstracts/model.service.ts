@@ -46,24 +46,20 @@ export abstract class ModelService<T, M extends Model<T>> implements IModelServi
 
   async paginate(
     filter: FilterQuery<T>,
-    { sortBy, page, limit, select, populate, lean, checkPaginate }: QueryOptions = {},
+    { sort, page, limit, select, populate, lean, checkPaginate }: QueryOptions = {},
   ): Promise<{ data: InstanceType<M>[]; totalPages?: number }> {
     const query = this.Model.find(filter)
 
-    if (sortBy) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      query.sort(sortBy)
+    if (sort) {
+      query.sort(sort)
     }
     if (select) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       query.select(select)
     }
     if (populate) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       query.populate(populate)
     }
     if (lean) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       query.lean()
     }
 

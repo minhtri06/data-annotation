@@ -10,7 +10,7 @@ export type SortOption<T = { [key: string]: unknown }> = { [K in keyof T]: SortO
 export type SelectOption = Parameters<typeof Query.prototype.select>[0]
 export type PopulateOption = Parameters<typeof Query.prototype.populate>[0]
 export type QueryOptions<DocType = { [key: string]: unknown }> = {
-  sortBy?: SortOption<DocType>
+  sort?: SortOption<DocType>
   page?: number
   limit?: number
   select?: SelectOption
