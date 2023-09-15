@@ -1,11 +1,11 @@
-import { IUserModel } from '../../models/interfaces'
+import { UserDocument } from '../../types'
 
 export interface IAuthService {
   login(
     username: string,
     password: string,
   ): Promise<{
-    user: InstanceType<IUserModel>
+    user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }>
 }
