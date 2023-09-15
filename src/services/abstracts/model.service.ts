@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import createError from 'http-errors'
 import { FilterQuery, Model } from 'mongoose'
-import { DocumentId } from '../../types'
+import { DocumentId, QueryOptions } from '../../types'
 import { injectable } from 'inversify'
+import ENV_CONFIG from '../../configs/env-config'
 
 export interface IModelService<T, M extends Model<T>> {
   getOne(filter: FilterQuery<T>): Promise<InstanceType<M> | null>
@@ -11,6 +13,11 @@ export interface IModelService<T, M extends Model<T>> {
   getOneOrError(filter: FilterQuery<T>): Promise<InstanceType<M>>
 
   getOneByIdOrError(id: DocumentId): Promise<InstanceType<M>>
+
+  paginate(
+    filter: FilterQuery<T>,
+    options: QueryOptions,
+  ): Promise<{ data: InstanceType<M>[]; totalPage?: number }>
 }
 
 @injectable()
@@ -35,5 +42,48 @@ export abstract class ModelService<T, M extends Model<T>> implements IModelServi
 
   async getOneByIdOrError(id: DocumentId): Promise<InstanceType<M>> {
     return await this.getOneOrError({ _id: id })
+  }
+
+  async paginate(
+    filter: FilterQuery<T>,
+    { sortBy, page, limit, select, populate, lean, checkPaginate }: QueryOptions = {},
+  ): Promise<{ data: InstanceType<M>[]; totalPages?: number }> {
+    const query = this.Model.find(filter)
+
+    if (sortBy) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      query.sort(sortBy)
+    }
+    if (select) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      query.select(select)
+    }
+    if (populate) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      query.populate(populate)
+    }
+    if (lean) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      query.lean()
+    }
+
+    page = page || 1
+    limit = limit || ENV_CONFIG.DEFAULT_PAGE_LIMIT
+    const skip = (page - 1) * limit
+
+    query.skip(skip).limit(limit)
+
+    if (checkPaginate) {
+      const [data, totalRecords] = await Promise.all([
+        query.exec(),
+        this.Model.countDocuments(filter).exec(),
+      ])
+      return {
+        totalPages: Math.ceil(totalRecords / limit),
+        data: data as InstanceType<M>[],
+      }
+    }
+    const data = (await query.exec()) as InstanceType<M>[]
+    return { data }
   }
 }

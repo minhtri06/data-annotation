@@ -7,6 +7,7 @@ interface IEnvSchema {
   NODE_ENV: 'dev' | 'test' | 'prod'
   PORT: number
   CLIENT_URL: string
+  DEFAULT_PAGE_LIMIT: number
   MONGODB_URL: string
   REDIS_URL: string
   REDIS_DEFAULT_EXPIRATION: number
@@ -19,6 +20,7 @@ const envSchema = Joi.object<IEnvSchema, true>({
   NODE_ENV: Joi.string().valid('dev', 'test', 'prod').required(),
   PORT: Joi.number().integer().required(),
   CLIENT_URL: Joi.string().required(),
+  DEFAULT_PAGE_LIMIT: Joi.number().integer().min(1).required(),
   MONGODB_URL: Joi.string().required(),
   REDIS_URL: Joi.string().required(),
   REDIS_DEFAULT_EXPIRATION: Joi.number().integer().min(1),
