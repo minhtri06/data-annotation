@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { IAuthService, ITokenService, IUserService } from './interfaces'
-import { TYPES } from '../configs/constants'
+import { TOKEN_TYPES, TYPES } from '../configs/constants'
 import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
 import { UserDocument } from '../types'
@@ -38,5 +38,14 @@ export class AuthService implements IAuthService {
     const authTokens = await this.tokenService.createAuthTokens(user._id, user.role)
 
     return { user, authTokens }
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    const refreshTokenDocument = await this.tokenService.getOneOrError({
+      body: refreshToken,
+      type: TOKEN_TYPES.REFRESH_TOKEN,
+    })
+    refreshTokenDocument.isRevoked = true
+    await refreshTokenDocument.save()
   }
 }

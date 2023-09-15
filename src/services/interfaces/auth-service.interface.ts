@@ -8,4 +8,6 @@ export interface IAuthService {
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }>
+
+  logout(refreshToken: string): Promise<void>
 }
