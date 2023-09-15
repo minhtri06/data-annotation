@@ -7,7 +7,7 @@ import { IToken, ITokenModel } from '../models/interfaces'
 import { ModelService } from './abstracts/model.service'
 import { ITokenService } from './interfaces'
 import { TYPES } from '../configs/constants'
-import { documentId, JwtPayload, Role } from '../types'
+import { DocumentId, JwtPayload, Role } from '../types'
 import envConfig from '../configs/env-config'
 
 @injectable()
@@ -20,7 +20,7 @@ export class TokenService
   }
 
   generateToken(
-    userId: documentId,
+    userId: DocumentId,
     role: Role,
     expires: Moment,
     type: 'access-token' | 'refresh-token',
@@ -35,13 +35,13 @@ export class TokenService
     return jwt.sign(payload, envConfig.JWT_SECRET)
   }
 
-  generateAccessToken(userId: documentId, role: Role): string {
+  generateAccessToken(userId: DocumentId, role: Role): string {
     const expires = moment().add(envConfig.JWT_ACCESS_EXPIRATION_MINUTES, 'minutes')
     return `Bearer ${this.generateToken(userId, role, expires, 'access-token')}`
   }
 
   async createRefreshToken(
-    userId: documentId,
+    userId: DocumentId,
     role: Role,
   ): Promise<InstanceType<ITokenModel>> {
     const expires = moment().add(envConfig.JWT_REFRESH_EXPIRATION_DAYS, 'days')
@@ -58,7 +58,7 @@ export class TokenService
   }
 
   async createAuthTokens(
-    userId: documentId,
+    userId: DocumentId,
     role: Role,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(userId, role)
@@ -88,7 +88,7 @@ export class TokenService
     }
   }
 
-  async blacklistAUser(userId: documentId): Promise<void> {
+  async blacklistAUser(userId: DocumentId): Promise<void> {
     const tokenType: IToken['type'] = 'refresh-token'
     await this.Model.updateMany(
       {

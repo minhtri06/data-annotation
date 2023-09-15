@@ -1,3 +1,3 @@
 import { Types } from 'mongoose'
 
-export type documentId = Types.ObjectId | string
+export type DocumentId = Types.ObjectId | string

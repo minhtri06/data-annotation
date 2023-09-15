@@ -3,22 +3,22 @@ import { Moment } from 'moment'
 
 import { IToken, ITokenModel } from '../../models/interfaces/token.interface'
 import { IModelService } from '../abstracts/model.service'
-import { JwtPayload, Role, documentId } from '../../types'
+import { JwtPayload, Role, DocumentId } from '../../types'
 
 export interface ITokenService extends IModelService<IToken, ITokenModel> {
   generateToken(
-    userId: documentId,
+    userId: DocumentId,
     role: Role,
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string
 
-  generateAccessToken(userId: documentId, role: Role): string
+  generateAccessToken(userId: DocumentId, role: Role): string
 
-  createRefreshToken(userId: documentId, role: Role): Promise<InstanceType<ITokenModel>>
+  createRefreshToken(userId: DocumentId, role: Role): Promise<InstanceType<ITokenModel>>
 
   createAuthTokens(
-    userId: documentId,
+    userId: DocumentId,
     role: Role,
   ): Promise<{ accessToken: string; refreshToken: string }>
 
@@ -28,5 +28,5 @@ export interface ITokenService extends IModelService<IToken, ITokenModel> {
     options: jwt.VerifyOptions & { complete: true },
   ): JwtPayload
 
-  blacklistAUser(userId: documentId): Promise<void>
+  blacklistAUser(userId: DocumentId): Promise<void>
 }
