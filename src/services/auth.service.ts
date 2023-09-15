@@ -4,6 +4,7 @@ import { TOKEN_TYPES, TYPES } from '../configs/constants'
 import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
 import { UserDocument } from '../types'
+import moment from 'moment'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -47,5 +48,56 @@ export class AuthService implements IAuthService {
     })
     refreshTokenDocument.isRevoked = true
     await refreshTokenDocument.save()
+  }
+
+  async refreshAuthTokens(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    accessToken = accessToken.slice(7)
+    const accessPayload = this.tokenService.verifyToken(
+      accessToken,
+      TOKEN_TYPES.ACCESS_TOKEN,
+      { ignoreExpiration: true },
+    )
+    const refreshPayload = this.tokenService.verifyToken(
+      refreshToken,
+      TOKEN_TYPES.REFRESH_TOKEN,
+      { ignoreExpiration: true },
+    )
+    const now = moment().unix()
+    if (accessPayload.exp > now) {
+      throw createHttpError.Unauthorized('Access token has not expired')
+    }
+    if (refreshPayload.exp < now) {
+      throw createHttpError.Unauthorized('Refresh token has expired')
+    }
+
+    if (refreshPayload.sub !== accessPayload.sub) {
+      throw createHttpError.Unauthorized('Invalid token')
+    }
+
+    const refreshTokenDocument = await this.tokenService.getOneOrError({
+      body: refreshToken,
+      type: TOKEN_TYPES.REFRESH_TOKEN,
+    })
+
+    if (refreshTokenDocument.isBlacklisted) {
+      throw createHttpError.Unauthorized('Unauthorized')
+    }
+
+    const userId = refreshPayload.sub
+    const userRole = refreshPayload.role
+    if (refreshTokenDocument.isUsed || refreshTokenDocument.isRevoked) {
+      // Blacklist this token and all usable refresh tokens of that user
+      refreshTokenDocument.isBlacklisted = true
+      await refreshTokenDocument.save()
+      await this.tokenService.blacklistAUser(userId)
+      throw createHttpError.Unauthorized('Unauthorized')
+    }
+
+    refreshTokenDocument.isUsed = true
+    await refreshTokenDocument.save()
+    return this.tokenService.createAuthTokens(userId, userRole)
   }
 }

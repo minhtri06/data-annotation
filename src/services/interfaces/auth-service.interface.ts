@@ -10,4 +10,9 @@ export interface IAuthService {
   }>
 
   logout(refreshToken: string): Promise<void>
+
+  refreshAuthTokens(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }>
 }
