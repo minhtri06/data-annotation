@@ -17,13 +17,7 @@ export interface IGeneralMiddleware {
 
   handleException: ErrorRequestHandler
 
-  auth({
-    requiredPrivileges,
-    required,
-  }?: {
-    requiredPrivileges?: Privilege[]
-    required?: boolean
-  }): RequestHandler
+  auth(options?: { requiredPrivileges?: Privilege[]; required?: boolean }): RequestHandler
 
   validate(requestSchema: CustomSchemaMap<RequestSchema>): RequestHandler
 }
@@ -80,8 +74,10 @@ export class GeneralMiddleware implements IGeneralMiddleware {
   } = {}): ReqHandler => {
     return (req, res, next) => {
       const unauthorizedError = createHttpError.Unauthorized('Unauthorized!')
+
       let accessToken = req.headers['authorization']
       accessToken = accessToken?.split(' ')[1]
+
       if (!accessToken) {
         if (!required) {
           return next()
@@ -89,6 +85,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           throw unauthorizedError
         }
       }
+
       let payload
       try {
         payload = jwt.verify(accessToken, envConfig.JWT_SECRET) as JwtPayload
@@ -99,6 +96,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           throw unauthorizedError
         }
       }
+
       if (requiredPrivileges.length !== 0) {
         const userPrivileges = ROLE_PRIVILEGES[payload.role]
         if (
@@ -107,7 +105,8 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           throw unauthorizedError
         }
       }
-      req.user
+
+      req.user = { _id: payload.sub, role: payload.role }
       return next()
     }
   }
