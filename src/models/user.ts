@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { IUser } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role-config'
+import { toJSON } from './plugins'
 
 const userSchema = new mongoose.Schema<IUser>(
   {
@@ -25,7 +26,14 @@ const userSchema = new mongoose.Schema<IUser>(
   {
     timestamps: true,
     optimisticConcurrency: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        ret.password = undefined
+      },
+    },
   },
 )
+
+userSchema.plugin(toJSON)
 
 export const User = mongoose.model('User', userSchema)
