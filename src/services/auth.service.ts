@@ -25,8 +25,8 @@ export class AuthService implements IAuthService {
     if (!user) {
       throw createHttpError(
         StatusCodes.UNAUTHORIZED,
-        'We cannot find user with your given email',
-        { headers: { type: 'incorrect-email' } },
+        'We cannot find user with your given username',
+        { headers: { type: 'incorrect-username' } },
       )
     }
 
