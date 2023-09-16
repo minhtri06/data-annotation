@@ -1,1 +1,1 @@
-export { default as GeneralMiddleware } from './general.middleware'
+export * from './general.middleware'

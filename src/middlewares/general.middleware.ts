@@ -11,12 +11,28 @@ import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { RequestSchema } from '../types/request-schemas'
 import { getObjectKeys } from '../utils/object-utils'
 
-class GeneralMiddleware {
-  public static handleNotFound: ReqHandler = (req, res) => {
+export interface IGeneralMiddleware {
+  handleNotFound: ReqHandler
+
+  handleException: ErrorRequestHandler
+
+  auth({
+    requiredPrivileges,
+    required,
+  }: {
+    requiredPrivileges?: Privilege[]
+    required?: boolean
+  }): ReqHandler
+
+  validate(requestSchema: CustomSchemaMap<RequestSchema>): ReqHandler
+}
+
+export class GeneralMiddleware implements IGeneralMiddleware {
+  public handleNotFound: ReqHandler = (req, res) => {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
-  public static handleException: ErrorRequestHandler = (
+  public handleException: ErrorRequestHandler = (
     err: Error & { code?: number; keyValue?: { [key: string]: string } },
     req,
     res,
@@ -53,7 +69,7 @@ class GeneralMiddleware {
     }
   }
 
-  public static auth = ({
+  public auth = ({
     requiredPrivileges = [],
     required = true,
   }: {
@@ -94,9 +110,7 @@ class GeneralMiddleware {
     }
   }
 
-  public static validate = (
-    requestSchema: CustomSchemaMap<RequestSchema>,
-  ): ReqHandler => {
+  public validate = (requestSchema: CustomSchemaMap<RequestSchema>): ReqHandler => {
     return (req, res, next) => {
       const strictRequestSchema = {
         body: requestSchema.body || {},
@@ -117,5 +131,3 @@ class GeneralMiddleware {
     }
   }
 }
-
-export default GeneralMiddleware
