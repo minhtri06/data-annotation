@@ -1,12 +1,20 @@
 import { NextFunction, Request, Response } from 'express'
-import { IUser } from '../models/interfaces'
 import { Model } from 'mongoose'
 
-export type CustomRequest<ReqSchema> = Request<object, object, object, object> & {
-  user?: Model<IUser> | Pick<IUser, '_id' | 'role'>
-} & ReqSchema
+import { IUser } from '../models/interfaces'
+import { RequestSchema } from './request-schemas'
 
-export type ReqHandler<ReqSchema = object> = (
+export type CustomRequest<ReqSchema extends RequestSchema> = Request<
+  Exclude<RequestSchema['params'], undefined>,
+  object,
+  Exclude<RequestSchema['body'], undefined>,
+  Exclude<RequestSchema['query'], undefined>
+> &
+  Pick<ReqSchema, 'body' | 'params' | 'query'> & {
+    user?: Model<IUser> | Pick<IUser, '_id' | 'role'>
+  }
+
+export type ReqHandler<ReqSchema extends RequestSchema = RequestSchema> = (
   req: CustomRequest<ReqSchema>,
   res: Response,
   next: NextFunction,

@@ -3,11 +3,13 @@ import { StatusCodes } from 'http-status-codes'
 import createError from 'http-errors'
 import { Error as MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
+import Joi from 'joi'
 
 import envConfig from '../configs/env-config'
 import ROLE_PRIVILEGES from '../configs/role-config'
-import { JwtPayload, Privilege, ReqHandler, RequestValidator } from '../types'
-import Joi from 'joi'
+import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
+import { RequestSchema } from '../types/request-schemas'
+import { getObjectKeys } from '../utils/object-utils'
 
 class GeneralMiddleware {
   public static handleNotFound: ReqHandler = (req, res) => {
@@ -93,21 +95,24 @@ class GeneralMiddleware {
   }
 
   public static validate = (
-    validator: Joi.StrictSchemaMap<RequestValidator>,
+    requestSchema: CustomSchemaMap<RequestSchema>,
   ): ReqHandler => {
     return (req, res, next) => {
-      const validation = Joi.object<RequestValidator, true>(validator)
+      const strictRequestSchema = {
+        body: requestSchema.body || {},
+        query: requestSchema.query || {},
+        params: requestSchema.params || {},
+      }
+      const validation = Joi.object<typeof strictRequestSchema>(strictRequestSchema)
         .unknown()
-        .validate(req, {
-          errors: { wrap: { label: '' } },
-        })
+        .validate(req, { errors: { wrap: { label: '' } } })
       if (validation.error) {
         return next(new createError.BadRequest(validation.error.message))
       }
       const value = validation.value
-      req.body = value.body || {}
-      req.query = value.query || {}
-      req.params = value.params || {}
+      for (const key of getObjectKeys(value)) {
+        req[key] = value[key]
+      }
       return next()
     }
   }
