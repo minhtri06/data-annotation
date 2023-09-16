@@ -6,7 +6,11 @@ import { AuthService, TokenService, UserService } from '../services'
 import { Token, User } from '../models'
 import { ITokenModel } from '../models/interfaces/token.interface'
 import { GeneralMiddleware, IGeneralMiddleware } from '../middlewares'
-import { authControllerFactory, userControllerFactory } from '../controllers'
+import {
+  authControllerFactory,
+  meControllerFactory,
+  userControllerFactory,
+} from '../controllers'
 
 const container = new Container()
 
@@ -25,5 +29,6 @@ container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddlewar
 // register controllers
 authControllerFactory(container)
 userControllerFactory(container)
+meControllerFactory(container)
 
 export default container
