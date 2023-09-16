@@ -1,6 +1,6 @@
-import { ErrorRequestHandler } from 'express'
+import { ErrorRequestHandler, RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import createError from 'http-errors'
+import createHttpError from 'http-errors'
 import { Error as MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 import Joi from 'joi'
@@ -10,20 +10,38 @@ import ROLE_PRIVILEGES from '../configs/role-config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { RequestSchema } from '../types/request-schemas'
 import { getObjectKeys } from '../utils/object-utils'
+import { injectable } from 'inversify'
 
-export class GeneralMiddleware {
-  public static handleNotFound: ReqHandler = (req, res) => {
+export interface IGeneralMiddleware {
+  handleNotFound: RequestHandler
+
+  handleException: ErrorRequestHandler
+
+  auth({
+    requiredPrivileges,
+    required,
+  }?: {
+    requiredPrivileges?: Privilege[]
+    required?: boolean
+  }): RequestHandler
+
+  validate(requestSchema: CustomSchemaMap<RequestSchema>): RequestHandler
+}
+
+@injectable()
+export class GeneralMiddleware implements IGeneralMiddleware {
+  public handleNotFound: ReqHandler = (req, res) => {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
-  public static handleException: ErrorRequestHandler = (
+  public handleException: ErrorRequestHandler = (
     err: Error & { code?: number; keyValue?: { [key: string]: string } },
     req,
     res,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     next,
   ) => {
-    if (err instanceof createError.HttpError) {
+    if (err instanceof createHttpError.HttpError) {
       return res
         .status(err.statusCode)
         .json({ type: err.headers?.type, message: err.message })
@@ -53,7 +71,7 @@ export class GeneralMiddleware {
     }
   }
 
-  public static auth = ({
+  public auth = ({
     requiredPrivileges = [],
     required = true,
   }: {
@@ -61,7 +79,7 @@ export class GeneralMiddleware {
     required?: boolean
   } = {}): ReqHandler => {
     return (req, res, next) => {
-      const unauthorizedError = createError.Unauthorized('Unauthorized!')
+      const unauthorizedError = createHttpError.Unauthorized('Unauthorized!')
       let accessToken = req.headers['authorization']
       accessToken = accessToken?.split(' ')[1]
       if (!accessToken) {
@@ -94,9 +112,7 @@ export class GeneralMiddleware {
     }
   }
 
-  public static validate = (
-    requestSchema: CustomSchemaMap<RequestSchema>,
-  ): ReqHandler => {
+  public validate = (requestSchema: CustomSchemaMap<RequestSchema>): ReqHandler => {
     return (req, res, next) => {
       const strictRequestSchema = {
         body: requestSchema.body || {},
@@ -104,10 +120,11 @@ export class GeneralMiddleware {
         params: requestSchema.params || {},
       }
       const validation = Joi.object<typeof strictRequestSchema>(strictRequestSchema)
+        .required()
         .unknown()
         .validate(req, { errors: { wrap: { label: '' } } })
       if (validation.error) {
-        return next(new createError.BadRequest(validation.error.message))
+        return next(createHttpError.BadRequest(validation.error.message))
       }
       const value = validation.value
       for (const key of getObjectKeys(value)) {

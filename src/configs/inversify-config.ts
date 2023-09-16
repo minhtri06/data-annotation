@@ -4,8 +4,9 @@ import { TYPES } from './constants'
 import { IUserModel } from '../models/interfaces'
 import { AuthService, TokenService, UserService } from '../services'
 import { Token, User } from '../models'
-import '../controllers'
 import { ITokenModel } from '../models/interfaces/token.interface'
+import { GeneralMiddleware, IGeneralMiddleware } from '../middlewares'
+import { authControllerFactory, userControllerFactory } from '../controllers'
 
 const container = new Container()
 
@@ -17,5 +18,12 @@ container.bind<IUserModel>(TYPES.USER_MODEL).toConstantValue(User)
 container.bind<IAuthService>(TYPES.AUTH_SERVICE).to(AuthService)
 container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
 container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
+
+// bind middlewares
+container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddleware)
+
+// register controllers
+authControllerFactory(container)
+userControllerFactory(container)
 
 export default container

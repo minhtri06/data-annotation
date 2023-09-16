@@ -3,4 +3,5 @@ export type RequestSchema = {
   params?: object
   query?: object
 }
-export * as userRequestSchemas from './user.request-schema'
+export * from './auth.request-schema'
+export * from './user.request-schema'

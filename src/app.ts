@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import express, { ErrorRequestHandler } from 'express'
+import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
@@ -8,8 +8,9 @@ import compression from 'compression'
 import { InversifyExpressServer } from 'inversify-express-utils'
 
 import ENV_CONFIG from './configs/env-config'
-import { GeneralMiddleware } from './middlewares'
+import { IGeneralMiddleware } from './middlewares'
 import container from './configs/inversify-config'
+import { TYPES } from './configs/constants'
 
 const server = new InversifyExpressServer(container, null, { rootPath: '/api/v1' })
 
@@ -30,12 +31,9 @@ server.setConfig((app) => {
 
 server.setErrorConfig((app) => {
   // handle error
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  app.use(GeneralMiddleware.handleNotFound)
-  app.use(GeneralMiddleware.handleException)
-  app.use(((err, req, res) => {
-    res.send(':v')
-  }) as ErrorRequestHandler)
+  const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  app.use(generalMiddleware.handleNotFound)
+  app.use(generalMiddleware.handleException)
 })
 
 const app = server.build()
