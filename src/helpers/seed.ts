@@ -1,9 +1,15 @@
+import 'reflect-metadata'
 import mongoose from 'mongoose'
-import { User } from '../models'
 import { connectMongoDb } from './connect-mongodb'
 
+import container from '../configs/inversify-config'
+import { TYPES } from '../configs/constants'
+import { IUserService } from '../services/interfaces'
+
 const seedUser = async () => {
-  await User.create({
+  const userService = container.get<IUserService>(TYPES.USER_SERVICE)
+
+  await userService.createUser({
     name: 'Minh Tri',
     username: 'admin',
     password: 'password123',
@@ -12,7 +18,7 @@ const seedUser = async () => {
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
-  await User.create({
+  await userService.createUser({
     name: 'Minh Tri',
     username: 'manager',
     password: 'password123',
@@ -21,7 +27,7 @@ const seedUser = async () => {
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
-  await User.create({
+  await userService.createUser({
     name: 'Minh Tri',
     username: 'lv1annotator',
     password: 'password123',
@@ -30,7 +36,7 @@ const seedUser = async () => {
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
-  await User.create({
+  await userService.createUser({
     name: 'Minh Tri',
     username: 'lv2annotator',
     password: 'password123',
