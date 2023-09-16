@@ -56,7 +56,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     if (err.code === 11000 && err.keyValue) {
       const { keyValue } = err
       const message = Object.keys(keyValue)
-        .map((key) => `${key} with value '${keyValue[key]}' already exists`)
+        .map((key) => `${key} '${keyValue[key]}' already exists`)
         .join(', ')
       return res.status(StatusCodes.BAD_REQUEST).json({ message })
     }
