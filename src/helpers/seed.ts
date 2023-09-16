@@ -5,8 +5,26 @@ import { connectMongoDb } from './connect-mongodb'
 const seedUser = async () => {
   await User.create({
     name: 'Minh Tri',
-    username: 'minhtri1',
-    password: 'yolo123',
+    username: 'admin',
+    password: 'password123',
+    role: 'admin',
+    birthOfDate: new Date(),
+    phoneNumber: '0349123213',
+    address: 'Hau Giang',
+  })
+  await User.create({
+    name: 'Minh Tri',
+    username: 'manager',
+    password: 'password123',
+    role: 'manager',
+    birthOfDate: new Date(),
+    phoneNumber: '0349123213',
+    address: 'Hau Giang',
+  })
+  await User.create({
+    name: 'Minh Tri',
+    username: 'lv1annotator',
+    password: 'password123',
     role: 'level-1-annotator',
     birthOfDate: new Date(),
     phoneNumber: '0349123213',
@@ -14,27 +32,9 @@ const seedUser = async () => {
   })
   await User.create({
     name: 'Minh Tri',
-    username: 'minhtri2',
-    password: 'yolo123',
-    role: 'level-1-annotator',
-    birthOfDate: new Date(),
-    phoneNumber: '0349123213',
-    address: 'Hau Giang',
-  })
-  await User.create({
-    name: 'Minh Tri',
-    username: 'minhtri3',
-    password: 'yolo123',
-    role: 'level-1-annotator',
-    birthOfDate: new Date(),
-    phoneNumber: '0349123213',
-    address: 'Hau Giang',
-  })
-  await User.create({
-    name: 'Minh Tri',
-    username: 'minhtri4',
-    password: 'yolo123',
-    role: 'level-1-annotator',
+    username: 'lv2annotator',
+    password: 'password123',
+    role: 'level-2-annotator',
     birthOfDate: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
