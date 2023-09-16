@@ -14,6 +14,9 @@ interface IEnvSchema {
   JWT_SECRET: string
   JWT_ACCESS_EXPIRATION_MINUTES: number
   JWT_REFRESH_EXPIRATION_DAYS: number
+  CLOUDINARY_NAME: string
+  CLOUDINARY_API_KEY: string
+  CLOUDINARY_API_SECRET: string
 }
 
 const envSchema = Joi.object<IEnvSchema, true>({
@@ -27,6 +30,9 @@ const envSchema = Joi.object<IEnvSchema, true>({
   JWT_SECRET: Joi.string().required(),
   JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().integer().min(1),
   JWT_REFRESH_EXPIRATION_DAYS: Joi.number().integer().min(1),
+  CLOUDINARY_NAME: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
 }).unknown()
 
 const validation = envSchema.validate(process.env)

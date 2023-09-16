@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { IUser } from './interfaces'
-import ROLE_PRIVILEGES from '../configs/role-config'
+import ROLE_PRIVILEGES from '../configs/role.config'
 import { toJSON } from './plugins'
 
 const userSchema = new mongoose.Schema<IUser>(

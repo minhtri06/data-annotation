@@ -1,4 +1,4 @@
-import { ROLES } from '../configs/role-config'
+import { ROLES } from '../configs/role.config'
 import { CustomSchemaMap } from '../types'
 import { CreateUser } from '../types/request-schemas'
 import { userSchema } from './schema'

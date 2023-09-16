@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import mongoose from 'mongoose'
 import { connectMongoDb } from './connect-mongodb'
 
-import container from '../configs/inversify-config'
+import container from '../configs/inversify.config'
 import { TYPES } from '../configs/constants'
 import { IUserService } from '../services/interfaces'
 

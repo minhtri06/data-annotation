@@ -3,7 +3,7 @@ import createError from 'http-errors'
 import { FilterQuery, Model } from 'mongoose'
 import { DocumentId, QueryOptions } from '../../types'
 import { injectable } from 'inversify'
-import ENV_CONFIG from '../../configs/env-config'
+import ENV_CONFIG from '../../configs/env.config'
 
 export interface IModelService<T, M extends Model<T>> {
   getOne(filter: FilterQuery<T>): Promise<InstanceType<M> | null>

@@ -1,7 +1,7 @@
 import app from './app'
 
 import { connectMongoDb, redisClient } from './helpers'
-import envConfig from './configs/env-config'
+import envConfig from './configs/env.config'
 
 const start = async () => {
   await connectMongoDb()

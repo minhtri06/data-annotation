@@ -7,7 +7,7 @@ import { IToken, ITokenModel } from '../models/interfaces'
 import { ITokenService } from './interfaces'
 import { TYPES } from '../configs/constants'
 import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
-import envConfig from '../configs/env-config'
+import envConfig from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 
 @injectable()
