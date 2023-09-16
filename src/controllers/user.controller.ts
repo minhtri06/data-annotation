@@ -9,6 +9,7 @@ import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role-config'
 import { CustomRequest } from '../types'
 import { CreateUser } from '../types/request-schemas'
+import { userValidation as validation } from '../validations'
 
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -24,6 +25,7 @@ export const userControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
+      generalMiddleware.validate(validation.createUser),
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_USERS] }),
     )
     async createUser(req: CustomRequest<CreateUser>, res: Response) {
