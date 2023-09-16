@@ -5,7 +5,9 @@ export const userSchema = {
   name: Joi.string(),
   username: Joi.string(),
   password: Joi.string(),
-  role: Joi.string().valid(ROLES.LEVEL_1_ANNOTATOR, ROLES.LEVEL_2_ANNOTATOR),
+  role: Joi.string()
+    .valid(ROLES.LEVEL_1_ANNOTATOR, ROLES.LEVEL_2_ANNOTATOR)
+    .messages({ 'any.only': 'invalid role' }),
   birthOfDate: Joi.date(),
   phoneNumber: Joi.string(),
   address: Joi.string(),
