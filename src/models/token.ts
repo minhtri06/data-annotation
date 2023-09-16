@@ -8,7 +8,7 @@ const tokenSchema = new Schema<IToken>(
 
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    type: { type: String, enum: Object.keys(TOKEN_TYPES), required: true },
+    type: { type: String, enum: Object.values(TOKEN_TYPES), required: true },
 
     expires: { type: Date, required: true },
 
