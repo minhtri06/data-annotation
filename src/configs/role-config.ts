@@ -1,18 +1,21 @@
-export const ROLES = [
-  'admin',
-  'manager',
-  'level-1-annotator',
-  'level-2-annotator',
-] as const
+export const ROLES = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  LEVEL_1_ANNOTATOR: 'level-1-annotator',
+  LEVEL_2_ANNOTATOR: 'level-2-annotator',
+} as const
 
-export const PRIVILEGES = ['get-users'] as const
+export const PRIVILEGES = { GET_USERS: 'get-users' } as const
 
 const ROLE_PRIVILEGES: Readonly<
-  Record<(typeof ROLES)[number], (typeof PRIVILEGES)[number][]>
+  Record<
+    (typeof ROLES)[keyof typeof ROLES],
+    (typeof PRIVILEGES)[keyof typeof PRIVILEGES][]
+  >
 > = {
-  admin: ['get-users'],
-  manager: ['get-users'],
-  'level-1-annotator': [],
-  'level-2-annotator': [],
+  [ROLES.ADMIN]: [PRIVILEGES.GET_USERS],
+  [ROLES.MANAGER]: [PRIVILEGES.GET_USERS],
+  [ROLES.LEVEL_1_ANNOTATOR]: [],
+  [ROLES.LEVEL_2_ANNOTATOR]: [],
 }
 export default ROLE_PRIVILEGES
