@@ -16,7 +16,9 @@ export class AuthService implements IAuthService {
     @inject(TYPES.USER_SERVICE) private userService: IUserService,
   ) {}
 
-  async register(body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>): Promise<{
+  async register(
+    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
+  ): Promise<{
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }> {

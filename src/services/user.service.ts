@@ -23,7 +23,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
   }
 
   async createUser(
-    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>,
+    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
   ): Promise<UserDocument> {
     body = pickFields(
       body,

@@ -12,6 +12,8 @@ export interface IUser {
 
   role: Role
 
+  avatar: string
+
   birthOfDate: Date
 
   phoneNumber: string

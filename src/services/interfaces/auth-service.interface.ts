@@ -2,7 +2,7 @@ import { IUser } from '../../models/interfaces'
 import { UserDocument } from '../../types'
 
 export interface IAuthService {
-  register(body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>): Promise<{
+  register(body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>): Promise<{
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }>

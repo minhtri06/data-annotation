@@ -17,6 +17,8 @@ const userSchema = new mongoose.Schema<IUser>(
       required: true,
     },
 
+    avatar: String,
+
     birthOfDate: { type: Date, required: true },
 
     phoneNumber: { type: String, required: true },

@@ -1,7 +1,7 @@
 import { ROLES } from '../configs/role-config'
 import { CustomSchemaMap } from '../types'
 import { CreateUser } from '../types/request-schemas'
-import { userSchema } from './schema/user'
+import { userSchema } from './schema'
 
 export const createUser: CustomSchemaMap<CreateUser> = {
   body: {

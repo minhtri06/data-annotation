@@ -8,5 +8,5 @@ export type GetUsers = {
 }
 
 export type CreateUser = {
-  body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>
+  body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>
 }
