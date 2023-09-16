@@ -7,8 +7,6 @@ import { IUser, IUserModel } from '../models/interfaces'
 import { TYPES } from '../configs/constants'
 import { UserDocument } from '../types'
 import { pickFields } from '../utils/object-utils'
-import { ROLES } from '../configs/role-config'
-import createHttpError from 'http-errors'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
@@ -37,9 +35,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
       'role',
       'username',
     )
-    if (body.role !== ROLES.LEVEL_1_ANNOTATOR && body.role !== ROLES.LEVEL_2_ANNOTATOR) {
-      throw createHttpError.BadRequest('Invalid role')
-    }
+
     body.password = await this.hashPassword(body.password)
     return await this.Model.create(body)
   }

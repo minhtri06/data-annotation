@@ -1,6 +1,6 @@
 import { userSchema } from './schema/user'
 import { CustomSchemaMap } from '../types'
-import { RegisterUser } from '../types/request-schemas'
+import { Login, RegisterUser } from '../types/request-schemas'
 
 export const registerUser: CustomSchemaMap<RegisterUser> = {
   body: {
@@ -11,5 +11,12 @@ export const registerUser: CustomSchemaMap<RegisterUser> = {
     birthOfDate: userSchema.birthOfDate.required(),
     phoneNumber: userSchema.phoneNumber.required(),
     address: userSchema.address.required(),
+  },
+}
+
+export const login: CustomSchemaMap<Login> = {
+  body: {
+    username: userSchema.username.required(),
+    password: userSchema.password.required(),
   },
 }
