@@ -29,7 +29,7 @@ export class UploadMiddleware implements IUploadMiddleware {
     return (async (req, res, next) => {
       await storage.uploadSingle(req, fieldName)
       if (required && !req.file) {
-        next(createHttpError.BadRequest(`${fieldName} field is required in form-data`))
+        next(createHttpError.BadRequest(`'${fieldName}' field is required in form-data`))
       }
       next()
     }) as RequestHandler

@@ -1,7 +1,7 @@
 import Joi from 'joi'
 
 import { CustomSchemaMap } from '../types'
-import { Login, Logout, RegisterUser } from '../types/request-schemas'
+import { Login, Logout, RefreshTokens, RegisterUser } from '../types/request-schemas'
 import { userSchema } from './schema'
 
 export const registerUser: CustomSchemaMap<RegisterUser> = {
@@ -25,6 +25,13 @@ export const login: CustomSchemaMap<Login> = {
 
 export const logout: CustomSchemaMap<Logout> = {
   body: {
+    refreshToken: Joi.string().required(),
+  },
+}
+
+export const refreshTokens: CustomSchemaMap<RefreshTokens> = {
+  body: {
+    accessToken: Joi.string().required(),
     refreshToken: Joi.string().required(),
   },
 }

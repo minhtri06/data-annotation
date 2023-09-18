@@ -20,7 +20,7 @@ export const meControllerFactory = (container: Container) => {
     @httpGet('/', generalMiddleware.auth())
     async getMyProfile(req: CustomRequest<EmptyObject>, res: Response) {
       if (!req.user) {
-        throw createHttpError.Unauthorized('unauthorized')
+        throw createHttpError.Unauthorized('Unauthorized')
       }
       const profile = await this.userService.getOneByIdOrError(req.user._id)
       return res.status(200).json({ profile })
@@ -32,7 +32,7 @@ export const meControllerFactory = (container: Container) => {
       uploadMiddleware.uploadSingle('image', 'avatar', {}),
     )
     replaceAvatar(req: Request, res: Response) {
-      return res.status(200).json({ message: 'oke' })
+      return res.status(200).json({ message: 'Oke' })
     }
   }
 

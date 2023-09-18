@@ -13,3 +13,10 @@ export type Logout = {
     refreshToken: string
   }
 }
+
+export type RefreshTokens = {
+  body: {
+    accessToken: string
+    refreshToken: string
+  }
+}

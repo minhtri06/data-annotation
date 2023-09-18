@@ -26,7 +26,7 @@ export interface IGeneralMiddleware {
 @injectable()
 export class GeneralMiddleware implements IGeneralMiddleware {
   public handleNotFound: ReqHandler = (req, res) => {
-    return res.status(StatusCodes.NOT_FOUND).json({ message: 'route not found' })
+    return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
   public handleException: ErrorRequestHandler = (
@@ -66,7 +66,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     } else {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ message: 'something went wrong' })
+        .json({ message: 'Something went wrong' })
     }
   }
 
@@ -78,7 +78,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     required?: boolean
   } = {}): ReqHandler => {
     return (req, res, next) => {
-      const unauthorizedError = createHttpError.Unauthorized('unauthorized!')
+      const unauthorizedError = createHttpError.Unauthorized('Unauthorized!')
 
       let accessToken = req.headers['authorization']
       accessToken = accessToken?.split(' ')[1]
@@ -107,7 +107,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         if (
           !requiredPrivileges.every((privilege) => userPrivileges.includes(privilege))
         ) {
-          next(createHttpError.Forbidden('forbidden'))
+          next(createHttpError.Forbidden('Forbidden'))
         }
       }
 
