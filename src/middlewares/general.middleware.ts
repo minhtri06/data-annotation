@@ -11,7 +11,7 @@ import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { RequestSchema } from '../types/request-schemas'
 import { getObjectKeys } from '../utils/object-utils'
 import { injectable } from 'inversify'
-import { ApiError } from '../utils'
+import { ApiError, camelCaseToNormalText } from '../utils'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -126,12 +126,14 @@ export class GeneralMiddleware implements IGeneralMiddleware {
       const validation = Joi.object<typeof strictRequestSchema>(strictRequestSchema)
         .required()
         .unknown()
-        .validate(req, { errors: { wrap: { label: '' } } })
+        .validate(req, { errors: { wrap: { label: '' }, label: 'key' } })
       if (validation.error) {
         return next(
-          createHttpError(StatusCodes.BAD_REQUEST, validation.error.message, {
-            headers: { type: 'validation-error' },
-          }),
+          new ApiError(
+            StatusCodes.BAD_REQUEST,
+            camelCaseToNormalText(validation.error.message),
+            { type: 'validation-error' },
+          ),
         )
       }
       const value = validation.value

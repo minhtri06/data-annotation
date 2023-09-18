@@ -11,8 +11,6 @@ export class ApiError extends Error {
   ) {
     super(message)
     this.statusCode = statusCode
-    if (type) {
-      this.type = type
-    }
+    this.type = type
   }
 }

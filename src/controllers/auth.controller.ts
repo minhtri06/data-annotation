@@ -7,7 +7,7 @@ import { TYPES } from '../configs/constants'
 import { IAuthService, ITokenService, IUserService } from '../services/interfaces'
 import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
-import { Login, Logout, RegisterUser } from '../types/request-schemas'
+import { Login, Logout, RefreshTokens, RegisterUser } from '../types/request-schemas'
 import { authValidation as validation } from '../validations'
 
 export const authControllerFactory = (container: Container) => {
@@ -25,7 +25,7 @@ export const authControllerFactory = (container: Container) => {
     async register(req: CustomRequest<RegisterUser>, res: Response) {
       const { user, authTokens } = await this.authService.register(req.body)
       return res
-        .json({ message: 'create user successfully', user, authTokens })
+        .json({ message: 'Create user successfully', user, authTokens })
         .status(StatusCodes.CREATED)
     }
 
@@ -33,7 +33,7 @@ export const authControllerFactory = (container: Container) => {
     async login(req: CustomRequest<Login>, res: Response) {
       const { username, password } = req.body
       const { user, authTokens } = await this.authService.login(username, password)
-      return res.status(200).json({ message: 'login successfully', user, authTokens })
+      return res.status(200).json({ message: 'Login successfully', user, authTokens })
     }
 
     @httpPost('/logout', generalMiddleware.validate(validation.logout))
@@ -41,6 +41,16 @@ export const authControllerFactory = (container: Container) => {
       const { refreshToken } = req.body
       await this.authService.logout(refreshToken)
       return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPost('/refresh-tokens', generalMiddleware.validate(validation.refreshTokens))
+    async refreshTokens(req: CustomRequest<RefreshTokens>, res: Response) {
+      const { accessToken, refreshToken } = req.body
+      const authTokens = await this.authService.refreshAuthTokens(
+        accessToken,
+        refreshToken,
+      )
+      return res.status(StatusCodes.OK).json({ authTokens })
     }
   }
 
