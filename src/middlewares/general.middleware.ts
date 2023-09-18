@@ -11,6 +11,7 @@ import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { RequestSchema } from '../types/request-schemas'
 import { getObjectKeys } from '../utils/object-utils'
 import { injectable } from 'inversify'
+import { ApiError } from '../utils'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -39,6 +40,10 @@ export class GeneralMiddleware implements IGeneralMiddleware {
       return res
         .status(err.statusCode)
         .json({ type: err.headers?.type, message: err.message })
+    }
+    if (err instanceof ApiError) {
+      const { statusCode, type, message } = err
+      return res.status(statusCode).json({ type, message })
     }
 
     if (err instanceof MongooseError.ValidationError) {
@@ -82,7 +87,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         if (!required) {
           return next()
         } else {
-          throw unauthorizedError
+          return next(unauthorizedError)
         }
       }
 
@@ -93,7 +98,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         if (!required) {
           return next()
         } else {
-          throw unauthorizedError
+          return next(unauthorizedError)
         }
       }
 
@@ -102,7 +107,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         if (
           !requiredPrivileges.every((privilege) => userPrivileges.includes(privilege))
         ) {
-          throw createHttpError.Forbidden('forbidden')
+          next(createHttpError.Forbidden('forbidden'))
         }
       }
 
@@ -123,7 +128,11 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         .unknown()
         .validate(req, { errors: { wrap: { label: '' } } })
       if (validation.error) {
-        return next(createHttpError.BadRequest(validation.error.message))
+        return next(
+          createHttpError(StatusCodes.BAD_REQUEST, validation.error.message, {
+            headers: { type: 'validation-error' },
+          }),
+        )
       }
       const value = validation.value
       for (const key of getObjectKeys(value)) {
