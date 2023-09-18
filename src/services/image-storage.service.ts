@@ -12,7 +12,6 @@ export class ImageStorageService extends StorageService implements IStorageServi
 
   constructor() {
     super()
-    console.log('create image storage')
 
     this.uploader = multer({
       storage: imageStorage,

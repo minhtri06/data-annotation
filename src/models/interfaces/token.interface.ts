@@ -1,12 +1,13 @@
-import mongoose, { Model } from 'mongoose'
+import { Model } from 'mongoose'
+
 import { TOKEN_TYPES } from '../../configs/constants'
+import { ISchema } from './schema.interface'
+import { DocumentId } from '../../types'
 
-export interface IToken {
-  _id: string | mongoose.Types.ObjectId
-
+export interface IToken extends ISchema {
   body: string
 
-  user: string | mongoose.Types.ObjectId
+  user: DocumentId
 
   type: (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES]
 

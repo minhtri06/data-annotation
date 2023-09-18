@@ -1,9 +1,9 @@
-import mongoose, { Model } from 'mongoose'
+import { Model } from 'mongoose'
+
 import { Role } from '../../types'
+import { ISchema } from './schema.interface'
 
-export interface IUser {
-  _id: string | mongoose.Types.ObjectId
-
+export interface IUser extends ISchema {
   name: string
 
   username: string
@@ -19,10 +19,6 @@ export interface IUser {
   phoneNumber: string
 
   address: string
-
-  createdAt: Date
-
-  updatedAt: Date
 }
 
 export interface IUserModel extends Model<IUser> {}

@@ -18,7 +18,10 @@ const tokenSchema = new Schema<IToken>(
 
     isBlacklisted: { type: Boolean },
   },
-  { timestamps: true, optimisticConcurrency: true },
+  {
+    timestamps: true,
+    optimisticConcurrency: true,
+  },
 )
 
 export const Token = mongoose.model<IToken>('Token', tokenSchema)
