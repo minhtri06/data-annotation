@@ -7,7 +7,7 @@ import { TYPES } from '../configs/constants'
 import { IAuthService, ITokenService, IUserService } from '../services/interfaces'
 import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
-import { Login, RegisterUser } from '../types/request-schemas'
+import { Login, Logout, RegisterUser } from '../types/request-schemas'
 import { authValidation as validation } from '../validations'
 
 export const authControllerFactory = (container: Container) => {
@@ -34,6 +34,13 @@ export const authControllerFactory = (container: Container) => {
       const { username, password } = req.body
       const { user, authTokens } = await this.authService.login(username, password)
       return res.status(200).json({ message: 'login successfully', user, authTokens })
+    }
+
+    @httpPost('/logout', generalMiddleware.validate(validation.logout))
+    async logout(req: CustomRequest<Logout>, res: Response) {
+      const { refreshToken } = req.body
+      await this.authService.logout(refreshToken)
+      return res.status(StatusCodes.NO_CONTENT).send()
     }
   }
 

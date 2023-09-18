@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "docker:mongodb": "docker exec -it data-annotation-mongodb-1 mongosh -u root",
     "seed": "npx tsc & TZ='UTC' node dist/helpers/seed.js",
     "build": "npx tsc",
     "start": "TZ='UTC' node dist/index.js",

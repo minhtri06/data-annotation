@@ -7,3 +7,9 @@ export type RegisterUser = {
 export type Login = {
   body: Pick<IUser, 'username' | 'password'>
 }
+
+export type Logout = {
+  body: {
+    refreshToken: string
+  }
+}
