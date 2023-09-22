@@ -7,7 +7,7 @@ import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
 import { IUser } from '../models/interfaces'
 import { ROLES } from '../configs/role.config'
-import { TOKEN_TYPES, TYPES } from '../configs/constant.config'
+import { TOKEN_TYPES, TYPES } from '../configs/constants'
 
 @injectable()
 export class AuthService implements IAuthService {

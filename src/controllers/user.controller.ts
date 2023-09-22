@@ -9,7 +9,7 @@ import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
 import { CreateUser } from '../types/request-schemas'
 import { userValidation as validation } from '../validations'
-import { TYPES } from '../configs/constant.config'
+import { TYPES } from '../configs/constants'
 
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)

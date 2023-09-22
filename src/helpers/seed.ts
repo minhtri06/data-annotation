@@ -4,7 +4,7 @@ import { connectMongoDb } from './connect-mongodb'
 
 import container from '../configs/inversify.config'
 import { IUserService } from '../services/interfaces'
-import { TYPES } from '../configs/constant.config'
+import { TYPES } from '../configs/constants'
 
 const seedUser = async () => {
   const userService = container.get<IUserService>(TYPES.USER_SERVICE)

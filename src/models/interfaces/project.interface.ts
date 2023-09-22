@@ -2,7 +2,7 @@ import { Model } from 'mongoose'
 
 import { DocumentId } from '../../types'
 import { ISchema } from './schema.interface'
-import { PROJECT_STATUS } from '../../configs/constant.config'
+import { PROJECT_STATUS } from '../../configs/constants'
 
 export interface IProject extends ISchema {
   name: string

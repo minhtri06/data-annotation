@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary'
-import ENV_CONFIG from './env.config'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
+
+import ENV_CONFIG from './env.config'
 
 cloudinary.config({
   cloud_name: ENV_CONFIG.CLOUDINARY_NAME,

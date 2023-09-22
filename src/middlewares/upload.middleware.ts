@@ -3,7 +3,7 @@ import { RequestHandler } from 'express'
 import createHttpError from 'http-errors'
 
 import { IStorageService } from '../services/interfaces'
-import { TYPES } from '../configs/constant.config'
+import { TYPES } from '../configs/constants'
 
 export interface IUploadMiddleware {
   uploadSingle(

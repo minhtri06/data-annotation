@@ -2,7 +2,7 @@ import { Model } from 'mongoose'
 
 import { ISchema } from './schema.interface'
 import { DocumentId } from '../../types'
-import { TOKEN_TYPES } from '../../configs/constant.config'
+import { TOKEN_TYPES } from '../../configs/constants'
 
 export interface IToken extends ISchema {
   body: string

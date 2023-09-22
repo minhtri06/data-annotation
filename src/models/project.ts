@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+
 import { IProject } from './interfaces'
 import { toJSON } from './plugins'
 
@@ -12,7 +13,15 @@ const projectSchema = new Schema<IProject>(
 
     requirement: { type: String, required: true },
 
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    manager: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+
+    numberOfLevel1Annotators: { type: Number, required: true },
+
+    level1AnnotatorDivision: {
+      type: [{ annotator: { type: Schema.Types.ObjectId, ref: 'User', required: true } }],
+    },
+
+    numberOfLevel2Annotators: { type: Number, required: true },
 
     assignment: {
       type: {

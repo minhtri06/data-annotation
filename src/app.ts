@@ -10,7 +10,7 @@ import { InversifyExpressServer } from 'inversify-express-utils'
 import ENV_CONFIG from './configs/env.config'
 import { IGeneralMiddleware } from './middlewares'
 import container from './configs/inversify.config'
-import { TYPES } from './configs/constant.config'
+import { TYPES } from './configs/constants'
 
 const server = new InversifyExpressServer(container, null, { rootPath: '/api/v1' })
 

@@ -6,7 +6,7 @@ import { ModelService } from './abstracts/model.service'
 import { IUser, IUserModel } from '../models/interfaces'
 import { UserDocument } from '../types'
 import { pickFields } from '../utils/object-utils'
-import { TYPES } from '../configs/constant.config'
+import { TYPES } from '../configs/constants'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
