@@ -1,10 +1,10 @@
 import createHttpError from 'http-errors'
-
+import multer, { Multer } from 'multer'
 import cloudinary, { imageStorage } from '../configs/cloudinary.config'
+import { injectable } from 'inversify'
+
 import { StorageService } from './abstracts/storage.service'
 import { IStorageService } from './interfaces'
-import multer, { Multer } from 'multer'
-import { injectable } from 'inversify'
 
 @injectable()
 export class ImageStorageService extends StorageService implements IStorageService {

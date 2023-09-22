@@ -3,12 +3,12 @@ import { controller, httpPost } from 'inversify-express-utils'
 import { Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-import { TYPES } from '../configs/constants'
 import { IAuthService, ITokenService, IUserService } from '../services/interfaces'
 import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
 import { Login, Logout, RefreshTokens, RegisterUser } from '../types/request-schemas'
 import { authValidation as validation } from '../validations'
+import { TYPES } from '../configs/constant.config'
 
 export const authControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)

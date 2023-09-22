@@ -2,44 +2,52 @@ import { Model } from 'mongoose'
 
 import { DocumentId } from '../../types'
 import { ISchema } from './schema.interface'
+import { PROJECT_STATUS } from '../../configs/constant.config'
 
 export interface IProject extends ISchema {
   name: string
 
   projectType: DocumentId
 
-  description: string
-
   requirement: string
 
-  createdBy: DocumentId
+  description?: string
 
-  assignment: {
-    performers: DocumentId[]
+  manager: DocumentId
+
+  numberOfLevel1Annotators: number
+
+  level1AnnotatorDivision: {
+    annotator: DocumentId
     startSample: number
     endSample: number
-  }
-
-  labelSets: {
-    title: string
-    isMultiSelected: boolean
-    labels: string[]
-    isRequired: boolean
   }[]
 
-  sampleTextConfigs: {
-    title: string
-    labelSets: {
-      title: string
+  numberOfLevel2Annotators: number
+
+  level2AnnotatorDivision: {
+    annotator: DocumentId
+    startSample: number
+    endSample: number
+  }[]
+
+  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+
+  sampleTextConfig: {
+    labelSets?: {
       isMultiSelected: boolean
       labels: string[]
-      isRequired: boolean
+    }
+    detailConfigs?: {
+      labelSets?: {
+        isMultiSelected: boolean
+        labels: string[]
+      }[]
+      inlineLabels: string[]
     }[]
-    inlineLabels: string[]
   }
 
-  generatedTextTitles: string[]
-  numberOfGeneratedTexts: number
+  hasGeneratedTexts: boolean
 }
 
 export interface IProjectModel extends Model<IProject> {}

@@ -1,6 +1,7 @@
-import mongoose, { Schema } from 'mongoose'
-import { TOKEN_TYPES } from '../configs/constants'
-import { IToken } from './interfaces/token.interface'
+import { Schema, model } from 'mongoose'
+
+import { IToken, ITokenModel } from './interfaces/token.interface'
+import { TOKEN_TYPES } from '../configs/constant.config'
 
 const tokenSchema = new Schema<IToken>(
   {
@@ -24,4 +25,4 @@ const tokenSchema = new Schema<IToken>(
   },
 )
 
-export const Token = mongoose.model<IToken>('Token', tokenSchema)
+export const Token = model<IToken, ITokenModel>('Token', tokenSchema)

@@ -1,9 +1,9 @@
-import mongoose from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 import { IProjectType } from './interfaces'
 import { toJSON } from './plugins'
 
-const projectTypeSchema = new mongoose.Schema<IProjectType>(
+const projectTypeSchema = new Schema<IProjectType>(
   {
     name: { type: String, required: true },
   },
@@ -15,4 +15,4 @@ const projectTypeSchema = new mongoose.Schema<IProjectType>(
 
 projectTypeSchema.plugin(toJSON)
 
-export const ProjectType = mongoose.model('ProjectType', projectTypeSchema)
+export const ProjectType = model('ProjectType', projectTypeSchema)

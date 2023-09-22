@@ -4,9 +4,9 @@ import bcrypt from 'bcryptjs'
 import { IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IUser, IUserModel } from '../models/interfaces'
-import { TYPES } from '../configs/constants'
 import { UserDocument } from '../types'
 import { pickFields } from '../utils/object-utils'
+import { TYPES } from '../configs/constant.config'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {

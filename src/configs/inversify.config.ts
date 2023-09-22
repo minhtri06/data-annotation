@@ -1,11 +1,11 @@
 import { Container, interfaces } from 'inversify'
+
 import {
   IAuthService,
   IStorageService,
   ITokenService,
   IUserService,
 } from '../services/interfaces'
-import { TYPES } from './constants'
 import { IUserModel } from '../models/interfaces'
 import { AuthService, ImageStorageService, TokenService, UserService } from '../services'
 import { Token, User } from '../models'
@@ -17,6 +17,7 @@ import {
   userControllerFactory,
 } from '../controllers'
 import { IUploadMiddleware, UploadMiddleware } from '../middlewares/upload.middleware'
+import { TYPES } from './constant.config'
 
 const container = new Container()
 

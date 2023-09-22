@@ -3,13 +3,13 @@ import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { StatusCodes } from 'http-status-codes'
 
-import { TYPES } from '../configs/constants'
 import { IUserService } from '../services/interfaces'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
 import { CreateUser } from '../types/request-schemas'
 import { userValidation as validation } from '../validations'
+import { TYPES } from '../configs/constant.config'
 
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)

@@ -2,8 +2,8 @@ import { inject, injectable } from 'inversify'
 import { RequestHandler } from 'express'
 import createHttpError from 'http-errors'
 
-import { TYPES } from '../configs/constants'
 import { IStorageService } from '../services/interfaces'
+import { TYPES } from '../configs/constant.config'
 
 export interface IUploadMiddleware {
   uploadSingle(

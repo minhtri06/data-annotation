@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import createError from 'http-errors'
 import { FilterQuery, Model } from 'mongoose'
-import { DocumentId, QueryOptions } from '../../types'
 import { injectable } from 'inversify'
+
+import { DocumentId, QueryOptions } from '../../types'
 import ENV_CONFIG from '../../configs/env.config'
 
 export interface IModelService<T, M extends Model<T>> {

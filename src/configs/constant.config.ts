@@ -1,3 +1,16 @@
+export const TOKEN_TYPES = {
+  ACCESS_TOKEN: 'access-token',
+  REFRESH_TOKEN: 'refresh-token',
+} as const
+
+export const PROJECT_STATUS = {
+  SETUP: 'setup',
+  OPEN_FOR_JOINING: 'open-for-joining',
+  ANNOTATING: 'annotating',
+  DONE: 'done',
+} as const
+
+// inversify types
 export const TYPES = {
   // models
   TOKEN_MODEL: Symbol('token-model'),

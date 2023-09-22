@@ -5,10 +5,10 @@ import { inject, injectable } from 'inversify'
 
 import { IToken, ITokenModel } from '../models/interfaces'
 import { ITokenService } from './interfaces'
-import { TYPES } from '../configs/constants'
 import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
 import envConfig from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
+import { TYPES } from '../configs/constant.config'
 
 @injectable()
 export class TokenService

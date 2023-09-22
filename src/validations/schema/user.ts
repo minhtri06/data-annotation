@@ -1,4 +1,5 @@
 import Joi from 'joi'
+
 import { ROLES } from '../../configs/role.config'
 
 export const userSchema = {

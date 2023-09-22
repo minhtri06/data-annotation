@@ -1,9 +1,10 @@
-import mongoose from 'mongoose'
-import { IUser } from './interfaces'
+import { Schema, model } from 'mongoose'
+
+import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { toJSON } from './plugins'
 
-const userSchema = new mongoose.Schema<IUser>(
+const userSchema = new Schema<IUser>(
   {
     name: { type: String, trim: true, required: true },
 
@@ -38,4 +39,4 @@ const userSchema = new mongoose.Schema<IUser>(
 
 userSchema.plugin(toJSON)
 
-export const User = mongoose.model('User', userSchema)
+export const User = model<IUser, IUserModel>('User', userSchema)

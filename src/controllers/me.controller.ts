@@ -4,10 +4,10 @@ import createHttpError from 'http-errors'
 import { Request, Response } from 'express'
 
 import { IGeneralMiddleware } from '../middlewares'
-import { TYPES } from '../configs/constants'
 import { IUserService } from '../services/interfaces'
 import { CustomRequest, EmptyObject } from '../types'
 import { IUploadMiddleware } from '../middlewares/upload.middleware'
+import { TYPES } from '../configs/constant.config'
 
 export const meControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)

@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose'
+import { Schema, model } from 'mongoose'
 import { IProject } from './interfaces'
 import { toJSON } from './plugins'
 
@@ -8,7 +8,7 @@ const projectSchema = new Schema<IProject>(
 
     projectType: { type: Schema.Types.ObjectId, ref: 'ProjectType', required: true },
 
-    description: { type: String, required: true },
+    description: { type: String },
 
     requirement: { type: String, required: true },
 
@@ -26,8 +26,8 @@ const projectSchema = new Schema<IProject>(
     labelSets: [
       {
         title: { type: String, required: true },
-        isMultiSelected: { type: Boolean, required: true },
         labels: { type: [String], required: true },
+        isMultiSelected: { type: Boolean, required: true },
       },
     ],
 
@@ -56,3 +56,5 @@ const projectSchema = new Schema<IProject>(
 )
 
 projectSchema.plugin(toJSON)
+
+export const Project = model('Project', projectSchema)
