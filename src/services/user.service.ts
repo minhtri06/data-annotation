@@ -14,8 +14,8 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     super(Model)
   }
 
-  comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
-    return bcrypt.compare(rawPassword, hashedPassword)
+  async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
+    return await bcrypt.compare(rawPassword, hashedPassword)
   }
 
   async hashPassword(password: string): Promise<string> {
@@ -27,16 +27,17 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
   ): Promise<UserDocument> {
     body = pickFields(
       body,
-      'address',
-      'birthOfDate',
       'name',
-      'password',
-      'phoneNumber',
-      'role',
       'username',
+      'password',
+      'role',
+      'birthOfDate',
+      'phoneNumber',
+      'address',
     )
 
     body.password = await this.hashPassword(body.password)
+
     return await this.Model.create(body)
   }
 }

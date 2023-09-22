@@ -1,2 +1,2 @@
-export { connectMongoDb } from './connect-mongodb'
-export { redisClient } from './redis-client'
+export * from './connect-mongodb'
+export * from './redis-client'
