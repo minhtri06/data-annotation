@@ -2,46 +2,38 @@ import { Schema, model } from 'mongoose'
 
 import { ISample, ISampleModel } from './interfaces'
 import { toJSON } from './plugins'
+import { MODEL_NAMES, SAMPLE_STATUS } from '../configs/constants'
 
 const sampleSchema = new Schema<ISample>(
   {
     texts: { type: [String], required: true },
 
-    annotations: [
-      {
-        performer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, enum: Object.values(SAMPLE_STATUS), required: true },
 
-        generatedTexts: [String],
+    textAnnotation: {
+      labelSets: [{ selectedLabels: { type: [String], required: true } }],
 
-        labelSets: [
-          {
-            selectedLabels: {
-              type: [String],
-              required: true,
+      singleTextAnnotation: [
+        {
+          labelSets: [{ selectedLabels: { type: [String], required: true } }],
+
+          inlineLabels: [
+            {
+              startAt: { type: Number, required: true },
+              endAt: { type: Number, required: true },
             },
-          },
-        ],
+          ],
+        },
+      ],
+    },
 
-        textAnnotations: [
-          {
-            inlineLabels: [
-              {
-                label: { type: String, required: true },
-                startAt: { type: Number, required: true },
-                endAt: { type: String, required: true },
-              },
-            ],
+    generatedTexts: [String],
 
-            labelSets: [
-              {
-                selectedLabels: {
-                  type: [String],
-                  required: true,
-                },
-              },
-            ],
-          },
-        ],
+    comments: [
+      {
+        body: { type: String, required: true },
+        author: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
+        createdAt: { type: Date, required: true },
       },
     ],
   },
@@ -53,4 +45,4 @@ const sampleSchema = new Schema<ISample>(
 
 sampleSchema.plugin(toJSON)
 
-export const Sample = model<ISample, ISampleModel>('Sample', sampleSchema)
+export const Sample = model<ISample, ISampleModel>(MODEL_NAMES.SAMPLE, sampleSchema)

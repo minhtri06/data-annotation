@@ -1,13 +1,13 @@
 import { Schema, model } from 'mongoose'
 
 import { IToken, ITokenModel } from './interfaces/token.interface'
-import { TOKEN_TYPES } from '../configs/constants'
+import { MODEL_NAMES, TOKEN_TYPES } from '../configs/constants'
 
 const tokenSchema = new Schema<IToken>(
   {
     body: { type: String, index: true, required: true },
 
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
 
     type: { type: String, enum: Object.values(TOKEN_TYPES), required: true },
 
@@ -25,4 +25,4 @@ const tokenSchema = new Schema<IToken>(
   },
 )
 
-export const Token = model<IToken, ITokenModel>('Token', tokenSchema)
+export const Token = model<IToken, ITokenModel>(MODEL_NAMES.TOKEN, tokenSchema)

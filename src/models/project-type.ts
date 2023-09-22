@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose'
 
 import { IProjectType } from './interfaces'
 import { toJSON } from './plugins'
+import { MODEL_NAMES } from '../configs/constants'
 
 const projectTypeSchema = new Schema<IProjectType>(
   {
@@ -15,4 +16,4 @@ const projectTypeSchema = new Schema<IProjectType>(
 
 projectTypeSchema.plugin(toJSON)
 
-export const ProjectType = model('ProjectType', projectTypeSchema)
+export const ProjectType = model(MODEL_NAMES.PROJECT_TYPE, projectTypeSchema)

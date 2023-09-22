@@ -34,16 +34,20 @@ export interface IProject extends ISchema {
   status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
 
   sampleTextConfig: {
+    hasLabelSets: boolean
     labelSets?: {
       isMultiSelected: boolean
       labels: string[]
     }
-    detailConfigs?: {
+    singleSampleTextConfig: {
+      hasLabelSets: boolean
       labelSets?: {
         isMultiSelected: boolean
         labels: string[]
       }[]
-      inlineLabels: string[]
+
+      hasInlineLabels: boolean
+      inlineLabels?: string[]
     }[]
   }
 

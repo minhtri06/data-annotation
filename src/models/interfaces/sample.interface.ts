@@ -10,13 +10,11 @@ export interface ISample extends ISchema {
   status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
 
   textAnnotation: {
-    generatedTexts?: string[]
-
     labelSets?: {
       selectedLabels: string[]
     }[]
 
-    detailAnnotation?: {
+    singleTextAnnotation?: {
       labelSets?: {
         selectedLabels: string[]
       }[]
@@ -26,6 +24,8 @@ export interface ISample extends ISchema {
       }[]
     }[]
   }
+
+  generatedTexts?: string[]
 
   comments: {
     body: string

@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose'
 import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { toJSON } from './plugins'
+import { MODEL_NAMES } from '../configs/constants'
 
 const userSchema = new Schema<IUser>(
   {
@@ -39,4 +40,4 @@ const userSchema = new Schema<IUser>(
 
 userSchema.plugin(toJSON)
 
-export const User = model<IUser, IUserModel>('User', userSchema)
+export const User = model<IUser, IUserModel>(MODEL_NAMES.USER, userSchema)
