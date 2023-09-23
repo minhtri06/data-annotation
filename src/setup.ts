@@ -38,8 +38,8 @@ const setup = async () => {
 
     app.use(
       rateLimit({
-        windowMs: 2 * 1000,
-        max: 1,
+        windowMs: 15 * 60 * 1000,
+        max: ENV_CONFIG.RATE_LIMIT_PER_15_MINUTES,
         standardHeaders: true,
         legacyHeaders: false,
         message: { message: 'Too many request' },

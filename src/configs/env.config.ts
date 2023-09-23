@@ -11,6 +11,7 @@ interface IEnvSchema {
   MONGODB_URL: string
   REDIS_URL: string
   REDIS_DEFAULT_EXPIRATION: number
+  RATE_LIMIT_PER_15_MINUTES: number
   JWT_SECRET: string
   JWT_ACCESS_EXPIRATION_MINUTES: number
   JWT_REFRESH_EXPIRATION_DAYS: number
@@ -26,7 +27,8 @@ const envSchema = Joi.object<IEnvSchema, true>({
   DEFAULT_PAGE_LIMIT: Joi.number().integer().min(1).required(),
   MONGODB_URL: Joi.string().required(),
   REDIS_URL: Joi.string().required(),
-  REDIS_DEFAULT_EXPIRATION: Joi.number().integer().min(1),
+  REDIS_DEFAULT_EXPIRATION: Joi.number().integer().min(1).required(),
+  RATE_LIMIT_PER_15_MINUTES: Joi.number().integer().min(1).required(),
   JWT_SECRET: Joi.string().required(),
   JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().integer().min(1),
   JWT_REFRESH_EXPIRATION_DAYS: Joi.number().integer().min(1),
