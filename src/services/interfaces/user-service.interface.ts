@@ -8,4 +8,9 @@ export interface IUserService extends IModelService<IUser, IUserModel> {
   createUser(
     body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
   ): Promise<UserDocument>
+
+  updateUser(
+    user: UserDocument,
+    updateBody: Partial<Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'role'>>,
+  ): Promise<void>
 }

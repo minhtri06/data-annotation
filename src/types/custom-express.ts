@@ -2,16 +2,15 @@ import { NextFunction, Request, Response } from 'express'
 
 import { IUser } from '../models/interfaces'
 import { RequestSchema } from './request-schemas'
-import { UserDocument } from './custom-mongoose'
 
-export type CustomRequest<ReqSchema extends RequestSchema> = Request<
+export type CustomRequest<ReqSchema extends RequestSchema = RequestSchema> = Request<
   Exclude<RequestSchema['params'], undefined>,
   object,
   Exclude<RequestSchema['body'], undefined>,
   Exclude<RequestSchema['query'], undefined>
 > &
   Pick<ReqSchema, 'body' | 'params' | 'query'> & {
-    user?: UserDocument | Pick<IUser, '_id' | 'role'>
+    user?: Pick<IUser, '_id' | 'role'>
   }
 
 export type ReqHandler<ReqSchema extends RequestSchema = RequestSchema> = (

@@ -1,7 +1,4 @@
 export const TYPES = {
-  // models
-  TOKEN_MODEL: Symbol('token-model'),
-  USER_MODEL: Symbol('user-model'),
   // services
   AUTH_SERVICE: Symbol('auth-service'),
   IMAGE_STORAGE_SERVICE: Symbol('image-storage-service'),

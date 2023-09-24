@@ -1,23 +1,21 @@
 import createHttpError from 'http-errors'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 
 import { IToken, ITokenModel } from '../models/interfaces'
 import { ITokenService } from './interfaces'
 import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
 import envConfig from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
-import { TYPES } from '../configs/constants'
+import { Token } from '../models'
 
 @injectable()
 export class TokenService
   extends ModelService<IToken, ITokenModel>
   implements ITokenService
 {
-  constructor(@inject(TYPES.TOKEN_MODEL) Model: ITokenModel) {
-    super(Model)
-  }
+  Model: ITokenModel = Token
 
   generateToken(
     userId: DocumentId,
