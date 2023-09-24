@@ -12,7 +12,7 @@ export interface IUser extends ISchema {
 
   role: Role
 
-  avatar: string
+  avatar?: string
 
   birthOfDate: Date
 
