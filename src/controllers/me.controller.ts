@@ -1,13 +1,15 @@
 import { Container, inject } from 'inversify'
 import { controller, httpGet, httpPut } from 'inversify-express-utils'
 import createHttpError from 'http-errors'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 
 import { IGeneralMiddleware } from '../middlewares'
 import { IUserService } from '../services/interfaces'
 import { CustomRequest, EmptyObject } from '../types'
 import { IUploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../configs/constants'
+import { ApiError } from '../utils'
+import { StatusCodes } from 'http-status-codes'
 
 export const meControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -29,10 +31,20 @@ export const meControllerFactory = (container: Container) => {
     @httpPut(
       '/avatar',
       generalMiddleware.auth(),
-      uploadMiddleware.uploadSingle('image', 'avatar', {}),
+      uploadMiddleware.uploadSingle('image', 'avatar'),
     )
-    replaceAvatar(req: Request, res: Response) {
-      return res.status(200).json({ message: 'Oke' })
+    async replaceAvatar(req: CustomRequest, res: Response) {
+      if (!req.user) {
+        throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
+      }
+      if (!req.file) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Avatar is required')
+      }
+      const user = await this.userService.getOneByIdOrError(req.user._id)
+      await this.userService.updateUser(user, { avatar: req.file.filename })
+      return res
+        .status(200)
+        .json({ message: 'Replace avatar successfully', avatar: user.avatar })
     }
   }
 
