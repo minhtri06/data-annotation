@@ -20,10 +20,14 @@ const setup = async () => {
   await connectMongoDb()
   await connectRedis()
 
+  // init inversify server
   const server = new InversifyExpressServer(container, null, { rootPath: '/api/v1' })
 
-  // setup middlewares
   server.setConfig((app) => {
+    // set trust proxy
+    app.set('trust proxy', 1)
+
+    // setup middlewares
     app.use(helmet())
     app.use(morgan('dev'))
     app.use(compression())
@@ -35,7 +39,6 @@ const setup = async () => {
     )
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
-
     app.use(
       rateLimit({
         windowMs: 15 * 60 * 1000,
@@ -57,6 +60,7 @@ const setup = async () => {
     app.use(generalMiddleware.handleException)
   })
 
+  // return the app
   return server.build()
 }
 
