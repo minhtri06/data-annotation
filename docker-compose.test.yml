@@ -17,3 +17,7 @@ services:
     volumes:
       - ./:/app:ro
     container_name: data-annotation-test
+
+  mongodb:
+    ports:
+      - 27017:27017

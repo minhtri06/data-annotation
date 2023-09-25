@@ -17,3 +17,7 @@ services:
     volumes:
       - ./:/app
     container_name: data-annotation-dev
+
+  mongodb:
+    ports:
+      - 27017:27017
