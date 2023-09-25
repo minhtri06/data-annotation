@@ -59,7 +59,7 @@ export class AuthService implements IAuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    const refreshTokenDocument = await this.tokenService.getOneOrError({
+    const refreshTokenDocument = await this.tokenService.getOneOrFail({
       body: refreshToken,
       type: TOKEN_TYPES.REFRESH_TOKEN,
     })
@@ -94,7 +94,7 @@ export class AuthService implements IAuthService {
       throw createHttpError.Unauthorized('Invalid token')
     }
 
-    const refreshTokenDocument = await this.tokenService.getOneOrError({
+    const refreshTokenDocument = await this.tokenService.getOneOrFail({
       body: refreshToken,
       type: TOKEN_TYPES.REFRESH_TOKEN,
     })

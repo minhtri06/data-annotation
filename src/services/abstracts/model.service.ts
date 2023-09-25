@@ -1,19 +1,31 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import createError from 'http-errors'
-import { FilterQuery, Model as MongooseModel } from 'mongoose'
+import { FilterQuery, Model as MongooseModel, Query } from 'mongoose'
 import { injectable } from 'inversify'
 
 import { DocumentId, QueryOptions } from '../../types'
 import ENV_CONFIG from '../../configs/env.config'
+import { ApiError } from '../../utils'
+import { StatusCodes } from 'http-status-codes'
 
 export interface IModelService<SchemaType, ModelType extends MongooseModel<SchemaType>> {
-  getOne(filter: FilterQuery<SchemaType>): Promise<InstanceType<ModelType> | null>
+  getOne(
+    filter: FilterQuery<SchemaType>,
+  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>>
 
-  getOneById(id: DocumentId): Promise<InstanceType<ModelType> | null>
+  getOneById(
+    id: DocumentId,
+  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>>
 
-  getOneOrError(filter: FilterQuery<SchemaType>): Promise<InstanceType<ModelType>>
+  getOneOrFail(
+    filter: FilterQuery<SchemaType>,
+  ): Query<InstanceType<ModelType>, InstanceType<ModelType>>
 
-  getOneByIdOrError(id: DocumentId): Promise<InstanceType<ModelType>>
+  getOneByIdOrFail(
+    id: DocumentId,
+  ): Query<InstanceType<ModelType>, InstanceType<ModelType>>
+
+  getMany(
+    filter: FilterQuery<SchemaType>,
+  ): Query<InstanceType<ModelType>[], InstanceType<ModelType>>
 
   paginate(
     filter: FilterQuery<SchemaType>,
@@ -29,24 +41,42 @@ export abstract class ModelService<
 {
   protected abstract Model: ModelType
 
-  async getOne(filter: FilterQuery<SchemaType>): Promise<InstanceType<ModelType> | null> {
-    return await this.Model.findOne(filter)
+  getOne(
+    filter: FilterQuery<SchemaType>,
+  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>> {
+    return this.Model.findOne(filter)
   }
 
-  async getOneById(id: DocumentId): Promise<InstanceType<ModelType> | null> {
-    return await this.getOne({ _id: id })
+  getOneById(
+    id: DocumentId,
+  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>> {
+    return this.Model.findById(id)
   }
 
-  async getOneOrError(filter: FilterQuery<SchemaType>): Promise<InstanceType<ModelType>> {
-    const document = await this.getOne(filter)
-    if (!document) {
-      throw new createError.NotFound(`${this.Model.name.toLowerCase()} not found`)
-    }
-    return document
+  getOneOrFail(
+    filter: FilterQuery<SchemaType>,
+    error: Error = new ApiError(StatusCodes.NOT_FOUND, `${this.Model.name} not found`),
+  ): Query<InstanceType<ModelType>, InstanceType<ModelType>> {
+    return this.getOne(filter).orFail(error)
   }
 
-  async getOneByIdOrError(id: DocumentId): Promise<InstanceType<ModelType>> {
-    return await this.getOneOrError({ _id: id })
+  getOneByIdOrFail(
+    id: DocumentId,
+    error = new ApiError(StatusCodes.NOT_FOUND, `${this.Model.name} not found`),
+  ): Query<InstanceType<ModelType>, InstanceType<ModelType>> {
+    return this.getOneById(id).orFail(error)
+  }
+
+  getMany(
+    filter: FilterQuery<SchemaType>,
+  ): Query<InstanceType<ModelType>[], InstanceType<ModelType>> {
+    return this.Model.find(filter)
+  }
+
+  countDocuments(
+    filter: FilterQuery<SchemaType>,
+  ): Query<number, InstanceType<ModelType>> {
+    return this.Model.countDocuments(filter) as Query<number, InstanceType<ModelType>>
   }
 
   async paginate(
@@ -56,23 +86,23 @@ export abstract class ModelService<
     const query = this.Model.find(filter)
 
     if (sort) {
-      query.sort(sort)
+      void query.sort(sort)
     }
     if (select) {
-      query.select(select)
+      void query.select(select)
     }
     if (populate) {
-      query.populate(populate)
+      void query.populate(populate)
     }
     if (lean) {
-      query.lean()
+      void query.lean()
     }
 
     page = page || 1
     limit = limit || ENV_CONFIG.DEFAULT_PAGE_LIMIT
     const skip = (page - 1) * limit
 
-    query.skip(skip).limit(limit)
+    void query.skip(skip).limit(limit)
 
     if (checkPaginate) {
       const [data, totalRecords] = await Promise.all([

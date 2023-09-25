@@ -24,7 +24,7 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw createHttpError.Unauthorized('Unauthorized')
       }
-      const profile = await this.userService.getOneByIdOrError(req.user._id)
+      const profile = await this.userService.getOneByIdOrFail(req.user._id)
       return res.status(200).json({ profile })
     }
 
@@ -40,7 +40,7 @@ export const meControllerFactory = (container: Container) => {
       if (!req.file) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Avatar is required')
       }
-      const user = await this.userService.getOneByIdOrError(req.user._id)
+      const user = await this.userService.getOneByIdOrFail(req.user._id)
       await this.userService.updateUser(user, { avatar: req.file.filename })
       return res
         .status(200)
