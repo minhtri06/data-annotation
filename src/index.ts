@@ -1,15 +1,19 @@
+import 'module-alias/register'
+
 import setup from './setup'
 
 import envConfig from './configs/env.config'
 
 const start = async () => {
-  const app = await setup()
+  try {
+    const app = await setup()
 
-  app.listen(envConfig.PORT, () => {
-    console.log('🍂 Server is running on port ' + envConfig.PORT)
-  })
+    app.listen(envConfig.PORT, () => {
+      console.log('🍂 Server is running on port ' + envConfig.PORT)
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }
 
-start().catch((error) => {
-  console.log(error)
-})
+void start()
