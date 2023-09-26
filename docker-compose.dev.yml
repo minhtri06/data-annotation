@@ -17,6 +17,7 @@ services:
     volumes:
       - ./:/app
     container_name: data-annotation-dev
+    tty: true
 
   mongodb:
     ports:
