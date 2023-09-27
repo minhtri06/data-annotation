@@ -8,6 +8,7 @@ import { UserDocument } from '../types'
 import { IUser } from '../models/interfaces'
 import { ROLES } from '../configs/role.config'
 import { TOKEN_TYPES, TYPES } from '../configs/constants'
+import { ApiError } from '../utils'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -23,7 +24,9 @@ export class AuthService implements IAuthService {
     authTokens: { accessToken: string; refreshToken: string }
   }> {
     if (body.role !== ROLES.LEVEL_1_ANNOTATOR && body.role !== ROLES.LEVEL_2_ANNOTATOR) {
-      throw createHttpError.BadRequest('Invalid role')
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid role', {
+        type: 'validation-error',
+      })
     }
     const user = await this.userService.createUser(body)
     const authTokens = await this.tokenService.createAuthTokens(user._id, user.role)

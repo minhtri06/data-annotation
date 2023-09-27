@@ -4,14 +4,14 @@ import createHttpError from 'http-errors'
 import { Error as MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 import Joi from 'joi'
+import { injectable } from 'inversify'
 
 import envConfig from '../configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
-import { RequestSchema } from '../types/request-schemas'
 import { getObjectKeys } from '../utils/object-utils'
-import { injectable } from 'inversify'
 import { ApiError, camelCaseToNormalText } from '../utils'
+import { RequestSchema } from '../types/request-schemas'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -39,23 +39,25 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     if (err instanceof createHttpError.HttpError) {
       return res
         .status(err.statusCode)
-        .json({ type: err.headers?.type, message: err.message })
+        .json({ message: err.message, type: err.headers?.type })
     }
     if (err instanceof ApiError) {
       const { statusCode, type, message } = err
-      return res.status(statusCode).json({ type, message })
+      return res.status(statusCode).json({ message, type })
     }
 
     if (err instanceof MongooseError.ValidationError) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: err.message.replaceAll('"', "'") })
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        // Show message of the first error
+        message: err.errors[Object.keys(err.errors)[0]].message,
+        type: 'validation-error',
+      })
     }
 
     if (err.code === 11000 && err.keyValue) {
       const { keyValue } = err
       const message = Object.keys(keyValue)
-        .map((key) => `${key} '${keyValue[key]}' already exists`)
+        .map((key) => `${camelCaseToNormalText(key)} '${keyValue[key]}' already exists`)
         .join(', ')
       return res.status(StatusCodes.BAD_REQUEST).json({ message })
     }

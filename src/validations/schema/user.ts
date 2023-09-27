@@ -8,7 +8,7 @@ export const userSchema = {
   password: Joi.string(),
   role: Joi.string()
     .valid(ROLES.LEVEL_1_ANNOTATOR, ROLES.LEVEL_2_ANNOTATOR)
-    .messages({ 'any.only': 'invalid role' }),
+    .messages({ 'any.only': 'Invalid role' }),
   birthOfDate: Joi.date(),
   phoneNumber: Joi.string(),
   address: Joi.string(),
