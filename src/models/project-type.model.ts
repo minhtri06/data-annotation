@@ -6,7 +6,7 @@ import { MODEL_NAMES } from '../configs/constants'
 
 const projectTypeSchema = new Schema<IProjectType>(
   {
-    name: { type: String, required: true },
+    name: { type: String, unique: true, trim: true, required: true },
   },
   {
     timestamps: true,
