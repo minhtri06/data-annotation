@@ -1,7 +1,4 @@
-import 'module-alias/register'
-
 import setup from './setup'
-
 import envConfig from './configs/env.config'
 
 const start = async () => {
