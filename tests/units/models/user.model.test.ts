@@ -5,25 +5,35 @@ import { fakeUserData, setupTestDb } from '../../utils'
 setupTestDb()
 
 describe('User model', () => {
-  let newUserRaw: Partial<IUser>
+  let rawUser: ReturnType<typeof fakeUserData>
   beforeEach(() => {
-    newUserRaw = fakeUserData()
+    rawUser = fakeUserData()
   })
 
   describe('User validation', () => {
     test('should correctly validate a valid user', async () => {
-      await expect(new User(newUserRaw).validate()).resolves.toBeUndefined()
+      await expect(new User(rawUser).validate()).resolves.toBeUndefined()
     })
 
     test('should throw a validation error if provide invalid role', async () => {
-      newUserRaw.role = 'invalid' as IUser['role']
-      await expect(new User(newUserRaw).validate()).rejects.toThrow()
+      rawUser.role = 'invalid' as IUser['role']
+      await expect(new User(rawUser).validate()).rejects.toThrow()
+    })
+  })
+
+  describe('User uniqueness', () => {
+    test('should throw error if save an user with existing username', async () => {
+      await User.create(rawUser)
+
+      const rawUser2 = fakeUserData()
+      rawUser2.username = rawUser.username
+      await expect(User.create(fakeUserData(rawUser2))).rejects.toThrow()
     })
   })
 
   describe('User toJSON', () => {
     test('should not return password', () => {
-      expect(new User(newUserRaw).toJSON().password).toBe(undefined)
+      expect(new User(rawUser).toJSON().password).toBe(undefined)
     })
   })
 })

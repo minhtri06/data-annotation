@@ -4,10 +4,10 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "seed": "npx tsc & TZ='UTC' node dist/helpers/seed.js",
-    "build": "npx tsc",
+    "seed": "npx tsc -p tsconfig.build.json & TZ='UTC' node dist/helpers/seed.js",
+    "build": "npx tsc -p tsconfig.build.json",
     "start": "TZ='UTC' node dist/index.js",
-    "dev": "npx tsc --watch & TZ='UTC' nodemon dist/index.js",
+    "dev": "npx tsc -p tsconfig.build.json --watch & TZ='UTC' nodemon dist/index.js",
     "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
     "lint": "eslint . --report-unused-disable-directives",
     "test": "jest",
