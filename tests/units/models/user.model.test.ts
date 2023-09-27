@@ -19,6 +19,21 @@ describe('User model', () => {
       rawUser.role = 'invalid' as IUser['role']
       await expect(new User(rawUser).validate()).rejects.toThrow()
     })
+
+    test('should throw an error if password length less than 6 characters', async () => {
+      rawUser.password = '1234a'
+      await expect(new User(rawUser).validate()).rejects.toThrow()
+    })
+
+    test("should throw an error if password doesn't contain letter", async () => {
+      rawUser.password = '1234567'
+      await expect(new User(rawUser).validate()).rejects.toThrow()
+    })
+
+    test("should throw an error if password doesn't contain number", async () => {
+      rawUser.password = 'onlyLetterABC'
+      await expect(new User(rawUser).validate()).rejects.toThrow()
+    })
   })
 
   describe('User uniqueness', () => {

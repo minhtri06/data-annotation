@@ -7,7 +7,7 @@ export const fakeUserData = (
 ): Omit<IUser, '_id' | 'createdAt' | 'updatedAt'> => {
   return {
     username: faker.internet.userName(),
-    password: faker.internet.password(),
+    password: 'ValidPassword123',
     name: faker.person.fullName(),
     birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
     phoneNumber: faker.phone.number(),
