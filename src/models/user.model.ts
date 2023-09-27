@@ -11,7 +11,16 @@ const userSchema = new Schema<IUser>(
 
     username: { type: String, required: true, unique: true },
 
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      validate: (password: string) => {
+        if (!password.match(/\d/) || !password.match(/[a-zA-Z]/)) {
+          throw new Error('Password must contain at least one letter and one number')
+        }
+      },
+    },
 
     role: {
       type: String,
