@@ -1,3 +1,5 @@
+import './configs/module-alias.config'
+
 import setup from './setup'
 import envConfig from './configs/env.config'
 

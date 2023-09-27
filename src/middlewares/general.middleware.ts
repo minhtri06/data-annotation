@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import Joi from 'joi'
 import { injectable } from 'inversify'
 
-import envConfig from '../configs/env.config'
+import envConfig from '@src/configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { getObjectKeys } from '../utils/object-utils'
