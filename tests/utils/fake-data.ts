@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import { IUser } from '@src/models/interfaces'
+import { IProjectType, IUser } from '@src/models/interfaces'
 
 export const fakeUserData = (
   overwriteFields: Partial<IUser> = {},
@@ -13,6 +13,15 @@ export const fakeUserData = (
     phoneNumber: faker.phone.number(),
     role: 'level-1-annotator',
     address: faker.location.streetAddress(),
+    ...overwriteFields,
+  }
+}
+
+export const fakeProjectTypeData = (
+  overwriteFields: Partial<IProjectType> = {},
+): Omit<IProjectType, '_id' | 'createdAt' | 'updatedAt'> => {
+  return {
+    name: 'Machine translation',
     ...overwriteFields,
   }
 }
