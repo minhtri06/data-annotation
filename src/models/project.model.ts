@@ -35,6 +35,7 @@ const projectSchema = new Schema<IProject>(
         },
       ],
       required: true,
+      validate: () => {},
     },
 
     numberOfLevel2Annotators: { type: Number, required: true },

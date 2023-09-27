@@ -15,7 +15,7 @@ const userSchema = new Schema<IUser>(
 
     role: {
       type: String,
-      enum: Object.keys(ROLE_PRIVILEGES),
+      enum: { values: Object.keys(ROLE_PRIVILEGES), message: 'Invalid role' },
       required: true,
     },
 
