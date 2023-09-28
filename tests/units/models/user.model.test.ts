@@ -1,6 +1,9 @@
 import { IUser } from '@src/models/interfaces'
 import { User } from '@src/models/user.model'
-import { fakeUser, setupTestDb } from '../../utils'
+import { fakeUser } from '@tests/fixtures'
+import { setupTestDb } from '@tests/utils'
+
+setupTestDb()
 
 describe('User model', () => {
   let rawUser: ReturnType<typeof fakeUser>
@@ -9,8 +12,6 @@ describe('User model', () => {
   })
 
   describe('User validation', () => {
-    setupTestDb()
-
     test('should correctly validate a valid user', async () => {
       await expect(new User(rawUser).validate()).resolves.toBeUndefined()
     })
@@ -37,8 +38,6 @@ describe('User model', () => {
   })
 
   describe('User uniqueness', () => {
-    setupTestDb()
-
     test('should throw error if save an user with existing username', async () => {
       await User.create(rawUser)
 

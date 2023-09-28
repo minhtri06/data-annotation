@@ -1,5 +1,6 @@
 import { ProjectType } from '@src/models'
-import { fakeProjectType, setupTestDb } from '@tests/utils'
+import { fakeProjectType } from '@tests/fixtures'
+import { setupTestDb } from '@tests/utils'
 
 setupTestDb()
 

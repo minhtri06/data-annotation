@@ -1,37 +1,10 @@
 import { faker } from '@faker-js/faker'
 
-import { IProject, IProjectType, IUser } from '@src/models/interfaces'
+import { IProject } from '@src/models/interfaces'
 import mongoose from 'mongoose'
 
 const { ObjectId } = mongoose.Types
 
-// user
-export const fakeUser = (
-  overwriteFields: Partial<IUser> = {},
-): Omit<IUser, '_id' | 'createdAt' | 'updatedAt'> => {
-  return {
-    username: faker.internet.userName(),
-    password: 'ValidPassword123',
-    name: faker.person.fullName(),
-    birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
-    phoneNumber: faker.phone.number(),
-    role: 'annotator',
-    address: faker.location.streetAddress(),
-    ...overwriteFields,
-  }
-}
-
-// project type
-export const fakeProjectType = (
-  overwriteFields: Partial<IProjectType> = {},
-): Omit<IProjectType, '_id' | 'createdAt' | 'updatedAt'> => {
-  return {
-    name: 'Machine translation',
-    ...overwriteFields,
-  }
-}
-
-// project
 export const fakeAnnotationTaskDivision = (length: number) => {
   const annotationTaskDivision: IProject['annotationTaskDivision'] = []
   let sampleIndex = 0

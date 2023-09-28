@@ -3,10 +3,10 @@ import { Project } from '@src/models'
 import { IProject } from '@src/models/interfaces'
 import {
   fakeAnnotationTaskDivision,
-  fakeProject,
   fakeIndividualTextConfig,
-  setupTestDb,
-} from '@tests/utils'
+  fakeProject,
+} from '@tests/fixtures'
+import { setupTestDb } from '@tests/utils'
 
 setupTestDb()
 
