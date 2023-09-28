@@ -65,7 +65,6 @@ describe('Project model', () => {
       projectRaw.annotationConfig!.hasLabelSets = true
       projectRaw.annotationConfig!.labelSets = []
       const project = new Project(projectRaw)
-      console.log(project.annotationConfig)
       await expect(project.validate()).rejects.toThrow()
     })
 

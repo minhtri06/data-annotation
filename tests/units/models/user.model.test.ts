@@ -43,7 +43,7 @@ describe('User model', () => {
 
       const rawUser2 = fakeUser()
       rawUser2.username = rawUser.username
-      await expect(User.create(fakeUser(rawUser2))).rejects.toThrow()
+      await expect(User.create(rawUser2)).rejects.toThrow()
     })
   })
 
