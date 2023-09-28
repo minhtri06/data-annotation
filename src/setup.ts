@@ -13,12 +13,14 @@ import ENV_CONFIG from './configs/env.config'
 import { IGeneralMiddleware } from './middlewares'
 import container from './configs/inversify.config'
 import { TYPES } from './configs/constants'
-import { connectMongoDb, connectRedis, redisClient } from './helpers'
+import { connectMongoDb, redisClient } from './helpers'
 
 const setup = async () => {
   // connect databases
   await connectMongoDb()
-  await connectRedis()
+  console.log('🍃 Connect mongodb successfully')
+  await redisClient.connect()
+  console.log('🍃 Connect redis successfully')
 
   // init inversify server
   const server = new InversifyExpressServer(container, null, { rootPath: '/api/v1' })
