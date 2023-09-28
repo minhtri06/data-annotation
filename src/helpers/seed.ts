@@ -29,18 +29,18 @@ const seedUser = async () => {
   })
   await userService.createUser({
     name: 'Minh Tri',
-    username: 'lv1annotator',
+    username: 'annotator',
     password: 'password123',
-    role: 'level-1-annotator',
+    role: 'annotator',
     birthOfDate: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
   await userService.createUser({
     name: 'Minh Tri',
-    username: 'lv2annotator',
+    username: 'annotator2',
     password: 'password123',
-    role: 'level-2-annotator',
+    role: 'annotator',
     birthOfDate: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',

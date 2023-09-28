@@ -4,7 +4,7 @@ export const TOKEN_TYPES = {
 } as const
 
 export const PROJECT_STATUS = {
-  SETUP: 'setup',
+  SETTING_UP: 'setting-up',
   OPEN_FOR_JOINING: 'open-for-joining',
   ANNOTATING: 'annotating',
   DONE: 'done',

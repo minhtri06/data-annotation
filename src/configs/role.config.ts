@@ -1,8 +1,7 @@
 export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
-  LEVEL_1_ANNOTATOR: 'level-1-annotator',
-  LEVEL_2_ANNOTATOR: 'level-2-annotator',
+  ANNOTATOR: 'annotator',
 } as const
 
 export const PRIVILEGES = {
@@ -20,7 +19,6 @@ const ROLE_PRIVILEGES: Readonly<
 > = {
   [ROLES.ADMIN]: [GET_USERS, CREATE_USERS],
   [ROLES.MANAGER]: [GET_USERS],
-  [ROLES.LEVEL_1_ANNOTATOR]: [],
-  [ROLES.LEVEL_2_ANNOTATOR]: [],
+  [ROLES.ANNOTATOR]: [],
 }
 export default ROLE_PRIVILEGES

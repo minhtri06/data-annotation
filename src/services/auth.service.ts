@@ -23,7 +23,7 @@ export class AuthService implements IAuthService {
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }> {
-    if (body.role !== ROLES.LEVEL_1_ANNOTATOR && body.role !== ROLES.LEVEL_2_ANNOTATOR) {
+    if (body.role !== ROLES.ANNOTATOR) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid role', {
         type: 'validation-error',
       })
