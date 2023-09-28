@@ -1,16 +1,16 @@
 import { IUser } from '@src/models/interfaces'
 import { User } from '@src/models/user.model'
-import { fakeUserData, setupTestDb } from '../../utils'
-
-setupTestDb()
+import { fakeUser, setupTestDb } from '../../utils'
 
 describe('User model', () => {
-  let rawUser: ReturnType<typeof fakeUserData>
+  let rawUser: ReturnType<typeof fakeUser>
   beforeEach(() => {
-    rawUser = fakeUserData()
+    rawUser = fakeUser()
   })
 
   describe('User validation', () => {
+    setupTestDb()
+
     test('should correctly validate a valid user', async () => {
       await expect(new User(rawUser).validate()).resolves.toBeUndefined()
     })
@@ -37,12 +37,14 @@ describe('User model', () => {
   })
 
   describe('User uniqueness', () => {
+    setupTestDb()
+
     test('should throw error if save an user with existing username', async () => {
       await User.create(rawUser)
 
-      const rawUser2 = fakeUserData()
+      const rawUser2 = fakeUser()
       rawUser2.username = rawUser.username
-      await expect(User.create(fakeUserData(rawUser2))).rejects.toThrow()
+      await expect(User.create(fakeUser(rawUser2))).rejects.toThrow()
     })
   })
 

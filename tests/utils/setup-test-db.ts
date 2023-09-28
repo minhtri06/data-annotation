@@ -16,5 +16,6 @@ export const setupTestDb = () => {
 
   afterAll(async () => {
     await mongoose.disconnect()
+    console.log('Disconnect')
   })
 }
