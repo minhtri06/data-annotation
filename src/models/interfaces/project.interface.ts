@@ -27,6 +27,8 @@ export interface IProject extends ISchema {
 
   status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
 
+  completionTime?: Date
+
   annotationConfig: {
     hasLabelSets: boolean
     labelSets: {
@@ -47,8 +49,6 @@ export interface IProject extends ISchema {
       inlineLabels: string[]
     }[]
   }
-
-  completionTime?: Date
 }
 
 export interface IProjectModel extends Model<IProject> {}

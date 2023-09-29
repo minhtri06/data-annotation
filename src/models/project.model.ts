@@ -40,6 +40,13 @@ const projectSchema = new Schema<IProject>(
       required: true,
     },
 
+    completionTime: {
+      type: Date,
+      required: function () {
+        return (this as IProject).status === PROJECT_STATUS.DONE
+      },
+    },
+
     maximumOfAnnotators: { type: Number, required: true, min: 1 },
 
     annotationTaskDivision: {
@@ -146,8 +153,6 @@ const projectSchema = new Schema<IProject>(
       default: {},
       required: true,
     },
-
-    completionTime: { type: Date },
   },
   {
     timestamps: true,
