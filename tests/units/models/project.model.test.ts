@@ -2,9 +2,9 @@ import { PROJECT_STATUS } from '@src/configs/constants'
 import { Project } from '@src/models'
 import { IProject } from '@src/models/interfaces'
 import {
-  fakeAnnotationTaskDivision,
-  fakeIndividualTextConfig,
-  fakeProject,
+  generateAnnotationTaskDivision,
+  generateIndividualTextConfig,
+  generateProject,
 } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 
@@ -12,7 +12,7 @@ setupTestDb()
 
 let projectRaw: Partial<IProject>
 beforeEach(() => {
-  projectRaw = fakeProject()
+  projectRaw = generateProject()
 })
 
 describe('Project model', () => {
@@ -51,13 +51,13 @@ describe('Project model', () => {
     it('should throw error if annotation task division length greater than maximum \
     of annotator', async () => {
       projectRaw.maximumOfAnnotators = 1
-      projectRaw.annotationTaskDivision = fakeAnnotationTaskDivision(4)
+      projectRaw.annotationTaskDivision = generateAnnotationTaskDivision(4)
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
     it('should throw an error if annotation task division length greater than 0 \
     when project status is setting up', async () => {
-      projectRaw.annotationTaskDivision = fakeAnnotationTaskDivision(1)
+      projectRaw.annotationTaskDivision = generateAnnotationTaskDivision(1)
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
@@ -69,14 +69,14 @@ describe('Project model', () => {
     })
 
     it('should throw an error if at singleTextConfig, hasLabelSets equals to true but labelSets length equals to 0', async () => {
-      projectRaw.annotationConfig!.individualTextConfigs = fakeIndividualTextConfig(1)
+      projectRaw.annotationConfig!.individualTextConfigs = generateIndividualTextConfig(1)
       projectRaw.annotationConfig!.individualTextConfigs[0].hasLabelSets = true
       projectRaw.annotationConfig!.individualTextConfigs[0].labelSets = []
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
     it('should throw an error if inlineLabels equals to true but provide no inlineLabels', async () => {
-      projectRaw.annotationConfig!.individualTextConfigs = fakeIndividualTextConfig(1)
+      projectRaw.annotationConfig!.individualTextConfigs = generateIndividualTextConfig(1)
       projectRaw.annotationConfig!.individualTextConfigs[0].hasInlineLabels = true
       projectRaw.annotationConfig!.individualTextConfigs[0].inlineLabels = []
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
@@ -93,7 +93,7 @@ describe('Project model', () => {
     it('should throw an error if save a project with (name, project type) already exist', async () => {
       await Project.create(projectRaw)
 
-      const projectRaw2: Partial<IProject> = fakeProject()
+      const projectRaw2: Partial<IProject> = generateProject()
       projectRaw2.name = projectRaw.name
       projectRaw2.projectType = projectRaw.projectType
       await expect(Project.create(projectRaw2)).rejects.toThrow()

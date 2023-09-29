@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 
 import { IUser } from '@src/models/interfaces'
 
-export const fakeUser = (
+export const generateUser = (
   overwriteFields: Partial<IUser> = {},
 ): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotation'> => {
   return {

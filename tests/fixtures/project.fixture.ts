@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 
 const { ObjectId } = mongoose.Types
 
-export const fakeAnnotationTaskDivision = (length: number) => {
+export const generateAnnotationTaskDivision = (length: number) => {
   const annotationTaskDivision: IProject['annotationTaskDivision'] = []
   let sampleIndex = 0
   for (let i = 0; i < length; i++) {
@@ -19,7 +19,7 @@ export const fakeAnnotationTaskDivision = (length: number) => {
   return annotationTaskDivision
 }
 
-export const fakeIndividualTextConfig = (length: number) => {
+export const generateIndividualTextConfig = (length: number) => {
   const singleSampleTextConfig: IProject['annotationConfig']['individualTextConfigs'] = []
   for (let i = 0; i < length; i++) {
     singleSampleTextConfig.push({
@@ -32,7 +32,7 @@ export const fakeIndividualTextConfig = (length: number) => {
   return singleSampleTextConfig
 }
 
-export const fakeProject = (
+export const generateProject = (
   overwriteFields: Partial<IProject> = {},
 ): Omit<
   IProject,

@@ -1,14 +1,14 @@
 import { IUser } from '@src/models/interfaces'
 import { User } from '@src/models/user.model'
-import { fakeUser } from '@tests/fixtures'
+import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 
 setupTestDb()
 
 describe('User model', () => {
-  let rawUser: ReturnType<typeof fakeUser>
+  let rawUser: ReturnType<typeof generateUser>
   beforeEach(() => {
-    rawUser = fakeUser()
+    rawUser = generateUser()
   })
 
   describe('User validation', () => {
@@ -41,7 +41,7 @@ describe('User model', () => {
     test('should throw error if save an user with existing username', async () => {
       await User.create(rawUser)
 
-      const rawUser2 = fakeUser()
+      const rawUser2 = generateUser()
       rawUser2.username = rawUser.username
       await expect(User.create(rawUser2)).rejects.toThrow()
     })
