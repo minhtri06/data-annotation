@@ -81,9 +81,15 @@ describe('Project model', () => {
       projectRaw.annotationConfig!.individualTextConfigs[0].inlineLabels = []
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
+
+    it("should throw an error if status of project is 'done' but doesn't have completion time", async () => {
+      const project = await Project.create(projectRaw)
+      project.status = PROJECT_STATUS.DONE
+      await expect(project.save()).rejects.toThrow()
+    })
   })
 
-  describe('Project constraint', () => {
+  describe('Project uniqueness', () => {
     it('should throw an error if save a project with (name, project type) already exist', async () => {
       await Project.create(projectRaw)
 

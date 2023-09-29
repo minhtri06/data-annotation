@@ -2,10 +2,9 @@ import { faker } from '@faker-js/faker'
 
 import { IUser } from '@src/models/interfaces'
 
-// user
 export const fakeUser = (
   overwriteFields: Partial<IUser> = {},
-): Omit<IUser, '_id' | 'createdAt' | 'updatedAt'> => {
+): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotation'> => {
   return {
     username: faker.internet.userName(),
     password: 'ValidPassword123',
