@@ -42,13 +42,17 @@ const sampleSchema = new Schema<ISample>(
       },
     },
 
-    comments: [
-      {
-        body: { type: String, required: true },
-        author: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
-        createdAt: { type: Date, required: true },
-      },
-    ],
+    comments: {
+      type: [
+        {
+          body: { type: String, required: true },
+          author: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
+          createdAt: { type: Date, required: true },
+        },
+      ],
+      default: [],
+      required: true,
+    },
   },
   {
     timestamps: true,

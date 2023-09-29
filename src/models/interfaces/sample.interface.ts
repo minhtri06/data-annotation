@@ -38,7 +38,7 @@ export interface ISample extends ISchema {
     body: string
     author: DocumentId
     createdAt: Date
-  }
+  }[]
 }
 
 export interface ISampleModel extends Model<ISample> {}
