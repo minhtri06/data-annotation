@@ -14,5 +14,4 @@ export const SAMPLE_STATUS = {
   NEW: 'new',
   ANNOTATED: 'annotated',
   MARKED_AS_A_MISTAKE: 'marked-as-a-mistake',
-  APPROVED: 'approved',
 } as const
