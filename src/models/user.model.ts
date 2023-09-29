@@ -35,6 +35,18 @@ const userSchema = new Schema<IUser>(
     phoneNumber: { type: String, required: true },
 
     address: { type: String, required: true },
+
+    monthlyAnnotation: {
+      type: [
+        {
+          month: { type: Number, required: true },
+          year: { type: Number, required: true },
+          annotationTotal: { type: Number, required: true, default: 0 },
+        },
+      ],
+      default: [],
+      required: true,
+    },
   },
   {
     timestamps: true,

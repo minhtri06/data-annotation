@@ -146,6 +146,8 @@ const projectSchema = new Schema<IProject>(
       default: {},
       required: true,
     },
+
+    completionTime: { type: Date },
   },
   {
     timestamps: true,

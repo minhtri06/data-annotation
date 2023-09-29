@@ -47,6 +47,8 @@ export interface IProject extends ISchema {
       inlineLabels: string[]
     }[]
   }
+
+  completionTime?: Date
 }
 
 export interface IProjectModel extends Model<IProject> {}

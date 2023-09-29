@@ -19,6 +19,12 @@ export interface IUser extends ISchema {
   phoneNumber: string
 
   address: string
+
+  monthlyAnnotation: {
+    month: number
+    year: number
+    annotationTotal: number
+  }[]
 }
 
 export interface IUserModel extends Model<IUser> {}
