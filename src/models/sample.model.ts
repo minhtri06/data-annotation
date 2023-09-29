@@ -6,28 +6,41 @@ import { MODEL_NAMES, SAMPLE_STATUS } from '../configs/constants'
 
 const sampleSchema = new Schema<ISample>(
   {
-    texts: { type: [String], required: true },
+    texts: { type: [String], required: true, minlength: 1 },
 
     status: { type: String, enum: Object.values(SAMPLE_STATUS), required: true },
 
-    textAnnotation: {
-      labelSets: [{ selectedLabels: { type: [String], required: true } }],
+    annotation: {
+      labelSets: {
+        type: [{ selectedLabels: { type: [String], required: true } }],
+        default: null,
+      },
 
-      singleTextAnnotation: [
-        {
-          labelSets: [{ selectedLabels: { type: [String], required: true } }],
+      generatedTexts: { type: [String], default: null },
 
-          inlineLabels: [
-            {
-              startAt: { type: Number, required: true },
-              endAt: { type: Number, required: true },
+      singleTextAnnotation: {
+        type: [
+          {
+            labelSets: {
+              type: [{ selectedLabels: { type: [String], required: true } }],
+              default: null,
             },
-          ],
-        },
-      ],
-    },
 
-    generatedTexts: [String],
+            inlineLabels: {
+              type: [
+                {
+                  startAt: { type: Number, required: true },
+                  endAt: { type: Number, required: true },
+                },
+              ],
+              default: null,
+            },
+          },
+        ],
+        default: [],
+        required: true,
+      },
+    },
 
     comments: [
       {
