@@ -22,7 +22,11 @@ export interface ITokenService extends IModelService<IToken, ITokenModel> {
     role: Role,
   ): Promise<{ accessToken: string; refreshToken: string }>
 
-  verifyToken(token: string, type: IToken['type'], options: jwt.VerifyOptions): JwtPayload
+  verifyToken(
+    token: string,
+    type: IToken['type'],
+    options?: jwt.VerifyOptions,
+  ): JwtPayload
 
   blacklistAUser(userId: DocumentId): Promise<void>
 }
