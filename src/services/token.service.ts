@@ -6,7 +6,7 @@ import { injectable } from 'inversify'
 import { IToken, ITokenModel } from '../models/interfaces'
 import { ITokenService } from './interfaces'
 import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
-import envConfig from '../configs/env.config'
+import ENV_CONFIG from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 import { Token } from '../models'
 
@@ -30,17 +30,18 @@ export class TokenService
       type,
       role,
     }
-    return jwt.sign(payload, envConfig.JWT_SECRET)
+    return jwt.sign(payload, ENV_CONFIG.JWT_SECRET)
   }
 
   generateAccessToken(userId: DocumentId, role: Role): string {
-    const expires = moment().add(envConfig.JWT_ACCESS_EXPIRATION_MINUTES, 'minutes')
+    const expires = moment().add(ENV_CONFIG.JWT_ACCESS_EXPIRATION_MINUTES, 'minutes')
     return `Bearer ${this.generateToken(userId, role, expires, 'access-token')}`
   }
 
   async createRefreshToken(userId: DocumentId, role: Role): Promise<TokenDocument> {
-    const expires = moment().add(envConfig.JWT_REFRESH_EXPIRATION_DAYS, 'days')
+    const expires = moment().add(ENV_CONFIG.JWT_REFRESH_EXPIRATION_DAYS, 'days')
     const token = this.generateToken(userId, role, expires, 'refresh-token')
+
     return await this.Model.create({
       body: token,
       user: userId,
@@ -70,7 +71,7 @@ export class TokenService
     options: VerifyOptions = {},
   ): JwtPayload {
     try {
-      const payload = jwt.verify(token, envConfig.JWT_SECRET, options) as JwtPayload
+      const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
       if (payload.type !== type) {
         throw createHttpError.Unauthorized(`Invalid ${type} token`)
       }

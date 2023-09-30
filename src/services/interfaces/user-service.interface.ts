@@ -6,7 +6,7 @@ export interface IUserService extends IModelService<IUser, IUserModel> {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
 
   createUser(
-    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
+    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar' | 'monthlyAnnotation'>,
   ): Promise<UserDocument>
 
   updateUser(
