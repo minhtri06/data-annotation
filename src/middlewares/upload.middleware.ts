@@ -9,7 +9,7 @@ export interface IUploadMiddleware {
   uploadSingle(
     type: 'image',
     fieldName: string,
-    { required }?: { required?: boolean },
+    options?: { required?: boolean },
   ): RequestHandler
 }
 
