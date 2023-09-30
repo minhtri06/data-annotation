@@ -5,10 +5,7 @@ import moment from 'moment'
 
 import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
-import { IUser } from '../models/interfaces'
-import { ROLES } from '../configs/role.config'
 import { TOKEN_TYPES, TYPES } from '../configs/constants'
-import { ApiError } from '../utils'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -16,22 +13,6 @@ export class AuthService implements IAuthService {
     @inject(TYPES.TOKEN_SERVICE) private tokenService: ITokenService,
     @inject(TYPES.USER_SERVICE) private userService: IUserService,
   ) {}
-
-  async register(
-    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
-  ): Promise<{
-    user: UserDocument
-    authTokens: { accessToken: string; refreshToken: string }
-  }> {
-    if (body.role !== ROLES.ANNOTATOR) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid role', {
-        type: 'validation-error',
-      })
-    }
-    const user = await this.userService.createUser(body)
-    const authTokens = await this.tokenService.createAuthTokens(user._id, user.role)
-    return { user, authTokens }
-  }
 
   async login(
     username: string,

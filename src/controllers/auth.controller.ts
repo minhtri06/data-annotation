@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes'
 import { IAuthService, ITokenService, IUserService } from '../services/interfaces'
 import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
-import { Login, Logout, RefreshTokens, RegisterUser } from '../types/request-schemas'
+import { Login, Logout, RefreshTokens } from '../types/request-schemas'
 import { authValidation as validation } from '../validations'
 import { TYPES } from '../configs/constants'
 
@@ -20,14 +20,6 @@ export const authControllerFactory = (container: Container) => {
       @inject(TYPES.USER_SERVICE) private userService: IUserService,
       @inject(TYPES.TOKEN_SERVICE) private tokenService: ITokenService,
     ) {}
-
-    @httpPost('/register', generalMiddleware.validate(validation.registerUser))
-    async register(req: CustomRequest<RegisterUser>, res: Response) {
-      const { user, authTokens } = await this.authService.register(req.body)
-      return res
-        .json({ message: 'Create user successfully', user, authTokens })
-        .status(StatusCodes.CREATED)
-    }
 
     @httpPost('/login', generalMiddleware.validate(validation.login))
     async login(req: CustomRequest<Login>, res: Response) {
