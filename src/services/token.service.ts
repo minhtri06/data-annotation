@@ -1,4 +1,3 @@
-import Joi from 'joi'
 import createHttpError from 'http-errors'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
@@ -10,10 +9,8 @@ import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
 import ENV_CONFIG from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 import { Token } from '../models'
-import { validate } from '@src/utils'
-import { userValidation } from './validation/user.validation'
-import { customValidation } from './validation/custom.validation'
-import { TOKEN_TYPES } from '@src/configs/constants'
+import { validateParams } from '@src/utils'
+import { tokenValidation as validation } from './validation'
 
 @injectable()
 export class TokenService
@@ -28,15 +25,7 @@ export class TokenService
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string {
-    validate(userId, userValidation._id.required())
-    validate(role, userValidation.role.required())
-    validate(expires, customValidation.moment.required())
-    validate(
-      type,
-      Joi.string()
-        .valid(...Object.values(TOKEN_TYPES))
-        .required(),
-    )
+    validateParams({ userId, role, expires, type }, validation.generateToken)
 
     const payload: JwtPayload = {
       sub: userId,
@@ -86,13 +75,7 @@ export class TokenService
     type: 'access-token' | 'refresh-token',
     options: VerifyOptions = {},
   ): JwtPayload {
-    validate(token, Joi.string().required())
-    validate(
-      type,
-      Joi.string()
-        .valid(...Object.values(TOKEN_TYPES))
-        .required(),
-    )
+    validateParams({ token, type }, validation.verifyToken)
 
     try {
       const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
@@ -109,7 +92,7 @@ export class TokenService
   }
 
   async blacklistAUser(userId: DocumentId): Promise<void> {
-    validate(userId, userValidation._id.required())
+    validateParams({ userId }, validation.blacklistAUser)
 
     const tokenType: IToken['type'] = 'refresh-token'
     await this.Model.updateMany(

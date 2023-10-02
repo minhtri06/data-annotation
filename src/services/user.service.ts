@@ -5,9 +5,10 @@ import { IStorageService, IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IUser, IUserModel } from '../models/interfaces'
 import { UserDocument } from '../types'
-import { pickFields } from '../utils/object-utils'
 import { TYPES } from '../configs/constants'
 import { User } from '../models'
+import { validateParams } from '@src/utils'
+import { userValidation as validation } from './validation'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
@@ -20,26 +21,21 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
   }
 
   async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
+    validateParams({ hashedPassword, rawPassword }, validation.comparePassword)
+
     return await bcrypt.compare(rawPassword, hashedPassword)
   }
 
   async hashPassword(password: string): Promise<string> {
+    validateParams({ password }, validation.hashPassword)
+
     return await bcrypt.hash(password, 8)
   }
 
   async createUser(
     body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
   ): Promise<UserDocument> {
-    body = pickFields(
-      body,
-      'name',
-      'username',
-      'password',
-      'role',
-      'birthOfDate',
-      'phoneNumber',
-      'address',
-    )
+    validateParams({ body }, validation.createUser)
 
     body.password = await this.hashPassword(body.password)
 
@@ -50,15 +46,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     user: UserDocument,
     updateBody: Partial<Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'role'>>,
   ): Promise<void> {
-    updateBody = pickFields(
-      updateBody,
-      'address',
-      'avatar',
-      'birthOfDate',
-      'name',
-      'password',
-      'phoneNumber',
-    )
+    validateParams({ updateBody }, validation.updateUser)
 
     const oldAvatar = user.avatar
 
