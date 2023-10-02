@@ -1,3 +1,4 @@
+import Joi from 'joi'
 import createHttpError from 'http-errors'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
@@ -9,6 +10,10 @@ import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
 import ENV_CONFIG from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 import { Token } from '../models'
+import { validate } from '@src/utils'
+import { userValidation } from './validation/user.validation'
+import { customValidation } from './validation/custom.validation'
+import { TOKEN_TYPES } from '@src/configs/constants'
 
 @injectable()
 export class TokenService
@@ -23,6 +28,16 @@ export class TokenService
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string {
+    validate(userId, userValidation._id.required())
+    validate(role, userValidation.role.required())
+    validate(expires, customValidation.moment.required())
+    validate(
+      type,
+      Joi.string()
+        .valid(...Object.values(TOKEN_TYPES))
+        .required(),
+    )
+
     const payload: JwtPayload = {
       sub: userId,
       iat: moment().unix(),
@@ -30,6 +45,7 @@ export class TokenService
       type,
       role,
     }
+
     return jwt.sign(payload, ENV_CONFIG.JWT_SECRET)
   }
 
@@ -70,6 +86,14 @@ export class TokenService
     type: 'access-token' | 'refresh-token',
     options: VerifyOptions = {},
   ): JwtPayload {
+    validate(token, Joi.string().required())
+    validate(
+      type,
+      Joi.string()
+        .valid(...Object.values(TOKEN_TYPES))
+        .required(),
+    )
+
     try {
       const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
       if (payload.type !== type) {
@@ -85,6 +109,8 @@ export class TokenService
   }
 
   async blacklistAUser(userId: DocumentId): Promise<void> {
+    validate(userId, userValidation._id.required())
+
     const tokenType: IToken['type'] = 'refresh-token'
     await this.Model.updateMany(
       {
