@@ -9,9 +9,8 @@ import { injectable } from 'inversify'
 import envConfig from '@src/configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
-import { getObjectKeys } from '../utils/object-utils'
 import { ApiError, camelCaseToNormalText } from '../utils'
-import { RequestSchema } from '../types/request-schemas'
+import { RequestSchema } from '../controllers/request-schemas'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -20,7 +19,7 @@ export interface IGeneralMiddleware {
 
   auth(options?: { requiredPrivileges?: Privilege[]; required?: boolean }): RequestHandler
 
-  validate(requestSchema: CustomSchemaMap<RequestSchema>): RequestHandler
+  validate(requestSchemaMap: CustomSchemaMap<RequestSchema>): RequestHandler
 }
 
 @injectable()
@@ -118,17 +117,22 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     }
   }
 
-  public validate = (requestSchema: CustomSchemaMap<RequestSchema>): ReqHandler => {
+  public validate = (requestSchemaMap: CustomSchemaMap<RequestSchema>): ReqHandler => {
+    const strictRequestSchemaMap = {
+      body: requestSchemaMap.body || {},
+      query: requestSchemaMap.query || {},
+      params: requestSchemaMap.params || {},
+    }
+    const validationSchema = Joi.object<typeof strictRequestSchemaMap>(
+      strictRequestSchemaMap,
+    )
+      .required()
+      .unknown()
+
     return (req, res, next) => {
-      const strictRequestSchema = {
-        body: requestSchema.body || {},
-        query: requestSchema.query || {},
-        params: requestSchema.params || {},
-      }
-      const validation = Joi.object<typeof strictRequestSchema>(strictRequestSchema)
-        .required()
-        .unknown()
-        .validate(req, { errors: { wrap: { label: '' }, label: 'key' } })
+      const validation = validationSchema.validate(req, {
+        errors: { wrap: { label: '' }, label: 'key' },
+      })
       if (validation.error) {
         return next(
           new ApiError(
@@ -138,9 +142,8 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           ),
         )
       }
-      const value = validation.value
-      for (const key of getObjectKeys(value)) {
-        req[key] = value[key]
+      for (const key of ['body', 'params', 'query'] as const) {
+        req[key] = validation.value[key]
       }
       return next()
     }

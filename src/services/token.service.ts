@@ -9,8 +9,6 @@ import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
 import ENV_CONFIG from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 import { Token } from '../models'
-import { validateParams } from '@src/utils'
-import { tokenValidation as validation } from './validation'
 
 @injectable()
 export class TokenService
@@ -25,8 +23,6 @@ export class TokenService
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string {
-    validateParams({ userId, role, expires, type }, validation.generateToken)
-
     const payload: JwtPayload = {
       sub: userId,
       iat: moment().unix(),
@@ -75,8 +71,6 @@ export class TokenService
     type: 'access-token' | 'refresh-token',
     options: VerifyOptions = {},
   ): JwtPayload {
-    validateParams({ token, type }, validation.verifyToken)
-
     try {
       const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
       if (payload.type !== type) {
@@ -92,8 +86,6 @@ export class TokenService
   }
 
   async blacklistAUser(userId: DocumentId): Promise<void> {
-    validateParams({ userId }, validation.blacklistAUser)
-
     const tokenType: IToken['type'] = 'refresh-token'
     await this.Model.updateMany(
       {

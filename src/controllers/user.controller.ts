@@ -7,8 +7,8 @@ import { IUserService } from '../services/interfaces'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
-import { CreateUser } from '../types/request-schemas'
-import { userValidation as validation } from '../validations'
+import { CreateUser } from './request-schemas'
+import { userRequestValidation as validation } from './request-validations'
 import { TYPES } from '../configs/constants'
 
 export const userControllerFactory = (container: Container) => {

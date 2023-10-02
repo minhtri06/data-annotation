@@ -6,8 +6,8 @@ import { StatusCodes } from 'http-status-codes'
 import { IAuthService, ITokenService, IUserService } from '../services/interfaces'
 import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
-import { Login, Logout, RefreshTokens } from '../types/request-schemas'
-import { authValidation as validation } from '../validations'
+import { Login, Logout, RefreshTokens } from './request-schemas'
+import { authRequestValidation as validation } from './request-validations'
 import { TYPES } from '../configs/constants'
 
 export const authControllerFactory = (container: Container) => {

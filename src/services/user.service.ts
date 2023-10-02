@@ -7,8 +7,8 @@ import { IUser, IUserModel } from '../models/interfaces'
 import { UserDocument } from '../types'
 import { TYPES } from '../configs/constants'
 import { User } from '../models'
-import { validateParams } from '@src/utils'
-import { userValidation as validation } from './validation'
+import { validate } from '@src/utils'
+import { userValidation as validation } from './validations'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
@@ -21,41 +21,37 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
   }
 
   async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
-    validateParams({ hashedPassword, rawPassword }, validation.comparePassword)
-
     return await bcrypt.compare(rawPassword, hashedPassword)
   }
 
   async hashPassword(password: string): Promise<string> {
-    validateParams({ password }, validation.hashPassword)
-
     return await bcrypt.hash(password, 8)
   }
 
   async createUser(
-    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
+    payload: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
   ): Promise<UserDocument> {
-    validateParams({ body }, validation.createUser)
+    validate(payload, validation.newUserPayload)
 
-    body.password = await this.hashPassword(body.password)
+    payload.password = await this.hashPassword(payload.password)
 
-    return await this.Model.create(body)
+    return await this.Model.create(payload)
   }
 
   async updateUser(
     user: UserDocument,
-    updateBody: Partial<Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'role'>>,
+    payload: Partial<Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'role'>>,
   ): Promise<void> {
-    validateParams({ updateBody }, validation.updateUser)
+    validate(payload, validation.userUpdatePayload)
 
     const oldAvatar = user.avatar
 
-    Object.assign(user, updateBody)
+    Object.assign(user, payload)
 
     await user.save()
 
     // if update avatar => delete old avatar
-    if (updateBody.avatar && oldAvatar) {
+    if (payload.avatar && oldAvatar) {
       await this.imageStorageService.deleteFile(oldAvatar)
     }
   }

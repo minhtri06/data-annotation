@@ -1,13 +1,12 @@
 import Joi from 'joi'
 
-import { CustomSchemaMap } from '../types'
-import { Login, Logout, RefreshTokens } from '../types/request-schemas'
-import { userSchema } from './schema'
+import { Login, Logout, RefreshTokens } from '../request-schemas'
+import { CustomSchemaMap } from '@src/types'
 
 export const login: CustomSchemaMap<Login> = {
   body: {
-    username: userSchema.username.required(),
-    password: userSchema.password.required(),
+    username: Joi.string().required(),
+    password: Joi.string().required(),
   },
 }
 

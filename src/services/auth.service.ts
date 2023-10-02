@@ -6,8 +6,6 @@ import moment from 'moment'
 import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
 import { TOKEN_TYPES, TYPES } from '../configs/constants'
-import { validateParams } from '@src/utils'
-import { authValidation as validation } from './validation'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -23,8 +21,6 @@ export class AuthService implements IAuthService {
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }> {
-    validateParams({ username, password }, validation.login)
-
     const user = await this.userService.getOne({ username })
 
     if (!user) {
@@ -47,8 +43,6 @@ export class AuthService implements IAuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    validateParams({ refreshToken }, validation.logout)
-
     const refreshTokenDocument = await this.tokenService.getOneOrFail({
       body: refreshToken,
       type: TOKEN_TYPES.REFRESH_TOKEN,
@@ -61,8 +55,6 @@ export class AuthService implements IAuthService {
     accessToken: string,
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    validateParams({ accessToken, refreshToken }, validation.refreshAuthTokens)
-
     accessToken = accessToken.slice(7)
     const accessPayload = this.tokenService.verifyToken(
       accessToken,
