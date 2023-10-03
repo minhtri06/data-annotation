@@ -41,7 +41,7 @@ export const meControllerFactory = (container: Container) => {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Avatar is required')
       }
       const user = await this.userService.getOneByIdOrFail(req.user._id)
-      await this.userService.updateUser(user, { avatar: req.file.filename })
+      await this.userService.updateAvatar(user, req.file.filename)
       return res
         .status(200)
         .json({ message: 'Replace avatar successfully', avatar: user.avatar })

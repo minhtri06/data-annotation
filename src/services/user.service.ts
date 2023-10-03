@@ -24,34 +24,36 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     return await bcrypt.compare(rawPassword, hashedPassword)
   }
 
-  async hashPassword(password: string): Promise<string> {
-    return await bcrypt.hash(password, 8)
-  }
-
   async createUser(
     payload: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
   ): Promise<UserDocument> {
     validate(payload, validation.newUserPayload)
 
-    payload.password = await this.hashPassword(payload.password)
+    const user = new User(payload)
 
-    return await this.Model.create(payload)
+    return await user.save()
   }
 
   async updateUser(
     user: UserDocument,
-    payload: Partial<Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'role'>>,
+    payload: Readonly<
+      Partial<
+        Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'avatar'>
+      >
+    >,
   ): Promise<void> {
     validate(payload, validation.userUpdatePayload)
-
-    const oldAvatar = user.avatar
 
     Object.assign(user, payload)
 
     await user.save()
+  }
 
-    // if update avatar => delete old avatar
-    if (payload.avatar && oldAvatar) {
+  async updateAvatar(user: UserDocument, newAvatar: string): Promise<void> {
+    const oldAvatar = user.avatar
+    user.avatar = newAvatar
+    await user.save()
+    if (oldAvatar) {
       await this.imageStorageService.deleteFile(oldAvatar)
     }
   }

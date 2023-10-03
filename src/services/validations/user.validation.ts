@@ -40,7 +40,6 @@ export const newUserPayload = Joi.object({
 
 export const userUpdatePayload = Joi.object({
   address: userSchema.address,
-  avatar: userSchema.avatar,
   birthOfDate: userSchema.birthOfDate,
   name: userSchema.name,
   password: userSchema.password,

@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import bcrypt from 'bcryptjs'
 
 import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
@@ -60,5 +61,10 @@ const userSchema = new Schema<IUser>(
 )
 
 userSchema.plugin(toJSON)
+
+userSchema.pre('save', async function (next) {
+  this.password = await bcrypt.hash(this.password, 8)
+  next()
+})
 
 export const User = model<IUser, IUserModel>(MODEL_NAMES.USER, userSchema)
