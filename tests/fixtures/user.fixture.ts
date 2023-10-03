@@ -4,7 +4,7 @@ import { IUser } from '@src/models/interfaces'
 
 export const generateUser = (
   overwriteFields: Partial<IUser> = {},
-): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotation'> => {
+): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotation' | 'avatar'> => {
   return {
     username: faker.internet.userName(),
     password: 'ValidPassword123',
