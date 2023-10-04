@@ -5,7 +5,7 @@ import { injectable } from 'inversify'
 
 import { IToken, ITokenModel } from '../models/interfaces'
 import { ITokenService } from './interfaces'
-import { DocumentId, JwtPayload, Role, TokenDocument } from '../types'
+import { DocumentId, JwtPayload, TokenDocument, UserDocument } from '../types'
 import ENV_CONFIG from '../configs/env.config'
 import { ModelService } from './abstracts/model.service'
 import { Token } from '../models'
@@ -18,34 +18,33 @@ export class TokenService
   Model: ITokenModel = Token
 
   generateToken(
-    userId: DocumentId,
-    role: Role,
+    user: UserDocument,
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string {
     const payload: JwtPayload = {
-      sub: userId,
+      sub: user._id.toString(),
+      role: user.role,
       iat: moment().unix(),
       exp: expires.unix(),
       type,
-      role,
     }
 
     return jwt.sign(payload, ENV_CONFIG.JWT_SECRET)
   }
 
-  generateAccessToken(userId: DocumentId, role: Role): string {
+  generateAccessToken(user: UserDocument): string {
     const expires = moment().add(ENV_CONFIG.JWT_ACCESS_EXPIRATION_MINUTES, 'minutes')
-    return `Bearer ${this.generateToken(userId, role, expires, 'access-token')}`
+    return `Bearer ${this.generateToken(user, expires, 'access-token')}`
   }
 
-  async createRefreshToken(userId: DocumentId, role: Role): Promise<TokenDocument> {
+  async createRefreshToken(user: UserDocument): Promise<TokenDocument> {
     const expires = moment().add(ENV_CONFIG.JWT_REFRESH_EXPIRATION_DAYS, 'days')
-    const token = this.generateToken(userId, role, expires, 'refresh-token')
+    const token = this.generateToken(user, expires, 'refresh-token')
 
     return await this.Model.create({
       body: token,
-      user: userId,
+      user: user._id,
       type: 'refresh-token',
       expires: expires.toDate(),
       isRevoked: false,
@@ -55,11 +54,10 @@ export class TokenService
   }
 
   async createAuthTokens(
-    userId: DocumentId,
-    role: Role,
+    user: UserDocument,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const accessToken = this.generateAccessToken(userId, role)
-    const refreshToken = await this.createRefreshToken(userId, role)
+    const accessToken = this.generateAccessToken(user)
+    const refreshToken = await this.createRefreshToken(user)
     return {
       accessToken,
       refreshToken: refreshToken.body,

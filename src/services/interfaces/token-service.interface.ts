@@ -1,25 +1,23 @@
 import jwt from 'jsonwebtoken'
 import { Moment } from 'moment'
 
-import { IToken, ITokenModel } from '../../models/interfaces/token.interface'
+import { IToken, ITokenModel } from '@src/models/interfaces/token.interface'
 import { IModelService } from '../abstracts/model.service'
-import { JwtPayload, Role, DocumentId, TokenDocument } from '../../types'
+import { JwtPayload, DocumentId, TokenDocument, UserDocument } from '@src/types'
 
 export interface ITokenService extends IModelService<IToken, ITokenModel> {
   generateToken(
-    userId: DocumentId,
-    role: Role,
+    user: UserDocument,
     expires: Moment,
     type: 'access-token' | 'refresh-token',
   ): string
 
-  generateAccessToken(userId: DocumentId, role: Role): string
+  generateAccessToken(user: UserDocument): string
 
-  createRefreshToken(userId: DocumentId, role: Role): Promise<TokenDocument>
+  createRefreshToken(user: UserDocument): Promise<TokenDocument>
 
   createAuthTokens(
-    userId: DocumentId,
-    role: Role,
+    user: UserDocument,
   ): Promise<{ accessToken: string; refreshToken: string }>
 
   verifyToken(

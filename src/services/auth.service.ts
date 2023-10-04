@@ -37,7 +37,7 @@ export class AuthService implements IAuthService {
       })
     }
 
-    const authTokens = await this.tokenService.createAuthTokens(user._id, user.role)
+    const authTokens = await this.tokenService.createAuthTokens(user)
 
     return { user, authTokens }
   }
@@ -88,7 +88,6 @@ export class AuthService implements IAuthService {
     }
 
     const userId = refreshPayload.sub
-    const userRole = refreshPayload.role
     if (refreshTokenDocument.isUsed || refreshTokenDocument.isRevoked) {
       // Blacklist this token and all usable refresh tokens of that user
       refreshTokenDocument.isBlacklisted = true
@@ -97,8 +96,9 @@ export class AuthService implements IAuthService {
       throw createHttpError.Unauthorized('Unauthorized')
     }
 
+    const user = await this.userService.getOneByIdOrFail(userId)
     refreshTokenDocument.isUsed = true
     await refreshTokenDocument.save()
-    return this.tokenService.createAuthTokens(userId, userRole)
+    return this.tokenService.createAuthTokens(user)
   }
 }
