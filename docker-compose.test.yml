@@ -13,6 +13,7 @@ services:
     environment:
       - NODE_ENV=test
       - MONGODB_URL=mongodb://root:password123@mongodb:27017/data-annotation-test?authSource=admin
+      - REDIS_URL=redis://redis:6379
     command: npm test
     volumes:
       - ./:/app:ro
@@ -22,3 +23,7 @@ services:
   mongodb:
     ports:
       - 27017:27017
+
+  redis:
+    ports:
+      - 6379:6379

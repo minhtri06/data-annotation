@@ -13,4 +13,5 @@ services:
     environment:
       - NODE_ENV=prod
       - MONGODB_URL=mongodb://root:password123@mongodb:27017/data-annotation?authSource=admin
+      - REDIS_URL=redis://redis:6379
     command: bash -c "npm run build && npm start"

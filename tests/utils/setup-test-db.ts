@@ -1,10 +1,12 @@
-import { connectMongoDb } from '@src/helpers'
 import mongoose from 'mongoose'
+
+import { connectMongoDb, redisClient } from '@src/helpers'
 
 export const setupTestDb = () => {
   beforeAll(async () => {
     // connect db
     await connectMongoDb()
+    await redisClient.connect()
   })
 
   beforeEach(async () => {
@@ -19,5 +21,6 @@ export const setupTestDb = () => {
   afterAll(async () => {
     // disconnect db
     await mongoose.disconnect()
+    await redisClient.disconnect()
   })
 }
