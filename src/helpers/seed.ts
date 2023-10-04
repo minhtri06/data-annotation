@@ -1,4 +1,6 @@
+import '../configs/module-alias.config'
 import 'reflect-metadata'
+
 import mongoose from 'mongoose'
 import { connectMongoDb } from './connect-mongodb'
 
