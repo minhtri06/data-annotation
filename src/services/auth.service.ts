@@ -6,6 +6,8 @@ import moment from 'moment'
 import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
 import { TOKEN_TYPES, TYPES } from '../configs/constants'
+import { ApiError } from '@src/utils'
+import ENV_CONFIG from '@src/configs/env.config'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -68,14 +70,23 @@ export class AuthService implements IAuthService {
     )
     const now = moment().unix()
     if (accessPayload.exp > now) {
-      throw createHttpError.Unauthorized('Access token has not expired')
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'Access token has not expired',
+      )
     }
     if (refreshPayload.exp < now) {
-      throw createHttpError.Unauthorized('Refresh token has expired')
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'Refresh token has expired',
+      )
     }
 
     if (refreshPayload.sub !== accessPayload.sub) {
-      throw createHttpError.Unauthorized('Invalid token')
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'Invalid token',
+      )
     }
 
     const refreshTokenDocument = await this.tokenService.getOneOrFail({
@@ -84,7 +95,7 @@ export class AuthService implements IAuthService {
     })
 
     if (refreshTokenDocument.isBlacklisted) {
-      throw createHttpError.Unauthorized('Unauthorized')
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
     }
 
     const userId = refreshPayload.sub
@@ -93,10 +104,23 @@ export class AuthService implements IAuthService {
       refreshTokenDocument.isBlacklisted = true
       await refreshTokenDocument.save()
       await this.tokenService.blacklistAUser(userId)
-      throw createHttpError.Unauthorized('Unauthorized')
+
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        ENV_CONFIG.NODE_ENV === 'prod'
+          ? 'Unauthorized'
+          : 'Refresh has been used or revoked',
+      )
     }
 
-    const user = await this.userService.getOneByIdOrFail(userId)
+    const user = await this.userService.getOneById(userId)
+    if (!user) {
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'User not found',
+      )
+    }
+
     refreshTokenDocument.isUsed = true
     await refreshTokenDocument.save()
     return this.tokenService.createAuthTokens(user)
