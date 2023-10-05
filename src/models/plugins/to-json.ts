@@ -6,6 +6,10 @@ export const toJSON = (schema: Schema) => {
   const transform = options.toJSON.transform
 
   options.toJSON.transform = function (doc, ret, options) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    ret.id = ret._id
+
+    delete ret._id
     delete ret.__v
     delete ret.createdAt
     delete ret.updatedAt

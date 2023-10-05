@@ -28,8 +28,8 @@ export interface IModelService<SchemaType, ModelType extends MongooseModel<Schem
   ): Query<InstanceType<ModelType>[], InstanceType<ModelType>>
 
   paginate(
-    filter: FilterQuery<SchemaType>,
-    options: QueryOptions,
+    filter?: FilterQuery<SchemaType>,
+    options?: QueryOptions,
   ): Promise<{ data: InstanceType<ModelType>[]; totalPage?: number }>
 }
 
@@ -80,7 +80,7 @@ export abstract class ModelService<
   }
 
   async paginate(
-    filter: FilterQuery<SchemaType>,
+    filter: FilterQuery<SchemaType> = {},
     { sort, page, limit, select, populate, lean, checkPaginate }: QueryOptions = {},
   ): Promise<{ data: InstanceType<ModelType>[]; totalPages?: number }> {
     const query = this.Model.find(filter)

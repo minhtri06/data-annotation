@@ -39,7 +39,7 @@ describe('Auth routes', () => {
         .send({ username: rawUser.username, password: rawUser.password })
         .expect(StatusCodes.OK)
       expect(res.body.user).toMatchObject({
-        _id: user._id.toString(),
+        id: user.id,
         name: user.name,
         role: user.role,
       })

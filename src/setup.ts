@@ -25,7 +25,9 @@ const setup = () => {
 
     // setup middlewares
     app.use(helmet())
-    app.use(morgan('dev'))
+    if (ENV_CONFIG.NODE_ENV !== 'test') {
+      app.use(morgan('dev'))
+    }
     app.use(compression())
     app.use(
       cors({

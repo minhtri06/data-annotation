@@ -1,4 +1,4 @@
-import { controller, httpGet, httpPost, response } from 'inversify-express-utils'
+import { controller, httpGet, httpPost } from 'inversify-express-utils'
 import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { StatusCodes } from 'http-status-codes'
@@ -7,7 +7,7 @@ import { IUserService } from '../services/interfaces'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
-import { CreateUser } from './request-schemas'
+import { CreateUser, GetUsers } from './request-schemas'
 import { userRequestValidation as validation } from './request-validations'
 import { TYPES } from '../configs/constants'
 
@@ -18,9 +18,15 @@ export const userControllerFactory = (container: Container) => {
   class UserController {
     constructor(@inject(TYPES.USER_SERVICE) private userService: IUserService) {}
 
-    @httpGet('/')
-    getUsers(@response() res: Response) {
-      return res.json({ users: [] })
+    @httpGet('/', generalMiddleware.validate(validation.getUsers))
+    async getUsers(req: CustomRequest<GetUsers>, res: Response) {
+      const { role, name } = req.query
+      const { limit, page, checkPaginate } = req.query
+      const result = await this.userService.getUsers(
+        { role, name },
+        { limit, page, checkPaginate },
+      )
+      return res.status(StatusCodes.OK).json(result)
     }
 
     @httpPost(

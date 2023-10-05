@@ -4,11 +4,12 @@ import bcrypt from 'bcryptjs'
 import { IStorageService, IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IUser, IUserModel } from '../models/interfaces'
-import { UserDocument } from '../types'
+import { QueryOptions, UserDocument } from '../types'
 import { TYPES } from '../configs/constants'
 import { User } from '../models'
 import { validate } from '@src/utils'
 import { userValidation as validation } from './validations'
+import { FilterQuery } from 'mongoose'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
@@ -22,6 +23,24 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
 
   async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
     return await bcrypt.compare(rawPassword, hashedPassword)
+  }
+
+  async getUsers(
+    queryFilter: FilterQuery<Pick<IUser, 'role' | 'name'>> = {},
+    queryOptions: QueryOptions = {},
+  ): Promise<{ data: UserDocument[]; totalPage?: number }> {
+    const filter: FilterQuery<IUser> = {}
+
+    if (queryFilter.role) {
+      filter.role = queryFilter.role as string
+    }
+    if (queryFilter.name) {
+      filter.name = { $regex: queryFilter.name as string, $options: 'i' }
+    }
+    console.log('filter ', queryFilter)
+    console.log('filter ', filter)
+
+    return this.paginate(filter, queryOptions)
   }
 
   async createUser(

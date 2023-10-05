@@ -8,6 +8,7 @@ import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { User } from '@src/models'
 import { UserDocument } from '@src/types'
+import { ROLES } from '@src/configs/role.config'
 
 setupTestDb()
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
@@ -80,6 +81,47 @@ describe('User service', () => {
       await expect(
         userService.createUser(generateUser({ username: rawUser.username })),
       ).rejects.toThrow()
+    })
+  })
+
+  describe('getUsers method', () => {
+    let user1: UserDocument, user2: UserDocument, adminUser: UserDocument
+    beforeEach(async () => {
+      await User.deleteMany()
+      ;[user1, user2, adminUser] = await Promise.all([
+        userService.createUser(generateUser()),
+        userService.createUser(generateUser()),
+        userService.createUser(generateUser({ role: ROLES.ADMIN })),
+      ])
+    })
+
+    it('should return a array of users', async () => {
+      const result = await userService.getUsers()
+      const data = result.data
+      expect(data).toEqual(expect.any(Array))
+      expect(data.length).toBe(3)
+      expect(data.map((u) => u.id as string)).toEqual([user1.id, user2.id, adminUser.id])
+    })
+
+    it('should call paginate', async () => {
+      const spy = jest.spyOn(userService, 'paginate')
+      await userService.getUsers()
+      expect(spy).toBeCalled()
+    })
+
+    it('should filter user based on role', async () => {
+      const result = await userService.getUsers({ role: ROLES.ADMIN })
+      expect(result.data.length).toBe(1)
+      expect(result.data[0].id).toBe(adminUser.id)
+    })
+
+    it('should filter user based on name', async () => {
+      const nameSearch = user2.name.slice(2, 5)
+      const result = await userService.getUsers({ name: nameSearch })
+
+      const regex = new RegExp(nameSearch, 'i')
+      expect(result.data.some((u) => u.id === user2.id))
+      expect(result.data.every((u) => regex.test(u.name)))
     })
   })
 
