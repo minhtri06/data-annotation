@@ -135,11 +135,9 @@ export class GeneralMiddleware implements IGeneralMiddleware {
       })
       if (validation.error) {
         return next(
-          new ApiError(
-            StatusCodes.BAD_REQUEST,
-            camelCaseToNormalText(validation.error.message),
-            { type: 'validation-error' },
-          ),
+          new ApiError(StatusCodes.BAD_REQUEST, validation.error.message, {
+            type: 'validation-error',
+          }),
         )
       }
       for (const key of ['body', 'params', 'query'] as const) {

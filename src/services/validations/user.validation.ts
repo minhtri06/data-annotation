@@ -9,23 +9,24 @@ export const userSchema = {
     Joi.object().instance(mongoose.Types.ObjectId),
   ),
 
-  name: Joi.string(),
+  name: Joi.string().label('Name'),
 
-  username: Joi.string(),
+  username: Joi.string().label('Username'),
 
-  password: Joi.string(),
+  password: Joi.string().label('Password'),
 
   role: Joi.string()
+    .label('Role')
     .valid(...Object.values(ROLES))
     .messages({ 'any.only': 'Invalid role' }),
 
-  birthOfDate: Joi.alternatives().try(Joi.string(), Joi.date()),
+  birthOfDate: Joi.alternatives().try(Joi.string(), Joi.date()).label('Birth of date'),
 
-  phoneNumber: Joi.string(),
+  phoneNumber: Joi.string().label('Phone number'),
 
-  address: Joi.string(),
+  address: Joi.string().label('Address'),
 
-  avatar: Joi.string(),
+  avatar: Joi.string().label('Avatar'),
 }
 
 export const newUserPayload = Joi.object({
