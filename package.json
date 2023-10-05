@@ -4,15 +4,16 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "seed": "npx tsc -p tsconfig.build.json & TZ='UTC' node dist/helpers/seed.js",
     "build": "npx tsc -p tsconfig.build.json",
     "start": "TZ='UTC' node dist/index.js",
     "dev": "npx tsc -p tsconfig.build.json --watch & TZ='UTC' nodemon dist/index.js",
     "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
     "lint": "eslint . --report-unused-disable-directives",
     "test": "jest -i --colors --verbose --detectOpenHandles",
+    "seed": "npx tsc -p tsconfig.build.json & TZ='UTC' node dist/helpers/seed.js",
     "docker:dev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d && docker logs data-annotation-dev -f",
     "docker:dev:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "docker:dev:seed": "docker exec -t data-annotation-dev npm run seed",
     "docker:test:up": "docker compose -f docker-compose.yml -f docker-compose.test.yml up -d && docker logs data-annotation-test -f",
     "docker:test:down": "docker compose -f docker-compose.yml -f docker-compose.test.yml down"
   },

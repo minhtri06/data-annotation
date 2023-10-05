@@ -52,6 +52,11 @@ const seedUser = async () => {
 const seed = async () => {
   console.log('🍃 seed start')
   await connectMongoDb()
+  await Promise.all(
+    Object.values(mongoose.connection.collections).map(async (collection) =>
+      collection.deleteMany(),
+    ),
+  )
   await seedUser()
   await mongoose.disconnect()
   console.log('🍂 seed done')
