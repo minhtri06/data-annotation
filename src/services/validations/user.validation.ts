@@ -2,10 +2,11 @@ import Joi from 'joi'
 import mongoose from 'mongoose'
 
 import { ROLES } from '@src/configs/role.config'
+import { stringIdType } from './custom.validation'
 
 export const userSchema = {
   _id: Joi.alternatives().try(
-    Joi.string(),
+    stringIdType,
     Joi.object().instance(mongoose.Types.ObjectId),
   ),
 

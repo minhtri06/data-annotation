@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import { CustomSchemaMap } from '../../types'
-import { CreateUser, GetUsers } from '../request-schemas'
-import { userValidation } from '@src/services/validations'
+import { CreateUser, GetUserById, GetUsers } from '../request-schemas'
+import { customValidation, userValidation } from '@src/services/validations'
 
 export const getUsers: CustomSchemaMap<GetUsers> = {
   query: {
@@ -15,4 +15,10 @@ export const getUsers: CustomSchemaMap<GetUsers> = {
 
 export const createUser: CustomSchemaMap<CreateUser> = {
   body: userValidation.newUserPayload,
+}
+
+export const getUserById: CustomSchemaMap<GetUserById> = {
+  params: {
+    userId: customValidation.stringIdType.required(),
+  },
 }

@@ -7,7 +7,7 @@ import { IUserService } from '../services/interfaces'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
-import { CreateUser, GetUsers } from './request-schemas'
+import { CreateUser, GetUserById, GetUsers } from './request-schemas'
 import { userRequestValidation as validation } from './request-validations'
 import { TYPES } from '../configs/constants'
 
@@ -37,6 +37,16 @@ export const userControllerFactory = (container: Container) => {
     async createUser(req: CustomRequest<CreateUser>, res: Response) {
       const user = await this.userService.createUser(req.body)
       return res.status(StatusCodes.CREATED).json({ user })
+    }
+
+    @httpGet(
+      '/:userId',
+      generalMiddleware.auth(),
+      generalMiddleware.validate(validation.getUserById),
+    )
+    async getUserById(req: CustomRequest<GetUserById>, res: Response) {
+      const user = await this.userService.getOneByIdOrFail(req.params.userId)
+      return res.status(StatusCodes.OK).json({ user })
     }
   }
 

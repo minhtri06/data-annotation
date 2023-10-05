@@ -14,3 +14,9 @@ export type GetUsers = {
 export type CreateUser = {
   body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar' | 'monthlyAnnotation'>
 }
+
+export type GetUserById = {
+  params: {
+    userId: string
+  }
+}
