@@ -29,4 +29,13 @@ export class ImageStorageService extends StorageService implements IStorageServi
   async deleteFile(filename: string) {
     await cloudinary.uploader.destroy(filename)
   }
+
+  async checkExist(filename: string): Promise<boolean> {
+    try {
+      await cloudinary.api.resource(filename)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
 }

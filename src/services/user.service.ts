@@ -37,8 +37,6 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     if (queryFilter.name) {
       filter.name = { $regex: queryFilter.name as string, $options: 'i' }
     }
-    console.log('filter ', queryFilter)
-    console.log('filter ', filter)
 
     return this.paginate(filter, queryOptions)
   }

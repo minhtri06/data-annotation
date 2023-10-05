@@ -24,7 +24,7 @@ export interface IModelService<SchemaType, ModelType extends MongooseModel<Schem
   ): Query<InstanceType<ModelType>, InstanceType<ModelType>>
 
   getMany(
-    filter: FilterQuery<SchemaType>,
+    filter?: FilterQuery<SchemaType>,
   ): Query<InstanceType<ModelType>[], InstanceType<ModelType>>
 
   paginate(
@@ -68,7 +68,7 @@ export abstract class ModelService<
   }
 
   getMany(
-    filter: FilterQuery<SchemaType>,
+    filter: FilterQuery<SchemaType> = {},
   ): Query<InstanceType<ModelType>[], InstanceType<ModelType>> {
     return this.Model.find(filter)
   }

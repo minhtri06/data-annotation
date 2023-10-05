@@ -1,5 +1,5 @@
 import { Container, inject } from 'inversify'
-import { controller, httpGet, httpPut } from 'inversify-express-utils'
+import { controller, httpGet, httpPatch, httpPut } from 'inversify-express-utils'
 import createHttpError from 'http-errors'
 import { Response } from 'express'
 
@@ -10,6 +10,8 @@ import { IUploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../configs/constants'
 import { ApiError } from '../utils'
 import { StatusCodes } from 'http-status-codes'
+import { updateMyProfile } from './request-validations/me.request-validation'
+import { UpdateMyProfile } from './request-schemas/me.request-schema'
 
 export const meControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -28,12 +30,22 @@ export const meControllerFactory = (container: Container) => {
       return res.status(200).json({ profile })
     }
 
+    @httpPatch('/', generalMiddleware.auth(), generalMiddleware.validate(updateMyProfile))
+    async updateMyProfile(req: CustomRequest<UpdateMyProfile>, res: Response) {
+      if (!req.user) {
+        throw createHttpError.Unauthorized('Unauthorized')
+      }
+      const me = await this.userService.getOneByIdOrFail(req.user._id)
+      await this.userService.updateUser(me, req.body)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
     @httpPut(
       '/avatar',
       generalMiddleware.auth(),
       uploadMiddleware.uploadSingle('image', 'avatar'),
     )
-    async replaceAvatar(req: CustomRequest, res: Response) {
+    async updateMyAvatar(req: CustomRequest, res: Response) {
       if (!req.user) {
         throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
       }

@@ -14,4 +14,6 @@ export abstract class StorageService implements IStorageService {
   }
 
   abstract deleteFile(filename: string): Promise<void>
+
+  abstract checkExist(filename: string): Promise<boolean>
 }
