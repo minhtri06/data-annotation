@@ -14,6 +14,7 @@ import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { User } from '@src/models'
 import { getObjectKeys } from '@src/utils'
+import mongoose from 'mongoose'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
@@ -28,7 +29,7 @@ beforeAll(() => {
 })
 
 describe('Users routes', () => {
-  describe('GET /api/v1/users', () => {
+  describe('GET /api/v1/users - Get users', () => {
     let user1: UserDocument, user2: UserDocument, user3: UserDocument
     let adminUser: UserDocument
     let accessToken: string
@@ -124,7 +125,7 @@ describe('Users routes', () => {
     })
   })
 
-  describe('POST /api/v1/users', () => {
+  describe('POST /api/v1/users - Create user', () => {
     let adminUser: UserDocument
     let adminAccessToken: string
     let newRawUser: ReturnType<typeof generateUser>
@@ -219,6 +220,51 @@ describe('Users routes', () => {
           .set('Authorization', adminAccessToken)
           .expect(StatusCodes.BAD_REQUEST)
       }
+    })
+  })
+
+  describe('GET /api/v1/users/:id - Get user by id', () => {
+    let caller: UserDocument, user: UserDocument
+    let accessToken: string
+    beforeEach(async () => {
+      caller = await userService.createUser(generateUser())
+      user = await userService.createUser(generateUser())
+      accessToken = tokenService.generateAccessToken(caller)
+    })
+
+    it('should return 200 (ok) and correct user information', async () => {
+      const res = await request
+        .get('/api/v1/users/' + user.id)
+        .set('Authorization', accessToken)
+        .expect(StatusCodes.OK)
+
+      expect(res.body.user).toMatchObject({
+        id: user.id,
+        name: user.name,
+      })
+    })
+
+    it('should return 404 (not found) if user id not exist', async () => {
+      await request
+        .get('/api/v1/users/' + new mongoose.Types.ObjectId().toString())
+        .set('Authorization', accessToken)
+        .expect(StatusCodes.NOT_FOUND)
+    })
+
+    it('should return 400 (bad request) provide invalid id', async () => {
+      await request
+        .get('/api/v1/users/' + 'invalid-id')
+        .set('Authorization', accessToken)
+        .expect(StatusCodes.BAD_REQUEST)
+    })
+
+    it('should not show password', async () => {
+      const res = await request
+        .get('/api/v1/users/' + user.id)
+        .set('Authorization', accessToken)
+        .expect(StatusCodes.OK)
+
+      expect(res.body.user.password).toBe(undefined)
     })
   })
 })

@@ -35,7 +35,7 @@ beforeEach(async () => {
 })
 
 describe('Me routes', () => {
-  describe('GET /api/v1/me - get user profile', () => {
+  describe('GET /api/v1/me - Get my profile', () => {
     it('should return 200 (ok) and correct information of user', async () => {
       const res = await request
         .get('/api/v1/me')
@@ -60,7 +60,7 @@ describe('Me routes', () => {
     })
   })
 
-  describe('PUT /api/v1/me/avatar', () => {
+  describe('PUT /api/v1/me/avatar - Update my avatar', () => {
     afterEach(async () => {
       const users = await userService.getMany()
       for (const user of users) {
