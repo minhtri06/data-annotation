@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
+import ROLE_PRIVILEGES, { ROLES } from '@src/configs/role.config'
 
 import { IUser } from '@src/models/interfaces'
+import { Privilege } from '@src/types'
 
 export const generateUser = (
   overwriteFields: Partial<IUser> = {},
@@ -15,4 +17,22 @@ export const generateUser = (
     address: faker.location.streetAddress(),
     ...overwriteFields,
   }
+}
+
+export const getRoleHasPrivilege = (privilege: Privilege) => {
+  for (const role of Object.values(ROLES)) {
+    if (ROLE_PRIVILEGES[role].includes(privilege)) {
+      return role
+    }
+  }
+  throw new Error(`No role has '${privilege}' privilege `)
+}
+
+export const getRoleDoesNotHavePrivilege = (privilege: Privilege) => {
+  for (const role of Object.values(ROLES)) {
+    if (!ROLE_PRIVILEGES[role].includes(privilege)) {
+      return role
+    }
+  }
+  throw new Error(`No role that does not have '${privilege}' privilege`)
 }

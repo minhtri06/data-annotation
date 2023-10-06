@@ -6,15 +6,20 @@ import { StatusCodes } from 'http-status-codes'
 
 import { TYPES } from '@src/configs/constants'
 import container from '@src/configs/inversify.config'
-import { ROLES } from '@src/configs/role.config'
+import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services/interfaces'
 import setup from '@src/setup'
 import { UserDocument } from '@src/types'
-import { generateUser } from '@tests/fixtures'
+import {
+  generateUser,
+  getRoleDoesNotHavePrivilege,
+  getRoleHasPrivilege,
+} from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { User } from '@src/models'
 import { getObjectKeys } from '@src/utils'
 import mongoose from 'mongoose'
+import { faker } from '@faker-js/faker'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
@@ -223,7 +228,7 @@ describe('Users routes', () => {
     })
   })
 
-  describe('GET /api/v1/users/:id - Get user by id', () => {
+  describe('GET /api/v1/users/:userId - Get user by id', () => {
     let caller: UserDocument, user: UserDocument
     let accessToken: string
     beforeEach(async () => {
@@ -265,6 +270,93 @@ describe('Users routes', () => {
         .expect(StatusCodes.OK)
 
       expect(res.body.user.password).toBe(undefined)
+    })
+  })
+
+  describe('PATCH /api/v1/users/:userId - Update user by id', () => {
+    let caller: UserDocument
+    let callerAccessToken: string
+    let user: UserDocument
+    const updatePayload = {
+      name: faker.person.fullName(),
+      address: faker.location.streetAddress(),
+      birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
+      password: 'password123',
+    }
+    beforeEach(async () => {
+      const role = getRoleHasPrivilege(PRIVILEGES.UPDATE_USERS)
+      caller = await userService.createUser(generateUser({ role }))
+      user = await userService.createUser(generateUser())
+
+      callerAccessToken = tokenService.generateAccessToken(caller)
+    })
+
+    it('should return 204 (no content) and correctly update user data', async () => {
+      await request
+        .patch('/api/v1/users/' + user.id)
+        .set('Authorization', callerAccessToken)
+        .send(updatePayload)
+        .expect(StatusCodes.NO_CONTENT)
+
+      const updatedUser = await userService.getOneById(user._id)
+      expect(updatedUser).toBeDefined()
+      expect(updatedUser).toMatchObject({
+        name: updatePayload.name,
+        address: updatePayload.address,
+        birthOfDate: updatePayload.birthOfDate,
+      })
+      expect(updatedUser?.password).not.toBe(updatePayload.password)
+    })
+
+    it('should return 401 (unauthorized) if access token is missing', async () => {
+      await request
+        .patch('/api/v1/users/' + user.id)
+        .send(updatePayload)
+        .expect(StatusCodes.UNAUTHORIZED)
+    })
+
+    it("should return 403 (forbidden) if caller does't have proper privilege", async () => {
+      caller = await userService.createUser(
+        generateUser({ role: getRoleDoesNotHavePrivilege(PRIVILEGES.UPDATE_USERS) }),
+      )
+      callerAccessToken = tokenService.generateAccessToken(caller)
+
+      await request
+        .patch('/api/v1/users/' + user.id)
+        .set('Authorization', callerAccessToken)
+        .send(updatePayload)
+        .expect(StatusCodes.FORBIDDEN)
+    })
+
+    it('should return 400 (bad request) if update un-allowed fields', async () => {
+      const unAllowedUpdatePayloads = [
+        { username: faker.internet.userName() },
+        { avatar: 'avatar' },
+        { monthlyAnnotation: [] },
+      ]
+      for (const payload of unAllowedUpdatePayloads) {
+        await request
+          .patch('/api/v1/users/' + user.id)
+          .set('Authorization', callerAccessToken)
+          .send(payload)
+          .expect(StatusCodes.BAD_REQUEST)
+      }
+    })
+
+    it('should return 404 (not found) if user id not exist', async () => {
+      await request
+        .patch('/api/v1/users/' + new mongoose.Types.ObjectId().toHexString())
+        .set('Authorization', callerAccessToken)
+        .send(updatePayload)
+        .expect(StatusCodes.NOT_FOUND)
+    })
+
+    it('should return 400 (bad request) if id is not valid', async () => {
+      await request
+        .patch('/api/v1/users/' + 'invalid-mongodb-id')
+        .set('Authorization', callerAccessToken)
+        .send(updatePayload)
+        .expect(StatusCodes.BAD_REQUEST)
     })
   })
 })
