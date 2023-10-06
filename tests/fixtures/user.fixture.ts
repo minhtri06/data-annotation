@@ -11,7 +11,7 @@ export const generateUser = (
     username: faker.internet.userName(),
     password: 'ValidPassword123',
     name: faker.person.fullName(),
-    birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
+    dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
     phoneNumber: faker.phone.number(),
     role: 'annotator',
     address: faker.location.streetAddress(),

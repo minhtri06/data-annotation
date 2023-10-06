@@ -25,13 +25,13 @@ export const getUserById: CustomSchemaMap<GetUserById> = {
 
 export const updateUserById: CustomSchemaMap<UpdateUserById> = {
   params: {
-    userId: customValidation.stringIdType.required(),
+    userId: customValidation.stringIdType.label('User id').required(),
   },
   body: {
-    address: Joi.string(),
-    birthOfDate: Joi.date(),
-    name: Joi.string(),
-    password: Joi.string(),
-    phoneNumber: Joi.string(),
+    address: userValidation.userSchema.address,
+    dateOfBirth: userValidation.userSchema.dateOfBirth,
+    name: userValidation.userSchema.name,
+    password: userValidation.userSchema.password,
+    phoneNumber: userValidation.userSchema.phoneNumber,
   },
 }

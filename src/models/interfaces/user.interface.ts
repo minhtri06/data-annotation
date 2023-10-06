@@ -14,7 +14,7 @@ export interface IUser extends ISchema {
 
   avatar?: string
 
-  birthOfDate: Date
+  dateOfBirth: Date
 
   phoneNumber: string
 

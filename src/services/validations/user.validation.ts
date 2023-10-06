@@ -21,9 +21,11 @@ export const userSchema = {
     .valid(...Object.values(ROLES))
     .messages({ 'any.only': 'Invalid role' }),
 
-  birthOfDate: Joi.alternatives().try(Joi.string(), Joi.date()).label('Birth of date'),
+  dateOfBirth: Joi.date().label('Date of birth'),
 
-  phoneNumber: Joi.string().label('Phone number'),
+  phoneNumber: Joi.string()
+    .label('Phone number')
+    .pattern(/^[0-9]+$/),
 
   address: Joi.string().label('Address'),
 
@@ -35,14 +37,14 @@ export const newUserPayload = Joi.object({
   username: userSchema.username.required(),
   password: userSchema.password.required(),
   role: userSchema.role.required(),
-  birthOfDate: userSchema.birthOfDate.required(),
+  dateOfBirth: userSchema.dateOfBirth.required(),
   phoneNumber: userSchema.phoneNumber.required(),
   address: userSchema.address.required(),
 }).required()
 
 export const userUpdatePayload = Joi.object({
   address: userSchema.address,
-  birthOfDate: userSchema.birthOfDate,
+  dateOfBirth: userSchema.dateOfBirth,
   name: userSchema.name,
   password: userSchema.password,
   phoneNumber: userSchema.phoneNumber,

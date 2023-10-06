@@ -46,7 +46,7 @@ describe('User service', () => {
       const user = await userService.createUser(rawUser)
       expect(user.username).toBe(rawUser.username)
       expect(user.address).toBe(rawUser.address)
-      expect(user.birthOfDate).toBe(rawUser.birthOfDate)
+      expect(user.dateOfBirth).toBe(rawUser.dateOfBirth)
       expect(user.monthlyAnnotation).toEqual([])
       expect(user.name).toBe(rawUser.name)
       expect(user.phoneNumber).toBe(rawUser.phoneNumber)
@@ -59,7 +59,7 @@ describe('User service', () => {
         'username',
         'password',
         'role',
-        'birthOfDate',
+        'dateOfBirth',
         'phoneNumber',
         'address',
       ] as const
@@ -134,7 +134,7 @@ describe('User service', () => {
     it('should correctly update a user', async () => {
       const updatePayload = {
         address: 'new address',
-        birthOfDate: new Date(),
+        dateOfBirth: new Date(),
         name: 'Minh Tri',
         phoneNumber: '0123456789',
       }

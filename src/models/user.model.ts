@@ -31,7 +31,7 @@ const userSchema = new Schema<IUser>(
 
     avatar: String,
 
-    birthOfDate: { type: Date, required: true },
+    dateOfBirth: { type: Date, required: true },
 
     phoneNumber: { type: String, required: true },
 

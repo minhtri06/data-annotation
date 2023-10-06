@@ -16,7 +16,7 @@ const seedUser = async () => {
     username: 'admin',
     password: 'password123',
     role: 'admin',
-    birthOfDate: new Date(),
+    dateOfBirth: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
@@ -25,7 +25,7 @@ const seedUser = async () => {
     username: 'manager',
     password: 'password123',
     role: 'manager',
-    birthOfDate: new Date(),
+    dateOfBirth: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
@@ -34,7 +34,7 @@ const seedUser = async () => {
     username: 'annotator',
     password: 'password123',
     role: 'annotator',
-    birthOfDate: new Date(),
+    dateOfBirth: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })
@@ -43,7 +43,7 @@ const seedUser = async () => {
     username: 'annotator2',
     password: 'password123',
     role: 'annotator',
-    birthOfDate: new Date(),
+    dateOfBirth: new Date(),
     phoneNumber: '0349123213',
     address: 'Hau Giang',
   })

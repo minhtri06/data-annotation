@@ -280,7 +280,7 @@ describe('Users routes', () => {
     const updatePayload = {
       name: faker.person.fullName(),
       address: faker.location.streetAddress(),
-      birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
+      dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
       password: 'password123',
     }
     beforeEach(async () => {
@@ -303,7 +303,7 @@ describe('Users routes', () => {
       expect(updatedUser).toMatchObject({
         name: updatePayload.name,
         address: updatePayload.address,
-        birthOfDate: updatePayload.birthOfDate,
+        dateOfBirth: updatePayload.dateOfBirth,
       })
       expect(updatedUser?.password).not.toBe(updatePayload.password)
     })

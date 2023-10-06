@@ -101,12 +101,12 @@ describe('Me routes', () => {
     }, 20000)
   })
 
-  describe('PATCH /api/v1/me - Update profile', () => {
+  describe('PATCH /api/v1/me - Update my profile', () => {
     it('should return 204 (no contend) and correctly update profile', async () => {
       const updatePayload = {
         name: faker.person.fullName(),
         address: faker.location.streetAddress(),
-        birthOfDate: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
+        dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
       }
       await request
         .patch('/api/v1/me')
@@ -118,11 +118,12 @@ describe('Me routes', () => {
       expect(updatedProfile?.toObject()).toMatchObject(updatePayload)
     })
 
-    it('should return bad request if provide invalid fields', async () => {
+    it('should return bad request if update un-allowed fields', async () => {
       const invalidData = {
         username: 'newusername',
         password: 'newPassword',
         avatar: 'newavatar',
+        role: 'admin',
       }
       for (const field of getObjectKeys(invalidData)) {
         const updatePayload: Record<string, string> = {}
