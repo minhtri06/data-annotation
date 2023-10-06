@@ -20,3 +20,10 @@ export type GetUserById = {
     userId: string
   }
 }
+
+export type UpdateUserById = {
+  params: {
+    userId: string
+  }
+  body: Pick<IUser, 'address' | 'birthOfDate' | 'name' | 'password' | 'phoneNumber'>
+}
