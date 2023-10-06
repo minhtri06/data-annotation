@@ -12,7 +12,7 @@ export const generateUser = (
     password: 'ValidPassword123',
     name: faker.person.fullName(),
     dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
-    phoneNumber: faker.phone.number(),
+    phoneNumber: faker.string.numeric(10),
     role: 'annotator',
     address: faker.location.streetAddress(),
     ...overwriteFields,

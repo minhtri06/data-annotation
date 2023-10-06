@@ -57,7 +57,7 @@ export const userControllerFactory = (container: Container) => {
     async updateUserById(req: CustomRequest<UpdateUserById>, res: Response) {
       const updatedUser = await this.userService.getOneByIdOrFail(req.params.userId)
       await this.userService.updateUser(updatedUser, req.body)
-      return res.status(StatusCodes.NO_CONTENT).send()
+      return res.status(StatusCodes.OK).json({ user: updatedUser })
     }
   }
 

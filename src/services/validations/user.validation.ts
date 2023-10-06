@@ -25,7 +25,7 @@ export const userSchema = {
 
   phoneNumber: Joi.string()
     .label('Phone number')
-    .pattern(/^[0-9]+$/),
+    .pattern(/^[0-9]+|-$/),
 
   address: Joi.string().label('Address'),
 

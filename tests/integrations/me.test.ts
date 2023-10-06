@@ -42,7 +42,7 @@ describe('Me routes', () => {
         .set('Authorization', accessToken)
         .expect(StatusCodes.OK)
 
-      expect(res.body.profile).toMatchObject({
+      expect(res.body.me).toMatchObject({
         name: me.name,
         username: me.username,
       })
@@ -112,7 +112,7 @@ describe('Me routes', () => {
         .patch('/api/v1/me')
         .set('Authorization', accessToken)
         .send(updatePayload)
-        .expect(StatusCodes.NO_CONTENT)
+        .expect(StatusCodes.OK)
 
       const updatedProfile = await userService.getOneById(me.id)
       expect(updatedProfile?.toObject()).toMatchObject(updatePayload)

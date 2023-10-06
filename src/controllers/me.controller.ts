@@ -26,8 +26,8 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw createHttpError.Unauthorized('Unauthorized')
       }
-      const profile = await this.userService.getOneByIdOrFail(req.user._id)
-      return res.status(200).json({ profile })
+      const me = await this.userService.getOneByIdOrFail(req.user._id)
+      return res.status(200).json({ me })
     }
 
     @httpPatch('/', generalMiddleware.auth(), generalMiddleware.validate(updateMyProfile))
@@ -37,7 +37,7 @@ export const meControllerFactory = (container: Container) => {
       }
       const me = await this.userService.getOneByIdOrFail(req.user._id)
       await this.userService.updateUser(me, req.body)
-      return res.status(StatusCodes.NO_CONTENT).send()
+      return res.status(StatusCodes.OK).json({ me })
     }
 
     @httpPut(

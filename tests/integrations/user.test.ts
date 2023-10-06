@@ -291,12 +291,18 @@ describe('Users routes', () => {
       callerAccessToken = tokenService.generateAccessToken(caller)
     })
 
-    it('should return 204 (no content) and correctly update user data', async () => {
-      await request
+    it('should return 200 (ok) and correctly update user data', async () => {
+      const res = await request
         .patch('/api/v1/users/' + user.id)
         .set('Authorization', callerAccessToken)
         .send(updatePayload)
-        .expect(StatusCodes.NO_CONTENT)
+        .expect(StatusCodes.OK)
+
+      expect(res.body.user).toMatchObject({
+        name: updatePayload.name,
+        address: updatePayload.address,
+        dateOfBirth: updatePayload.dateOfBirth.toISOString(),
+      })
 
       const updatedUser = await userService.getOneById(user._id)
       expect(updatedUser).toBeDefined()
