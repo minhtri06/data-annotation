@@ -5,7 +5,7 @@ import { IStorageService, IUserService } from './interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IUser, IUserModel } from '../models/interfaces'
 import { QueryOptions, UserDocument } from '../types'
-import { TYPES } from '../configs/constants'
+import { TYPES, USER_WORK_STATUS } from '../configs/constants'
 import { User } from '../models'
 import { validate } from '@src/utils'
 import { userValidation as validation } from './validations'
@@ -26,7 +26,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
   }
 
   async getUsers(
-    queryFilter: FilterQuery<Pick<IUser, 'role' | 'name'>> = {},
+    queryFilter: Partial<Pick<IUser, 'role' | 'name' | 'workStatus'>> = {},
     queryOptions: QueryOptions = {},
   ): Promise<{ data: UserDocument[]; totalPage?: number }> {
     const filter: FilterQuery<IUser> = {}
@@ -35,14 +35,27 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
       filter.role = queryFilter.role as string
     }
     if (queryFilter.name) {
-      filter.name = { $regex: queryFilter.name as string, $options: 'i' }
+      filter.name = { $regex: queryFilter.name, $options: 'i' }
     }
+    filter.workStatus = queryFilter.workStatus || USER_WORK_STATUS.ON
 
     return this.paginate(filter, queryOptions)
   }
 
   async createUser(
-    payload: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar'>,
+    payload: Readonly<
+      Pick<
+        IUser,
+        | 'name'
+        | 'username'
+        | 'password'
+        | 'role'
+        | 'dateOfBirth'
+        | 'phoneNumber'
+        | 'address'
+      > &
+        Partial<Pick<IUser, 'workStatus'>>
+    >,
   ): Promise<UserDocument> {
     validate(payload, validation.newUserPayload)
 
@@ -55,7 +68,10 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     user: UserDocument,
     payload: Readonly<
       Partial<
-        Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'avatar'>
+        Pick<
+          IUser,
+          'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
+        >
       >
     >,
   ): Promise<void> {

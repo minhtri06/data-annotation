@@ -1,5 +1,3 @@
-import { FilterQuery } from 'mongoose'
-
 import { IUser, IUserModel } from '@src/models/interfaces'
 import { QueryOptions, UserDocument } from '@src/types'
 import { IModelService } from '../abstracts/model.service'
@@ -8,19 +6,33 @@ export interface IUserService extends IModelService<IUser, IUserModel> {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
 
   getUsers(
-    queryFilter?: FilterQuery<Pick<IUser, 'role' | 'name'>>,
+    queryFilter?: Partial<Pick<IUser, 'role' | 'name' | 'workStatus'>>,
     queryOptions?: QueryOptions,
   ): Promise<{ data: UserDocument[]; totalPage?: number }>
 
   createUser(
-    body: Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'avatar' | 'monthlyAnnotation'>,
+    body: Readonly<
+      Pick<
+        IUser,
+        | 'name'
+        | 'username'
+        | 'password'
+        | 'role'
+        | 'dateOfBirth'
+        | 'phoneNumber'
+        | 'address'
+      >
+    >,
   ): Promise<UserDocument>
 
   updateUser(
     user: UserDocument,
     updateBody: Readonly<
       Partial<
-        Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'avatar'>
+        Pick<
+          IUser,
+          'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
+        >
       >
     >,
   ): Promise<void>

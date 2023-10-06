@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 
 import { ROLES } from '@src/configs/role.config'
 import { stringIdType } from './custom.validation'
+import { USER_WORK_STATUS } from '@src/configs/constants'
 
 export const userSchema = {
   _id: Joi.alternatives().try(
@@ -30,6 +31,10 @@ export const userSchema = {
   address: Joi.string().label('Address'),
 
   avatar: Joi.string().label('Avatar'),
+
+  workStatus: Joi.string()
+    .valid(...Object.values(USER_WORK_STATUS))
+    .label('Work status'),
 }
 
 export const newUserPayload = Joi.object({
@@ -40,6 +45,7 @@ export const newUserPayload = Joi.object({
   dateOfBirth: userSchema.dateOfBirth.required(),
   phoneNumber: userSchema.phoneNumber.required(),
   address: userSchema.address.required(),
+  workStatus: userSchema.workStatus,
 }).required()
 
 export const userUpdatePayload = Joi.object({
@@ -48,4 +54,5 @@ export const userUpdatePayload = Joi.object({
   name: userSchema.name,
   password: userSchema.password,
   phoneNumber: userSchema.phoneNumber,
+  workStatus: userSchema.workStatus,
 }).required()

@@ -20,10 +20,10 @@ export const userControllerFactory = (container: Container) => {
 
     @httpGet('/', generalMiddleware.validate(validation.getUsers))
     async getUsers(req: CustomRequest<GetUsers>, res: Response) {
-      const { role, name } = req.query
+      const { role, name, workStatus } = req.query
       const { limit, page, checkPaginate } = req.query
       const result = await this.userService.getUsers(
-        { role, name },
+        { role, name, workStatus },
         { limit, page, checkPaginate },
       )
       return res.status(StatusCodes.OK).json(result)
@@ -41,7 +41,7 @@ export const userControllerFactory = (container: Container) => {
 
     @httpGet(
       '/:userId',
-      generalMiddleware.auth(),
+      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.GET_USERS] }),
       generalMiddleware.validate(validation.getUserById),
     )
     async getUserById(req: CustomRequest<GetUserById>, res: Response) {

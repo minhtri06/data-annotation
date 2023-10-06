@@ -12,7 +12,6 @@ import setup from '@src/setup'
 import { UserDocument } from '@src/types'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
-import { getObjectKeys } from '@src/utils'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
@@ -118,21 +117,19 @@ describe('Me routes', () => {
       expect(updatedProfile?.toObject()).toMatchObject(updatePayload)
     })
 
-    it('should return bad request if update un-allowed fields', async () => {
-      const invalidData = {
-        username: 'newusername',
-        password: 'newPassword',
-        avatar: 'newavatar',
-        role: 'admin',
-      }
-      for (const field of getObjectKeys(invalidData)) {
-        const updatePayload: Record<string, string> = {}
-        updatePayload[field] = invalidData[field]
-
+    it('should return 400 (bad request) if update un-allowed fields', async () => {
+      const invalidPayloads = [
+        { username: 'newusername' },
+        { password: 'newPassword' },
+        { avatar: 'newavatar' },
+        { role: 'admin' },
+        { workStatus: 'off' },
+      ]
+      for (const payload of invalidPayloads) {
         await request
           .patch('/api/v1/me')
           .set('Authorization', accessToken)
-          .send(updatePayload)
+          .send(payload)
           .expect(StatusCodes.BAD_REQUEST)
       }
     })

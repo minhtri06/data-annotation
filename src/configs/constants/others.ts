@@ -15,3 +15,8 @@ export const SAMPLE_STATUS = {
   ANNOTATED: 'annotated',
   MARKED_AS_A_MISTAKE: 'marked-as-a-mistake',
 } as const
+
+export const USER_WORK_STATUS = {
+  ON: 'on',
+  OFF: 'off',
+} as const

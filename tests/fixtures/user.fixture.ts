@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { USER_WORK_STATUS } from '@src/configs/constants'
 import ROLE_PRIVILEGES, { ROLES } from '@src/configs/role.config'
 
 import { IUser } from '@src/models/interfaces'
@@ -15,6 +16,7 @@ export const generateUser = (
     phoneNumber: faker.string.numeric(10),
     role: 'annotator',
     address: faker.location.streetAddress(),
+    workStatus: USER_WORK_STATUS.ON,
     ...overwriteFields,
   }
 }

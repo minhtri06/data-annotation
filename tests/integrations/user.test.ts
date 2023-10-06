@@ -4,7 +4,7 @@ import { Application } from 'express'
 import superTest, { SuperTest, Test } from 'supertest'
 import { StatusCodes } from 'http-status-codes'
 
-import { TYPES } from '@src/configs/constants'
+import { TYPES, USER_WORK_STATUS } from '@src/configs/constants'
 import container from '@src/configs/inversify.config'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services/interfaces'
@@ -282,6 +282,7 @@ describe('Users routes', () => {
       address: faker.location.streetAddress(),
       dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
       password: 'password123',
+      workStatus: USER_WORK_STATUS.OFF,
     }
     beforeEach(async () => {
       const role = getRoleHasPrivilege(PRIVILEGES.UPDATE_USERS)
@@ -291,7 +292,7 @@ describe('Users routes', () => {
       callerAccessToken = tokenService.generateAccessToken(caller)
     })
 
-    it('should return 200 (ok) and correctly update user data', async () => {
+    it('should return 200 (ok) and correctly update user info', async () => {
       const res = await request
         .patch('/api/v1/users/' + user.id)
         .set('Authorization', callerAccessToken)
@@ -301,7 +302,8 @@ describe('Users routes', () => {
       expect(res.body.user).toMatchObject({
         name: updatePayload.name,
         address: updatePayload.address,
-        dateOfBirth: updatePayload.dateOfBirth.toISOString(),
+        dateOfBirth: updatePayload.dateOfBirth?.toISOString(),
+        workStatus: updatePayload.workStatus,
       })
 
       const updatedUser = await userService.getOneById(user._id)
@@ -310,6 +312,7 @@ describe('Users routes', () => {
         name: updatePayload.name,
         address: updatePayload.address,
         dateOfBirth: updatePayload.dateOfBirth,
+        workStatus: updatePayload.workStatus,
       })
       expect(updatedUser?.password).not.toBe(updatePayload.password)
     })

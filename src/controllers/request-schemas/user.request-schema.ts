@@ -8,6 +8,7 @@ export type GetUsers = {
     checkPaginate?: boolean
     role?: Role
     name?: string
+    workStatus?: IUser['workStatus']
   }
 }
 
@@ -25,5 +26,8 @@ export type UpdateUserById = {
   params: {
     userId: string
   }
-  body: Pick<IUser, 'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber'>
+  body: Pick<
+    IUser,
+    'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
+  >
 }

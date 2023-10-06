@@ -2,6 +2,7 @@ import { Model } from 'mongoose'
 
 import { Role } from '../../types'
 import { ISchema } from './schema.interface'
+import { USER_WORK_STATUS } from '@src/configs/constants'
 
 export interface IUser extends ISchema {
   name: string
@@ -19,6 +20,8 @@ export interface IUser extends ISchema {
   phoneNumber: string
 
   address: string
+
+  workStatus: (typeof USER_WORK_STATUS)[keyof typeof USER_WORK_STATUS]
 
   monthlyAnnotation: {
     month: number

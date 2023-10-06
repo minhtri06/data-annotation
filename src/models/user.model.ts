@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { toJSON } from './plugins'
-import { MODEL_NAMES } from '../configs/constants'
+import { MODEL_NAMES, USER_WORK_STATUS } from '../configs/constants'
 
 const userSchema = new Schema<IUser>(
   {
@@ -36,6 +36,13 @@ const userSchema = new Schema<IUser>(
     phoneNumber: { type: String, required: true },
 
     address: { type: String, required: true },
+
+    workStatus: {
+      type: String,
+      enum: Object.values(USER_WORK_STATUS),
+      default: USER_WORK_STATUS.ON,
+      required: true,
+    },
 
     monthlyAnnotation: {
       type: [

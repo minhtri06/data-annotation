@@ -8,8 +8,9 @@ export const getUsers: CustomSchemaMap<GetUsers> = {
     limit: Joi.number(),
     page: Joi.number(),
     checkPaginate: Joi.boolean(),
-    role: Joi.string(),
-    name: Joi.string(),
+    role: userValidation.userSchema.role,
+    name: userValidation.userSchema.name,
+    workStatus: userValidation.userSchema.workStatus,
   },
 }
 
@@ -33,5 +34,6 @@ export const updateUserById: CustomSchemaMap<UpdateUserById> = {
     name: userValidation.userSchema.name,
     password: userValidation.userSchema.password,
     phoneNumber: userValidation.userSchema.phoneNumber,
+    workStatus: userValidation.userSchema.workStatus,
   },
 }
