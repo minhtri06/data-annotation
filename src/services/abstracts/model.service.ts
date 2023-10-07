@@ -1,39 +1,11 @@
 import { FilterQuery, Model as MongooseModel, Query } from 'mongoose'
 import { injectable } from 'inversify'
 
-import { DocumentId, QueryOptions } from '../../types'
-import ENV_CONFIG from '../../configs/env.config'
-import { ApiError } from '../../utils'
+import { DocumentId, QueryOptions } from '@src/types'
+import ENV_CONFIG from '@src/configs/env.config'
+import { ApiError } from '@src/utils'
 import { StatusCodes } from 'http-status-codes'
-
-export interface IModelService<SchemaType, ModelType extends MongooseModel<SchemaType>> {
-  getOne(
-    filter: FilterQuery<SchemaType>,
-  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>>
-
-  getOneById(
-    id: DocumentId,
-  ): Query<InstanceType<ModelType> | null, InstanceType<ModelType>>
-
-  getOneOrFail(
-    filter: FilterQuery<SchemaType>,
-  ): Query<InstanceType<ModelType>, InstanceType<ModelType>>
-
-  getOneByIdOrFail(
-    id: DocumentId,
-  ): Query<InstanceType<ModelType>, InstanceType<ModelType>>
-
-  getMany(
-    filter?: FilterQuery<SchemaType>,
-  ): Query<InstanceType<ModelType>[], InstanceType<ModelType>>
-
-  countDocuments(filter?: FilterQuery<SchemaType>): Query<number, InstanceType<ModelType>>
-
-  paginate(
-    filter?: FilterQuery<SchemaType>,
-    options?: QueryOptions,
-  ): Promise<{ data: InstanceType<ModelType>[]; totalPage?: number }>
-}
+import { IModelService } from '../interfaces'
 
 @injectable()
 export abstract class ModelService<

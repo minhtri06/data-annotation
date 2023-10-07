@@ -1,6 +1,6 @@
 import { IProjectType, IProjectTypeModel } from '@src/models/interfaces'
-import { IModelService } from '../abstracts/model.service'
 import { ProjectTypeDocument } from '@src/types'
+import { IModelService } from './model-service.interface'
 
 export interface IProjectTypeService
   extends IModelService<IProjectType, IProjectTypeModel> {

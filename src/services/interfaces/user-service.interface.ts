@@ -1,6 +1,6 @@
 import { IUser, IUserModel } from '@src/models/interfaces'
 import { QueryOptions, UserDocument } from '@src/types'
-import { IModelService } from '../abstracts/model.service'
+import { IModelService } from './model-service.interface'
 
 export interface IUserService extends IModelService<IUser, IUserModel> {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
