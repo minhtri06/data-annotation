@@ -67,11 +67,11 @@ describe('Project type routes', () => {
       await request.get('/api/v1/project-types').expect(StatusCodes.UNAUTHORIZED)
     })
 
-    it('should return 400 (bad request) if access token is invalid', async () => {
+    it('should return 401 (unauthorized) if access token is invalid', async () => {
       await request
         .get('/api/v1/project-types')
         .set('Authorization', 'invalid access token')
-        .expect(StatusCodes.BAD_REQUEST)
+        .expect(StatusCodes.UNAUTHORIZED)
     })
   })
 
