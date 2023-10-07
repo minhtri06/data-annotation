@@ -1,7 +1,7 @@
+import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { controller, httpGet, httpPatch, httpPut } from 'inversify-express-utils'
 import createHttpError from 'http-errors'
-import { Response } from 'express'
 
 import { IGeneralMiddleware } from '../middlewares'
 import { IUserService } from '../services/interfaces'
@@ -10,8 +10,8 @@ import { IUploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../configs/constants'
 import { ApiError } from '../utils'
 import { StatusCodes } from 'http-status-codes'
-import { updateMyProfile } from './request-validations/me.request-validation'
-import { UpdateMyProfile } from './request-schemas/me.request-schema'
+import { meRequestValidation as validation } from './request-validations'
+import { UpdateMyProfile } from './request-schemas'
 
 export const meControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -30,7 +30,11 @@ export const meControllerFactory = (container: Container) => {
       return res.status(200).json({ me })
     }
 
-    @httpPatch('/', generalMiddleware.auth(), generalMiddleware.validate(updateMyProfile))
+    @httpPatch(
+      '/',
+      generalMiddleware.auth(),
+      generalMiddleware.validate(validation.updateMyProfile),
+    )
     async updateMyProfile(req: CustomRequest<UpdateMyProfile>, res: Response) {
       if (!req.user) {
         throw createHttpError.Unauthorized('Unauthorized')

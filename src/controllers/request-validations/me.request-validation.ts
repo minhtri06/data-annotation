@@ -1,7 +1,7 @@
 import Joi from 'joi'
 
 import { CustomSchemaMap } from '@src/types'
-import { UpdateMyProfile } from '../request-schemas/me.request-schema'
+import { UpdateMyProfile } from '../request-schemas'
 
 export const updateMyProfile: CustomSchemaMap<UpdateMyProfile> = {
   body: {

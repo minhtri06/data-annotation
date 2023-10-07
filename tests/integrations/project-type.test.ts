@@ -86,12 +86,12 @@ describe('Project type routes', () => {
       privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
     })
 
-    it('should return 200 (ok) and correctly create a project type', async () => {
+    it('should return 201 (created) and correctly create a project type', async () => {
       const res = await request
         .post('/api/v1/project-types')
         .set('Authorization', privilegedAccessToken)
         .send(rawProjectType)
-        .expect(StatusCodes.OK)
+        .expect(StatusCodes.CREATED)
 
       const projectType = res.body.projectType
       expect(projectType).not.toBeUndefined()
@@ -107,6 +107,14 @@ describe('Project type routes', () => {
         .post('/api/v1/project-types')
         .set('Authorization', privilegedAccessToken)
         .send({})
+        .expect(StatusCodes.BAD_REQUEST)
+    })
+
+    it('should return 400 (bad request) if send invalid fields', async () => {
+      await request
+        .post('/api/v1/project-types')
+        .set('Authorization', privilegedAccessToken)
+        .send({ ...rawProjectType, invalidField: 'invalid-fields' })
         .expect(StatusCodes.BAD_REQUEST)
     })
 

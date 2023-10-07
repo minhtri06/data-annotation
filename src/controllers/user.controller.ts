@@ -14,11 +14,15 @@ import { TYPES } from '../configs/constants'
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
 
-  @controller('/users', generalMiddleware.auth())
+  @controller('/users')
   class UserController {
     constructor(@inject(TYPES.USER_SERVICE) private userService: IUserService) {}
 
-    @httpGet('/', generalMiddleware.validate(validation.getUsers))
+    @httpGet(
+      '/',
+      generalMiddleware.auth(),
+      generalMiddleware.validate(validation.getUsers),
+    )
     async getUsers(req: CustomRequest<GetUsers>, res: Response) {
       const { role, name, workStatus } = req.query
       const { limit, page, checkPaginate } = req.query
@@ -31,8 +35,8 @@ export const userControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
-      generalMiddleware.validate(validation.createUser),
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_USERS] }),
+      generalMiddleware.validate(validation.createUser),
     )
     async createUser(req: CustomRequest<CreateUser>, res: Response) {
       const user = await this.userService.createUser(req.body)
