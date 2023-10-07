@@ -8,9 +8,10 @@ export const PRIVILEGES = {
   GET_USERS: 'get-users',
   CREATE_USERS: 'create-users',
   UPDATE_USERS: 'update-users',
+  CREATE_PROJECT_TYPES: 'create-project-types',
 } as const
 
-const { GET_USERS, CREATE_USERS, UPDATE_USERS } = PRIVILEGES
+const { GET_USERS, CREATE_USERS, UPDATE_USERS, CREATE_PROJECT_TYPES } = PRIVILEGES
 
 const ROLE_PRIVILEGES: Readonly<
   Record<
@@ -18,7 +19,7 @@ const ROLE_PRIVILEGES: Readonly<
     (typeof PRIVILEGES)[keyof typeof PRIVILEGES][]
   >
 > = {
-  [ROLES.ADMIN]: [GET_USERS, CREATE_USERS, UPDATE_USERS],
+  [ROLES.ADMIN]: [GET_USERS, CREATE_USERS, UPDATE_USERS, CREATE_PROJECT_TYPES],
   [ROLES.MANAGER]: [GET_USERS],
   [ROLES.ANNOTATOR]: [GET_USERS],
 }

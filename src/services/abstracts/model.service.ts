@@ -27,7 +27,7 @@ export interface IModelService<SchemaType, ModelType extends MongooseModel<Schem
     filter?: FilterQuery<SchemaType>,
   ): Query<InstanceType<ModelType>[], InstanceType<ModelType>>
 
-  countDocuments(filter: FilterQuery<SchemaType>): Query<number, InstanceType<ModelType>>
+  countDocuments(filter?: FilterQuery<SchemaType>): Query<number, InstanceType<ModelType>>
 
   paginate(
     filter?: FilterQuery<SchemaType>,
@@ -76,7 +76,7 @@ export abstract class ModelService<
   }
 
   countDocuments(
-    filter: FilterQuery<SchemaType>,
+    filter: FilterQuery<SchemaType> = {},
   ): Query<number, InstanceType<ModelType>> {
     return this.Model.countDocuments(filter) as Query<number, InstanceType<ModelType>>
   }
