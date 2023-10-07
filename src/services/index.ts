@@ -1,4 +1,6 @@
 export * from './auth.service'
 export * from './image-storage.service'
+export * from './project-type.service'
+export * from './project.service'
 export * from './token.service'
 export * from './user.service'

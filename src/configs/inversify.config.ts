@@ -3,11 +3,20 @@ import { Container, interfaces } from 'inversify'
 
 import {
   IAuthService,
+  IProjectService,
+  IProjectTypeService,
   IStorageService,
   ITokenService,
   IUserService,
 } from '../services/interfaces'
-import { AuthService, ImageStorageService, TokenService, UserService } from '../services'
+import {
+  AuthService,
+  ImageStorageService,
+  ProjectService,
+  ProjectTypeService,
+  TokenService,
+  UserService,
+} from '../services'
 import { GeneralMiddleware, IGeneralMiddleware } from '../middlewares'
 import {
   authControllerFactory,
@@ -35,6 +44,8 @@ container
       }
     }
   })
+container.bind<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE).to(ProjectTypeService)
+container.bind<IProjectService>(TYPES.PROJECT_SERVICE).to(ProjectService)
 container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
 container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
 

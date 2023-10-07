@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose'
 import { inject, injectable } from 'inversify'
 import bcrypt from 'bcryptjs'
 
@@ -9,7 +10,6 @@ import { TYPES, USER_WORK_STATUS } from '../configs/constants'
 import { User } from '../models'
 import { validate } from '@src/utils'
 import { userValidation as validation } from './validations'
-import { FilterQuery } from 'mongoose'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
