@@ -5,7 +5,7 @@ import moment from 'moment'
 
 import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
-import { TOKEN_TYPES, TYPES } from '../configs/constants'
+import { TOKEN_TYPES, TYPES } from '../constants'
 import { ApiError } from '@src/utils'
 import ENV_CONFIG from '@src/configs/env.config'
 

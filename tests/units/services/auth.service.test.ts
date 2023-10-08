@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
 
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { IUser } from '@src/models/interfaces'
 import { IAuthService, ITokenService, IUserService } from '@src/services/interfaces'

@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { toJSON } from './plugins'
-import { MODEL_NAMES, USER_WORK_STATUS } from '../configs/constants'
+import { MODEL_NAMES, USER_WORK_STATUS } from '../constants'
 
 const userSchema = new Schema<IUser>(
   {

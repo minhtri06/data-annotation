@@ -5,7 +5,7 @@ import supertest, { SuperTest, Test } from 'supertest'
 import { StatusCodes } from 'http-status-codes'
 import { faker } from '@faker-js/faker'
 
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { IStorageService, ITokenService, IUserService } from '@src/services/interfaces'
 import setup from '@src/setup'

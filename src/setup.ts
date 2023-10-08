@@ -12,7 +12,7 @@ import RateLimitRedisStore from 'rate-limit-redis'
 import ENV_CONFIG from './configs/env.config'
 import { IGeneralMiddleware } from './middlewares'
 import container from './configs/inversify.config'
-import { TYPES } from './configs/constants'
+import { TYPES } from './constants'
 import { redisClient } from './helpers'
 
 const setup = () => {

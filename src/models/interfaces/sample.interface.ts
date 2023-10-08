@@ -2,7 +2,7 @@ import { Model } from 'mongoose'
 
 import { ISchema } from './schema.interface'
 import { DocumentId } from '../../types'
-import { SAMPLE_STATUS } from '../../configs/constants'
+import { SAMPLE_STATUS } from '../../constants'
 
 export interface ISample extends ISchema {
   texts: string[]

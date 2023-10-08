@@ -1,4 +1,4 @@
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { Project, ProjectType } from '@src/models'
 import { IProjectTypeService } from '@src/services/interfaces/project-type.interface'

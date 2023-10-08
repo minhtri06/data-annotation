@@ -4,7 +4,7 @@ import { Application } from 'express'
 import superTest, { SuperTest, Test } from 'supertest'
 import { StatusCodes } from 'http-status-codes'
 
-import { TYPES, USER_WORK_STATUS } from '@src/configs/constants'
+import { TYPES, USER_WORK_STATUS } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services/interfaces'

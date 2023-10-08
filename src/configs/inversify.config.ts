@@ -25,7 +25,7 @@ import {
   userControllerFactory,
 } from '../controllers'
 import { IUploadMiddleware, UploadMiddleware } from '../middlewares/upload.middleware'
-import { TYPES } from './constants'
+import { TYPES } from '../constants'
 
 const container = new Container()
 

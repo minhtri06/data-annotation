@@ -1,4 +1,4 @@
-import { PROJECT_STATUS } from '@src/configs/constants'
+import { PROJECT_STATUS } from '@src/constants'
 import { Project } from '@src/models'
 import { IProject } from '@src/models/interfaces'
 import {

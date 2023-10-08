@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
 
 import { IToken, ITokenModel } from './interfaces/token.interface'
-import { MODEL_NAMES, TOKEN_TYPES } from '../configs/constants'
+import { MODEL_NAMES, TOKEN_TYPES } from '../constants'
 
 const tokenSchema = new Schema<IToken>(
   {

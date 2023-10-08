@@ -8,7 +8,7 @@ import { CustomRequest } from '../types'
 import { IGeneralMiddleware } from '../middlewares'
 import { Login, Logout, RefreshTokens } from './request-schemas'
 import { authRequestValidation as validation } from './request-validations'
-import { TYPES } from '../configs/constants'
+import { TYPES } from '../constants'
 
 export const authControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)

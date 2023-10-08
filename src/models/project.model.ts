@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose'
 
 import { IProject } from './interfaces'
 import { toJSON } from './plugins'
-import { MODEL_NAMES, PROJECT_STATUS } from '../configs/constants'
+import { MODEL_NAMES, PROJECT_STATUS } from '../constants'
 import { ProjectDocument } from '@src/types'
 
 const projectSchema = new Schema<IProject>(

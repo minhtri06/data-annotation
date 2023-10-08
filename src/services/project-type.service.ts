@@ -7,7 +7,7 @@ import { ProjectTypeDocument } from '@src/types'
 import { ApiError, validate } from '@src/utils'
 import { projectTypeValidation as validation } from './validations'
 import { IProjectService, IProjectTypeService } from './interfaces'
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import { StatusCodes } from 'http-status-codes'
 
 @injectable()

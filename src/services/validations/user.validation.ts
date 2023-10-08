@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 
 import { ROLES } from '@src/configs/role.config'
 import { stringIdType } from './custom.validation'
-import { USER_WORK_STATUS } from '@src/configs/constants'
+import { USER_WORK_STATUS } from '@src/constants'
 
 export const userSchema = {
   _id: Joi.alternatives().try(

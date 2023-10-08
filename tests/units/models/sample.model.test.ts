@@ -1,4 +1,4 @@
-import { SAMPLE_STATUS } from '@src/configs/constants'
+import { SAMPLE_STATUS } from '@src/constants'
 import { Sample } from '@src/models'
 import { ISample } from '@src/models/interfaces'
 import { generateSample, generateSampleComments } from '@tests/fixtures/sample.fixtures'

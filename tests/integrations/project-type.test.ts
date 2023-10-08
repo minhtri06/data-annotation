@@ -11,7 +11,7 @@ import {
   ITokenService,
   IUserService,
 } from '@src/services/interfaces'
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import { ProjectTypeDocument, UserDocument } from '@src/types'
 import {
   generateProject,

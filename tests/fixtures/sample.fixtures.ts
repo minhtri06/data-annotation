@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import mongoose from 'mongoose'
 
-import { SAMPLE_STATUS } from '@src/configs/constants'
+import { SAMPLE_STATUS } from '@src/constants'
 import { ISample } from '@src/models/interfaces'
 
 const { ObjectId } = mongoose.Types

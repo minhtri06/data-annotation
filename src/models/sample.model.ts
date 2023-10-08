@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose'
 
 import { ISample, ISampleModel } from './interfaces'
 import { toJSON } from './plugins'
-import { MODEL_NAMES, SAMPLE_STATUS } from '../configs/constants'
+import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
 import { SampleDocument } from '@src/types'
 
 const sampleSchema = new Schema<ISample>(

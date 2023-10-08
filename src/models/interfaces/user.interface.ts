@@ -2,7 +2,7 @@ import { Model } from 'mongoose'
 
 import { Role } from '../../types'
 import { ISchema } from './schema.interface'
-import { USER_WORK_STATUS } from '@src/configs/constants'
+import { USER_WORK_STATUS } from '@src/constants'
 
 export interface IUser extends ISchema {
   name: string

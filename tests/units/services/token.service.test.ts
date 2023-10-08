@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import moment from 'moment'
 import jwt from 'jsonwebtoken'
 
-import { TOKEN_TYPES, TYPES } from '@src/configs/constants'
+import { TOKEN_TYPES, TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { ITokenService, IUserService } from '@src/services/interfaces'
 import ENV_CONFIG from '@src/configs/env.config'

@@ -1,10 +1,7 @@
-import { Model } from 'mongoose'
+// import { PROJECT_STATUS } from '@src/constants'
+import { DocumentId } from '@src/types'
 
-import { DocumentId } from '../../types'
-import { ISchema } from './schema.interface'
-import { PROJECT_STATUS } from '../../constants'
-
-export interface IProject extends ISchema {
+export type createProjectPayload = {
   name: string
 
   projectType: DocumentId
@@ -17,17 +14,17 @@ export interface IProject extends ISchema {
 
   maximumOfAnnotators: number
 
-  annotationTaskDivision: {
-    annotator: DocumentId
-    startSample: number
-    endSample: number
-  }[]
+  // annotationTaskDivision: {
+  //   annotator: DocumentId
+  //   startSample: number
+  //   endSample: number
+  // }[]
 
-  numberOfSamples: number
+  // numberOfSamples: number
 
-  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+  // status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
 
-  completionTime?: Date
+  // completionTime?: Date
 
   annotationConfig: {
     hasLabelSets: boolean
@@ -50,5 +47,3 @@ export interface IProject extends ISchema {
     }[]
   }
 }
-
-export interface IProjectModel extends Model<IProject> {}

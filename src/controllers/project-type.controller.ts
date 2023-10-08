@@ -9,7 +9,7 @@ import {
   httpPost,
 } from 'inversify-express-utils'
 
-import { TYPES } from '@src/configs/constants'
+import { TYPES } from '@src/constants'
 import { IGeneralMiddleware } from '@src/middlewares'
 import { IProjectTypeService } from '@src/services/interfaces'
 import { CustomRequest } from '@src/types'
