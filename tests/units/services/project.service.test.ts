@@ -1,8 +1,12 @@
+import { faker } from '@faker-js/faker'
+import mongoose from 'mongoose'
+
 import container from '@src/configs/inversify.config'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { IProject } from '@src/models/interfaces'
 import { IProjectService } from '@src/services/interfaces'
-import { CreateProjectPayload } from '@src/services/types'
+import { CreateProjectPayload, UpdateProjectPayload } from '@src/services/types'
+import { ProjectDocument } from '@src/types'
 import { generateProject } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 
@@ -117,6 +121,111 @@ describe('Project service', () => {
         },
       ]
       await expect(projectService.createProject(rawProject)).rejects.toThrow()
+    })
+  })
+
+  describe('updateProject method', () => {
+    let project: ProjectDocument
+    let updatePayload: UpdateProjectPayload
+    beforeEach(async () => {
+      project = await projectService.createProject(generateProject())
+      updatePayload = {
+        name: 'Translate English',
+        projectType: new mongoose.Types.ObjectId(),
+        requirement: 'Translate English to Vietnamese',
+        description: faker.lorem.paragraph(),
+        maximumOfAnnotators: 20,
+        annotationConfig: {
+          hasLabelSets: false,
+          labelSets: [],
+
+          hasGeneratedTexts: true,
+
+          individualTextConfigs: [],
+        },
+      }
+    })
+
+    it('should correctly update a project', async () => {
+      await projectService.updateProject(project, updatePayload)
+
+      expect(project).toMatchObject(updatePayload)
+      expect(project.status).toBe(PROJECT_STATUS.SETTING_UP)
+
+      const dbProject = await projectService.getOneByIdOrFail(project._id)
+      expect(dbProject).toMatchObject(updatePayload)
+      expect(dbProject.status).toBe(PROJECT_STATUS.SETTING_UP)
+    })
+
+    it('should throw an error if project status is not "setting up"', async () => {
+      project.status = PROJECT_STATUS.ANNOTATING
+      await project.save({ validateBeforeSave: false })
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if update un-allow fields', async () => {
+      const unAllowPayloads = [
+        { manager: new mongoose.Types.ObjectId() },
+        { annotationTaskDivision: [{ annotator: new mongoose.Types.ObjectId() }] },
+        { numberOfSamples: 100 },
+        { status: PROJECT_STATUS.DONE },
+        { completionTime: new Date() },
+      ]
+      for (const unAllowPayload of unAllowPayloads) {
+        await expect(
+          projectService.updateProject(project, unAllowPayload as UpdateProjectPayload),
+        ).rejects.toThrow()
+      }
+    })
+
+    it('should throw error if maximum of annotator less than 1', async () => {
+      updatePayload.maximumOfAnnotators = 0
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if annotation config has no annotation', async () => {
+      updatePayload.annotationConfig = {
+        hasLabelSets: false,
+        labelSets: [],
+        hasGeneratedTexts: false,
+        individualTextConfigs: [],
+      }
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if hasLabelSets is true but labelSets is empty', async () => {
+      updatePayload.annotationConfig!.hasLabelSets = true
+      updatePayload.annotationConfig!.labelSets = []
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if (in individualTextConfig) hasLabelSets is true but labelSets is empty', async () => {
+      updatePayload.annotationConfig!.individualTextConfigs = [
+        {
+          hasLabelSets: true,
+          labelSets: [],
+          hasInlineLabels: true,
+          inlineLabels: ['Dogs'],
+        },
+      ]
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if (in individualTextConfig) hasInlineLabels is true but inlineLabels is empty', async () => {
+      updatePayload.annotationConfig!.individualTextConfigs = [
+        {
+          hasLabelSets: false,
+          labelSets: [],
+          hasInlineLabels: true,
+          inlineLabels: [],
+        },
+      ]
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
+    })
+
+    it('should throw an error if project is modify before update', async () => {
+      project.numberOfSamples = 100
+      await expect(projectService.updateProject(project, updatePayload)).rejects.toThrow()
     })
   })
 })
