@@ -93,3 +93,42 @@ export const createProjectPayload = Joi.object({
       .required(),
   }).required(),
 }).required()
+
+export const updateProjectPayload = Joi.object({
+  name: projectSchema.name,
+
+  projectType: projectSchema.projectType,
+
+  requirement: projectSchema.requirement,
+
+  description: projectSchema.description,
+
+  maximumOfAnnotators: projectSchema.maximumOfAnnotators,
+
+  annotationConfig: Joi.object({
+    hasLabelSets: annotationConfig.hasLabelSets.required(),
+    labelSets: Joi.array()
+      .items({
+        isMultiSelected: annotationConfig.labelSets.isMultiSelected.required(),
+        labels: annotationConfig.labelSets.labels.required(),
+      })
+      .required(),
+
+    hasGeneratedTexts: annotationConfig.hasGeneratedTexts.required(),
+
+    individualTextConfigs: Joi.array()
+      .items({
+        hasLabelSets: individualTextConfigs.hasLabelSets.required(),
+        labelSets: Joi.array()
+          .items({
+            isMultiSelected: individualTextConfigs.labelSets.isMultiSelected.required(),
+            labels: individualTextConfigs.labelSets.labels.required(),
+          })
+          .required(),
+
+        hasInlineLabels: individualTextConfigs.hasInlineLabels.required(),
+        inlineLabels: individualTextConfigs.inlineLabels.required(),
+      })
+      .required(),
+  }).required(),
+})

@@ -2,7 +2,7 @@ import { IProject, IProjectModel } from '@src/models/interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IProjectService } from './interfaces'
 import { Project } from '@src/models'
-import { CreateProjectPayload } from './types'
+import { CreateProjectPayload, UpdateProjectPayload } from './types'
 import { ProjectDocument } from '@src/types'
 import { ApiError, validate } from '@src/utils'
 import { projectValidation as validation } from './validations'
@@ -21,12 +21,12 @@ export class ProjectService
     if (
       !annotationConfig.hasLabelSets &&
       !annotationConfig.hasGeneratedTexts &&
-      !annotationConfig.individualTextConfigs.every((individualTextConfig) => {
+      annotationConfig.individualTextConfigs.every((individualTextConfig) => {
         return !individualTextConfig.hasLabelSets && !individualTextConfig.hasInlineLabels
       })
     ) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Project has no annotation config', {
-        type: 'no-annotation-config',
+        type: 'has-no-annotation',
       })
     }
 
@@ -75,5 +75,28 @@ export class ProjectService
     project.completionTime = undefined
 
     return project.save()
+  }
+
+  async updateProject(
+    project: ProjectDocument,
+    payload: Readonly<UpdateProjectPayload>,
+  ): Promise<void> {
+    validate(payload, validation.updateProjectPayload)
+
+    if (project.isModified()) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'Project is modified before update',
+        { type: 'project-modified-before-update' },
+      )
+    }
+
+    if (payload.annotationConfig) {
+      this.validateAnnotationConfig(payload.annotationConfig)
+    }
+
+    Object.assign(project, payload)
+
+    await project.save()
   }
 }

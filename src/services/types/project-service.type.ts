@@ -10,3 +10,15 @@ export type CreateProjectPayload = Pick<
   | 'maximumOfAnnotators'
   | 'annotationConfig'
 >
+
+export type UpdateProjectPayload = Partial<
+  Pick<
+    IProject,
+    | 'name'
+    | 'projectType'
+    | 'requirement'
+    | 'description'
+    | 'maximumOfAnnotators'
+    | 'annotationConfig'
+  >
+>
