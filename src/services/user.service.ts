@@ -10,6 +10,7 @@ import { TYPES, USER_WORK_STATUS } from '../constants'
 import { User } from '../models'
 import { validate } from '@src/utils'
 import { userValidation as validation } from './validations'
+import { CreateUserPayload, UpdateUserPayload } from './types'
 
 @injectable()
 export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
@@ -42,21 +43,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     return this.paginate(filter, queryOptions)
   }
 
-  async createUser(
-    payload: Readonly<
-      Pick<
-        IUser,
-        | 'name'
-        | 'username'
-        | 'password'
-        | 'role'
-        | 'dateOfBirth'
-        | 'phoneNumber'
-        | 'address'
-      > &
-        Partial<Pick<IUser, 'workStatus'>>
-    >,
-  ): Promise<UserDocument> {
+  async createUser(payload: Readonly<CreateUserPayload>): Promise<UserDocument> {
     validate(payload, validation.createUserPayload)
 
     const user = new User(payload)
@@ -66,14 +53,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
 
   async updateUser(
     user: UserDocument,
-    payload: Readonly<
-      Partial<
-        Pick<
-          IUser,
-          'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
-        >
-      >
-    >,
+    payload: Readonly<UpdateUserPayload>,
   ): Promise<void> {
     validate(payload, validation.updateUserPayload)
 
