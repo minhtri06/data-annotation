@@ -6,8 +6,5 @@ import { CreateProjectPayload, UpdateProjectPayload } from '../types'
 export interface IProjectService extends IModelService<IProject, IProjectModel> {
   createProject(payload: CreateProjectPayload): Promise<ProjectDocument>
 
-  updateProject(
-    project: ProjectDocument,
-    payload: Readonly<UpdateProjectPayload>,
-  ): Promise<void>
+  updateProject(project: ProjectDocument, payload: UpdateProjectPayload): Promise<void>
 }

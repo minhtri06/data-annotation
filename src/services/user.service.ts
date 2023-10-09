@@ -43,7 +43,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     return this.paginate(filter, queryOptions)
   }
 
-  async createUser(payload: Readonly<CreateUserPayload>): Promise<UserDocument> {
+  async createUser(payload: CreateUserPayload): Promise<UserDocument> {
     validate(payload, validation.createUserPayload)
 
     const user = new User(payload)
@@ -51,10 +51,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     return await user.save()
   }
 
-  async updateUser(
-    user: UserDocument,
-    payload: Readonly<UpdateUserPayload>,
-  ): Promise<void> {
+  async updateUser(user: UserDocument, payload: UpdateUserPayload): Promise<void> {
     validate(payload, validation.updateUserPayload)
 
     Object.assign(user, payload)

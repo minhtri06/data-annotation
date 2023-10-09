@@ -8,7 +8,7 @@ import { IProjectService } from '@src/services/interfaces'
 import { CreateProjectPayload, UpdateProjectPayload } from '@src/services/types'
 import { ProjectDocument } from '@src/types'
 import { generateProject } from '@tests/fixtures'
-import { setupTestDb } from '@tests/utils'
+import { Mutable, setupTestDb } from '@tests/utils'
 
 const projectService = container.get<IProjectService>(TYPES.PROJECT_SERVICE)
 
@@ -126,7 +126,7 @@ describe('Project service', () => {
 
   describe('updateProject method', () => {
     let project: ProjectDocument
-    let updatePayload: UpdateProjectPayload
+    let updatePayload: Mutable<UpdateProjectPayload>
     beforeEach(async () => {
       project = await projectService.createProject(generateProject())
       updatePayload = {

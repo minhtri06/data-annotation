@@ -11,9 +11,9 @@ export interface IUserService extends IModelService<IUser, IUserModel> {
     queryOptions?: QueryOptions,
   ): Promise<{ data: UserDocument[]; totalPage?: number }>
 
-  createUser(body: Readonly<CreateUserPayload>): Promise<UserDocument>
+  createUser(body: CreateUserPayload): Promise<UserDocument>
 
-  updateUser(user: UserDocument, updateBody: Readonly<UpdateUserPayload>): Promise<void>
+  updateUser(user: UserDocument, updateBody: UpdateUserPayload): Promise<void>
 
   updateAvatar(user: UserDocument, newAvatar: string): Promise<void>
 }

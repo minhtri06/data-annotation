@@ -62,7 +62,7 @@ export class ProjectService
     }
   }
 
-  async createProject(payload: Readonly<CreateProjectPayload>): Promise<ProjectDocument> {
+  async createProject(payload: CreateProjectPayload): Promise<ProjectDocument> {
     validate(payload, validation.createProjectPayload)
 
     this.validateAnnotationConfig(payload.annotationConfig)
@@ -79,7 +79,7 @@ export class ProjectService
 
   async updateProject(
     project: ProjectDocument,
-    payload: Readonly<UpdateProjectPayload>,
+    payload: UpdateProjectPayload,
   ): Promise<void> {
     validate(payload, validation.updateProjectPayload)
 
