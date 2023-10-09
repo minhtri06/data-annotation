@@ -1,6 +1,6 @@
 import { IUser, IUserModel } from '@src/models/interfaces'
 import { QueryOptions, UserDocument } from '@src/types'
-import { IModelService } from './model-service.interface'
+import { IModelService } from './model.service.interface'
 import { CreateUserPayload, UpdateUserPayload } from '../types'
 
 export interface IUserService extends IModelService<IUser, IUserModel> {
