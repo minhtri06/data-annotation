@@ -90,7 +90,7 @@ describe('Project model', () => {
   })
 
   describe('Project uniqueness', () => {
-    it('should throw an error if save a project with (name, project type) already exist', async () => {
+    it('should throw an error if save a project with name and project type already exist', async () => {
       await Project.create(projectRaw)
 
       const projectRaw2: Partial<IProject> = generateProject()

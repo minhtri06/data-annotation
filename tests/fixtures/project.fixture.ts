@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
+import mongoose from 'mongoose'
 
 import { IProject } from '@src/models/interfaces'
-import mongoose from 'mongoose'
+import { CreateProjectPayload } from '@src/services/types'
 
 const { ObjectId } = mongoose.Types
 
@@ -20,29 +21,21 @@ export const generateAnnotationTaskDivision = (length: number) => {
 }
 
 export const generateIndividualTextConfig = (length: number) => {
-  const singleSampleTextConfig: IProject['annotationConfig']['individualTextConfigs'] = []
+  const individualTextConfigs: IProject['annotationConfig']['individualTextConfigs'] = []
   for (let i = 0; i < length; i++) {
-    singleSampleTextConfig.push({
+    individualTextConfigs.push({
       hasInlineLabels: false,
       inlineLabels: [],
       hasLabelSets: false,
       labelSets: [],
     })
   }
-  return singleSampleTextConfig
+  return individualTextConfigs
 }
 
 export const generateProject = (
   overwriteFields: Partial<IProject> = {},
-): Omit<
-  IProject,
-  | '_id'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'status'
-  | 'annotationTaskDivision'
-  | 'numberOfSamples'
-> => {
+): CreateProjectPayload => {
   return {
     name: 'Context labeling abc',
     projectType: new ObjectId(),

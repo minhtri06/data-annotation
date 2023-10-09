@@ -19,8 +19,8 @@ export interface IProject extends ISchema {
 
   annotationTaskDivision: {
     annotator: DocumentId
-    startSample: number
-    endSample: number
+    startSample?: number
+    endSample?: number
   }[]
 
   numberOfSamples: number

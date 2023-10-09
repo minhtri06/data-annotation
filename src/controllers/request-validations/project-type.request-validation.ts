@@ -1,4 +1,6 @@
-import { customValidation, projectTypeValidation } from '@src/services/validations'
+import Joi from 'joi'
+
+import { customValidation } from '@src/services/validations'
 import { CustomSchemaMap } from '@src/types'
 import {
   CreateProjectType,
@@ -8,7 +10,7 @@ import {
 
 export const createProjectType: CustomSchemaMap<CreateProjectType> = {
   body: {
-    name: projectTypeValidation.projectTypeSchema.name.required(),
+    name: Joi.string().required(),
   },
 }
 
@@ -17,7 +19,7 @@ export const updateProjectTypeById: CustomSchemaMap<UpdateProjectTypeById> = {
     projectTypeId: customValidation.stringIdType.required(),
   },
   body: {
-    name: projectTypeValidation.projectTypeSchema.name,
+    name: Joi.string(),
   },
 }
 

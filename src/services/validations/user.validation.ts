@@ -1,43 +1,34 @@
 import Joi from 'joi'
-import mongoose from 'mongoose'
 
 import { ROLES } from '@src/configs/role.config'
-import { stringIdType } from './custom.validation'
+import { idType } from './custom.validation'
 import { USER_WORK_STATUS } from '@src/constants'
 
 export const userSchema = {
-  _id: Joi.alternatives().try(
-    stringIdType,
-    Joi.object().instance(mongoose.Types.ObjectId),
-  ),
+  _id: idType,
 
-  name: Joi.string().label('Name'),
+  name: Joi.string(),
 
-  username: Joi.string().label('Username'),
+  username: Joi.string(),
 
-  password: Joi.string().label('Password'),
+  password: Joi.string(),
 
   role: Joi.string()
-    .label('Role')
     .valid(...Object.values(ROLES))
     .messages({ 'any.only': 'Invalid role' }),
 
-  dateOfBirth: Joi.date().label('Date of birth'),
+  dateOfBirth: Joi.date(),
 
-  phoneNumber: Joi.string()
-    .label('Phone number')
-    .pattern(/^[0-9]+|-$/),
+  phoneNumber: Joi.string().pattern(/^[0-9]+|-$/),
 
-  address: Joi.string().label('Address'),
+  address: Joi.string(),
 
-  avatar: Joi.string().label('Avatar'),
+  avatar: Joi.string(),
 
-  workStatus: Joi.string()
-    .valid(...Object.values(USER_WORK_STATUS))
-    .label('Work status'),
+  workStatus: Joi.string().valid(...Object.values(USER_WORK_STATUS)),
 }
 
-export const newUserPayload = Joi.object({
+export const createUserPayload = Joi.object({
   name: userSchema.name.required(),
   username: userSchema.username.required(),
   password: userSchema.password.required(),
@@ -48,7 +39,7 @@ export const newUserPayload = Joi.object({
   workStatus: userSchema.workStatus,
 }).required()
 
-export const userUpdatePayload = Joi.object({
+export const updateUserPayload = Joi.object({
   address: userSchema.address,
   dateOfBirth: userSchema.dateOfBirth,
   name: userSchema.name,

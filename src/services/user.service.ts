@@ -57,7 +57,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
         Partial<Pick<IUser, 'workStatus'>>
     >,
   ): Promise<UserDocument> {
-    validate(payload, validation.newUserPayload)
+    validate(payload, validation.createUserPayload)
 
     const user = new User(payload)
 
@@ -75,7 +75,7 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
       >
     >,
   ): Promise<void> {
-    validate(payload, validation.userUpdatePayload)
+    validate(payload, validation.updateUserPayload)
 
     Object.assign(user, payload)
 

@@ -1,7 +1,7 @@
 import './configs/module-alias.config'
 
 import setup from './setup'
-import envConfig from './configs/env.config'
+import ENV_CONFIG from './configs/env.config'
 import { connectMongoDb, redisClient } from './helpers'
 
 const start = async () => {
@@ -14,8 +14,8 @@ const start = async () => {
 
     const app = setup()
 
-    app.listen(envConfig.PORT, () => {
-      console.log('🍂 Server is running on port ' + envConfig.PORT)
+    app.listen(ENV_CONFIG.PORT, () => {
+      console.log('🍂 Server is running on port ' + ENV_CONFIG.PORT)
     })
   } catch (error) {
     console.log(error)

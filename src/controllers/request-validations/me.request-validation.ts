@@ -5,9 +5,9 @@ import { UpdateMyProfile } from '../request-schemas'
 
 export const updateMyProfile: CustomSchemaMap<UpdateMyProfile> = {
   body: {
-    address: Joi.string().label('Address'),
-    dateOfBirth: Joi.date().label('Date of birth'),
-    name: Joi.string().label('Name'),
-    phoneNumber: Joi.string().label('Phone number'),
+    address: Joi.string(),
+    dateOfBirth: Joi.date(),
+    name: Joi.string(),
+    phoneNumber: Joi.string(),
   },
 }

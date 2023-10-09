@@ -27,6 +27,7 @@ const projectSchema = new Schema<IProject>(
       default: PROJECT_STATUS.SETTING_UP,
       validate: function (value: string) {
         const project = this as unknown as ProjectDocument
+
         if (project.isNew && value !== PROJECT_STATUS.SETTING_UP) {
           throw new Error('Invalid project status')
         }
@@ -57,20 +58,35 @@ const projectSchema = new Schema<IProject>(
             ref: MODEL_NAMES.USER,
             required: true,
           },
-          startSample: { type: Number, required: true },
-          endSample: { type: Number, required: true },
+          startSample: { type: Number },
+          endSample: { type: Number },
         },
       ],
       default: [],
-      validate: function (value: IProject['annotationTaskDivision']) {
+      validate: function (annotationTaskDivision: IProject['annotationTaskDivision']) {
         const project = this as unknown as IProject
-        if (value.length > project.maximumOfAnnotators) {
+
+        if (annotationTaskDivision.length > project.maximumOfAnnotators) {
           throw new Error(
             `Cannot have more than ${project.maximumOfAnnotators} annotators`,
           )
         }
-        if (project.status === PROJECT_STATUS.SETTING_UP && value.length !== 0) {
+
+        if (
+          project.status === PROJECT_STATUS.SETTING_UP &&
+          annotationTaskDivision.length !== 0
+        ) {
           throw new Error('Annotator cannot join when project is setting up')
+        }
+        if (
+          project.status === PROJECT_STATUS.ANNOTATING ||
+          project.status === PROJECT_STATUS.DONE
+        ) {
+          for (const annotationTask of annotationTaskDivision) {
+            if (!annotationTask.endSample || !annotationTask.startSample) {
+              throw new Error('Missing end sample or start sample in annotation task')
+            }
+          }
         }
       },
       required: true,
@@ -111,11 +127,11 @@ const projectSchema = new Schema<IProject>(
               type: Boolean,
               default: false,
               validate: function (value: boolean) {
-                const singleSampleTextConfig =
+                const individualTextConfigs =
                   this as unknown as IProject['annotationConfig']['individualTextConfigs'][number]
-                if (value && singleSampleTextConfig.labelSets) {
+                if (value && individualTextConfigs.labelSets) {
                   throw new Error(
-                    'hasLabelSets (singleSampleTextConfig) equals to true but provide 0 labelSets',
+                    'hasLabelSets (individualTextConfigs) equals to true but provide 0 labelSets',
                   )
                 }
               },
@@ -137,9 +153,9 @@ const projectSchema = new Schema<IProject>(
               required: true,
               default: false,
               validate: function (hasInlineLabels: boolean) {
-                const singleSampleTextConfig =
+                const individualTextConfigs =
                   this as unknown as IProject['annotationConfig']['individualTextConfigs'][number]
-                if (hasInlineLabels && singleSampleTextConfig.inlineLabels.length === 0) {
+                if (hasInlineLabels && individualTextConfigs.inlineLabels.length === 0) {
                   throw new Error(
                     'inlineLabels equals to true but provide 0 inlineLabels',
                   )
@@ -163,5 +179,9 @@ const projectSchema = new Schema<IProject>(
 projectSchema.index({ name: 1, projectType: 1 }, { unique: true })
 
 projectSchema.plugin(toJSON)
+
+projectSchema.pre('save', function (next) {
+  next()
+})
 
 export const Project = model(MODEL_NAMES.PROJECT, projectSchema)
