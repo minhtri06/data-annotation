@@ -1,18 +1,18 @@
 import Joi from 'joi'
 
-import { idType } from './custom.validation'
+import { customId } from './custom.validation'
 import { PROJECT_STATUS } from '@src/constants'
 
 export const projectSchema = {
   name: Joi.string(),
 
-  projectType: idType,
+  projectType: customId,
 
   requirement: Joi.string(),
 
   description: Joi.string(),
 
-  manager: idType,
+  manager: customId,
 
   maximumOfAnnotators: Joi.number().min(1),
 
@@ -23,7 +23,7 @@ export const projectSchema = {
   completionTime: Joi.date().iso(),
 
   annotationTaskDivision: {
-    annotator: idType,
+    annotator: customId,
     startSample: Joi.number().integer().min(1),
     endSample: Joi.number().integer().min(1),
   },

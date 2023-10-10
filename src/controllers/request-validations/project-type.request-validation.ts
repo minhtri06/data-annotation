@@ -1,6 +1,5 @@
 import Joi from 'joi'
 
-import { customValidation } from '@src/services/validations'
 import { CustomSchemaMap } from '@src/types'
 import {
   CreateProjectType,
@@ -16,7 +15,7 @@ export const createProjectType: CustomSchemaMap<CreateProjectType> = {
 
 export const updateProjectTypeById: CustomSchemaMap<UpdateProjectTypeById> = {
   params: {
-    projectTypeId: customValidation.stringIdType.required(),
+    projectTypeId: Joi.string().required(),
   },
   body: {
     name: Joi.string(),
@@ -25,6 +24,6 @@ export const updateProjectTypeById: CustomSchemaMap<UpdateProjectTypeById> = {
 
 export const deleteProjectTypeById: CustomSchemaMap<DeleteProjectTypeById> = {
   params: {
-    projectTypeId: customValidation.stringIdType.required(),
+    projectTypeId: Joi.string().required(),
   },
 }

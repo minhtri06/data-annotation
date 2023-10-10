@@ -2,12 +2,11 @@ import Joi from 'joi'
 
 import { CustomSchemaMap } from '@src/types'
 import { CreateProject } from '../request-schemas'
-import { customValidation } from '@src/services/validations'
 
 export const createProject: CustomSchemaMap<CreateProject> = {
   body: {
     name: Joi.string().required(),
-    projectType: customValidation.stringIdType.required(),
+    projectType: Joi.string().required(),
     requirement: Joi.string().required(),
     description: Joi.string(),
     maximumOfAnnotators: Joi.number().integer(),

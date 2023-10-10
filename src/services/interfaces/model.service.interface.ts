@@ -27,6 +27,6 @@ export interface IModelService<SchemaType, ModelType extends MongooseModel<Schem
 
   paginate(
     filter?: FilterQuery<SchemaType>,
-    options?: QueryOptions,
+    options?: Readonly<QueryOptions<SchemaType>>,
   ): Promise<{ data: InstanceType<ModelType>[]; totalPage?: number }>
 }

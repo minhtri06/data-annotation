@@ -55,7 +55,15 @@ export abstract class ModelService<
 
   async paginate(
     filter: FilterQuery<SchemaType> = {},
-    { sort, page, limit, select, populate, lean, checkPaginate }: QueryOptions = {},
+    {
+      sort,
+      page,
+      limit,
+      select,
+      populate,
+      lean,
+      checkPaginate,
+    }: Readonly<QueryOptions<SchemaType>> = {},
   ): Promise<{ data: InstanceType<ModelType>[]; totalPages?: number }> {
     const query = this.Model.find(filter)
 

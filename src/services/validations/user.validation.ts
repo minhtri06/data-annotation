@@ -1,11 +1,11 @@
 import Joi from 'joi'
 
 import { ROLES } from '@src/configs/role.config'
-import { idType } from './custom.validation'
+import { customId } from './custom.validation'
 import { USER_WORK_STATUS } from '@src/constants'
 
 export const userSchema = {
-  _id: idType,
+  _id: customId,
 
   name: Joi.string(),
 
