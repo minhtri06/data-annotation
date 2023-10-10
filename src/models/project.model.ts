@@ -19,7 +19,7 @@ const projectSchema = new Schema<IProject>(
 
     requirement: { type: String, trim: true, required: true },
 
-    manager: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
+    manager: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
 
     status: {
       type: String,

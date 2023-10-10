@@ -11,6 +11,7 @@ export const PRIVILEGES = {
   CREATE_PROJECT_TYPES: 'create-project-types',
   UPDATE_PROJECT_TYPES: 'update-project-types',
   DELETE_PROJECT_TYPES: 'delete-project-types',
+  CREATE_PROJECT: 'create-project',
 } as const
 
 const {
@@ -20,6 +21,7 @@ const {
   CREATE_PROJECT_TYPES,
   UPDATE_PROJECT_TYPES,
   DELETE_PROJECT_TYPES,
+  CREATE_PROJECT,
 } = PRIVILEGES
 
 const ROLE_PRIVILEGES: Readonly<
@@ -36,7 +38,7 @@ const ROLE_PRIVILEGES: Readonly<
     UPDATE_PROJECT_TYPES,
     DELETE_PROJECT_TYPES,
   ],
-  [ROLES.MANAGER]: [GET_USERS],
+  [ROLES.MANAGER]: [GET_USERS, CREATE_PROJECT],
   [ROLES.ANNOTATOR]: [GET_USERS],
 }
 export default ROLE_PRIVILEGES

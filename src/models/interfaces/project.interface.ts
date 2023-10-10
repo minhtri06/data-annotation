@@ -13,7 +13,7 @@ export interface IProject extends ISchema {
 
   description?: string
 
-  manager: DocumentId
+  manager?: DocumentId
 
   maximumOfAnnotators: number
 

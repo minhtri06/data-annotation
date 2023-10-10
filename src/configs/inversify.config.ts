@@ -21,6 +21,7 @@ import { GeneralMiddleware, IGeneralMiddleware } from '../middlewares'
 import {
   authControllerFactory,
   meControllerFactory,
+  projectControllerFactory,
   projectTypeControllerFactory,
   userControllerFactory,
 } from '../controllers'
@@ -58,6 +59,7 @@ container.bind<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE).to(UploadMiddleware)
 authControllerFactory(container)
 meControllerFactory(container)
 projectTypeControllerFactory(container)
+projectControllerFactory(container)
 userControllerFactory(container)
 
 export default container
