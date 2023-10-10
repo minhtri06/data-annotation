@@ -1,20 +1,117 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { faker } from '@faker-js/faker'
 import mongoose from 'mongoose'
 
 import container from '@src/configs/inversify.config'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { IProject } from '@src/models/interfaces'
-import { IProjectService } from '@src/services/interfaces'
+import { IProjectService, IProjectTypeService } from '@src/services/interfaces'
 import { CreateProjectPayload, UpdateProjectPayload } from '@src/services/types'
-import { ProjectDocument } from '@src/types'
-import { generateProject } from '@tests/fixtures'
+import { ProjectDocument, ProjectTypeDocument } from '@src/types'
+import { generateProject, generateProjectType } from '@tests/fixtures'
 import { Mutable, setupTestDb } from '@tests/utils'
 
 const projectService = container.get<IProjectService>(TYPES.PROJECT_SERVICE)
+const projectTypeService = container.get<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE)
 
 setupTestDb()
 
 describe('Project service', () => {
+  describe('getProjects method', () => {
+    let projectType1: ProjectTypeDocument
+    let projectType2: ProjectTypeDocument
+    let project1: ProjectDocument
+    let project2: ProjectDocument
+    let project3: ProjectDocument
+    beforeEach(async () => {
+      projectType1 = await projectTypeService.createProjectType(
+        generateProjectType({ name: 'Machine Translation' }),
+      )
+      projectType2 = await projectTypeService.createProjectType(
+        generateProjectType({ name: 'Text Labeling' }),
+      )
+      project1 = await projectService.createProject(
+        generateProject({
+          name: 'English to Vietnamese 1',
+          projectType: projectType1.id,
+        }),
+      )
+      project2 = await projectService.createProject(
+        generateProject({
+          name: 'English to Vietnamese 2',
+          projectType: projectType2.id,
+        }),
+      )
+      project3 = await projectService.createProject(
+        generateProject({
+          name: 'Animal labeling',
+        }),
+      )
+    })
+
+    it('should return an array of projects with default query options', async () => {
+      const result = await projectService.getProjects({}, {})
+      expect(result).toMatchObject({
+        data: expect.any(Array),
+      })
+      expect(result.totalPages).toBeUndefined()
+      expect(result.data.length).toBe(3)
+      expect(result.data[0].id).toBe(project3.id)
+      expect(result.data[1].id).toBe(project2.id)
+      expect(result.data[2].id).toBe(project1.id)
+    })
+
+    it('should return 1 project if limit is 1', async () => {
+      const result = await projectService.getProjects({}, { limit: 1 })
+      expect(result.data.length).toBe(1)
+      expect(result.data[0].id).toBe(project3.id)
+    })
+
+    it('should return 0 project if page is 2', async () => {
+      const result = await projectService.getProjects({}, { page: 2 })
+      expect(result.data.length).toBe(0)
+    })
+
+    it('should return an array [project1] if page is 2 and limit is 2', async () => {
+      const result = await projectService.getProjects({}, { page: 2, limit: 2 })
+      expect(result.data.length).toBe(1)
+      expect(result.data[0].id).toBe(project1.id)
+    })
+
+    it('should return total pages if checkPaginate is true', async () => {
+      const result = await projectService.getProjects({}, { checkPaginate: true })
+      expect(result.totalPages).toBe(1)
+    })
+
+    it('should return total pages equal 3 checkPaginate is true and limit is 1', async () => {
+      const result = await projectService.getProjects(
+        {},
+        { checkPaginate: true, limit: 1 },
+      )
+      expect(result.totalPages).toBe(3)
+    })
+
+    it('should be able to sort by name', async () => {
+      let result = await projectService.getProjects({}, { sort: 'name' })
+      expect(result.data[0].id).toBe(project3.id)
+
+      result = await projectService.getProjects({}, { sort: '-name' })
+      expect(result.data[0].id).not.toBe(project3.id)
+    })
+
+    it('should be able to sort by createdAt', async () => {
+      let result = await projectService.getProjects({}, { sort: 'createdAt' })
+      expect(result.data[0].id).toBe(project1.id)
+
+      result = await projectService.getProjects({}, { sort: '-createdAt' })
+      expect(result.data[0].id).toBe(project3.id)
+    })
+
+    it('should thrown an error if sort un-allow fields', async () => {
+      await expect(projectService.getProjects({}, { sort: 'manager' })).rejects.toThrow()
+    })
+  })
+
   describe('createProject method', () => {
     let rawProject: CreateProjectPayload
     beforeEach(() => {
