@@ -1,6 +1,6 @@
 import { FilterQuery, Model as MongooseModel, Query } from 'mongoose'
 
-import { DocumentId, QueryOptions } from '@src/types'
+import { DocumentId, PaginateResult, QueryOptions } from '@src/types'
 
 export interface IModelService<SchemaType, ModelType extends MongooseModel<SchemaType>> {
   getOne(
@@ -28,5 +28,5 @@ export interface IModelService<SchemaType, ModelType extends MongooseModel<Schem
   paginate(
     filter?: FilterQuery<SchemaType>,
     options?: Readonly<QueryOptions<SchemaType>>,
-  ): Promise<{ data: InstanceType<ModelType>[]; totalPage?: number }>
+  ): Promise<PaginateResult<InstanceType<ModelType>>>
 }

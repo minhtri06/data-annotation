@@ -1,4 +1,3 @@
-import { SortOption } from '@src/types'
 import Joi from 'joi'
 
 export const querySchema = {
@@ -8,20 +7,16 @@ export const querySchema = {
 
   checkPaginate: Joi.boolean(),
 
-  sort: (...fields: string[]) =>
-    Joi.string().custom((value: string, helpers) => {
-      // value can be for example "-price,name,-createAt"
-      const sortObj: SortOption = {}
-      for (const sort of value.split(',')) {
-        const [field, order]: [string, 1 | -1] =
-          sort[0] === '-' ? [sort.slice(1), -1] : [sort, 1]
-
-        if (!fields.includes(field)) {
+  sort: (...allowedFields: string[]) =>
+    Joi.string().custom((sort: string, helpers) => {
+      // 'sort' can be a space delimited list of path names.
+      // e.g. "-price name -createAt"
+      for (const fieldOrder of sort.split(' ')) {
+        const field = fieldOrder[0] === '-' ? fieldOrder.slice(1) : fieldOrder
+        if (!allowedFields.includes(field)) {
           return helpers.error('any.invalid')
         }
-
-        sortObj[field] = order
       }
-      return sortObj
+      return sort
     }),
 }

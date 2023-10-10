@@ -2,6 +2,7 @@ import Joi from 'joi'
 
 import { customId } from './custom.validation'
 import { PROJECT_STATUS } from '@src/constants'
+import { querySchema } from './query.validation'
 
 export const projectSchema = {
   name: Joi.string(),
@@ -49,6 +50,18 @@ export const projectSchema = {
     },
   },
 }
+
+export const getProjectsFilter = Joi.object({
+  name: projectSchema.name,
+  projectType: projectSchema.projectType,
+}).required()
+
+export const getProjectsQueryOptions = Joi.object({
+  limit: querySchema.limit,
+  page: querySchema.page,
+  checkPaginate: querySchema.checkPaginate,
+  sort: querySchema.sort('name', 'createdAt'),
+}).required()
 
 const { annotationConfig } = projectSchema
 const { individualTextConfigs } = annotationConfig

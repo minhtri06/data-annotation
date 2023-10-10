@@ -1,7 +1,7 @@
 import { FilterQuery, Model as MongooseModel, Query } from 'mongoose'
 import { injectable } from 'inversify'
 
-import { DocumentId, QueryOptions } from '@src/types'
+import { DocumentId, PaginateResult, QueryOptions } from '@src/types'
 import ENV_CONFIG from '@src/configs/env.config'
 import { ApiError } from '@src/utils'
 import { StatusCodes } from 'http-status-codes'
@@ -64,7 +64,7 @@ export abstract class ModelService<
       lean,
       checkPaginate,
     }: Readonly<QueryOptions<SchemaType>> = {},
-  ): Promise<{ data: InstanceType<ModelType>[]; totalPages?: number }> {
+  ): Promise<PaginateResult<InstanceType<ModelType>>> {
     const query = this.Model.find(filter)
 
     if (sort) {

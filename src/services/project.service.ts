@@ -2,8 +2,13 @@ import { IProject, IProjectModel } from '@src/models/interfaces'
 import { ModelService } from './abstracts/model.service'
 import { IProjectService } from './interfaces'
 import { Project } from '@src/models'
-import { CreateProjectPayload, UpdateProjectPayload } from './types'
-import { ProjectDocument } from '@src/types'
+import {
+  CreateProjectPayload,
+  GetProjectsFilter,
+  GetProjectsQueryOptions,
+  UpdateProjectPayload,
+} from './types'
+import { PaginateResult, ProjectDocument } from '@src/types'
 import { ApiError, validate } from '@src/utils'
 import { projectValidation as validation } from './validations'
 import { StatusCodes } from 'http-status-codes'
@@ -14,6 +19,21 @@ export class ProjectService
   implements IProjectService
 {
   protected Model: IProjectModel = Project
+
+  async getProjects(
+    filter: GetProjectsFilter = {},
+    options: GetProjectsQueryOptions = {},
+  ): Promise<PaginateResult<ProjectDocument>> {
+    validate(filter, validation.getProjectsFilter)
+    validate(options, validation.getProjectsQueryOptions)
+
+    const _options = { ...options }
+    if (!_options.sort) {
+      _options.sort = '-createdAt'
+    }
+
+    return this.paginate(filter, _options)
+  }
 
   protected validateAnnotationConfig(
     annotationConfig: Readonly<IProject['annotationConfig']>,
