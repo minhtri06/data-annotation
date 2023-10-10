@@ -10,11 +10,7 @@ import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services/interfaces'
 import setup from '@src/setup'
 import { UserDocument } from '@src/types'
-import {
-  generateUser,
-  getRoleDoesNotHavePrivilege,
-  getRoleHasPrivilege,
-} from '@tests/fixtures'
+import { generateUser, getNonPrivilegedRole, getPrivilegedRole } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { User } from '@src/models'
 import { getObjectKeys } from '@src/utils'
@@ -285,7 +281,7 @@ describe('Users routes', () => {
       workStatus: USER_WORK_STATUS.OFF,
     }
     beforeEach(async () => {
-      const role = getRoleHasPrivilege(PRIVILEGES.UPDATE_USERS)
+      const role = getPrivilegedRole(PRIVILEGES.UPDATE_USERS)
       caller = await userService.createUser(generateUser({ role }))
       user = await userService.createUser(generateUser())
 
@@ -326,7 +322,7 @@ describe('Users routes', () => {
 
     it("should return 403 (forbidden) if caller does't have proper privilege", async () => {
       caller = await userService.createUser(
-        generateUser({ role: getRoleDoesNotHavePrivilege(PRIVILEGES.UPDATE_USERS) }),
+        generateUser({ role: getNonPrivilegedRole(PRIVILEGES.UPDATE_USERS) }),
       )
       callerAccessToken = tokenService.generateAccessToken(caller)
 

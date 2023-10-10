@@ -21,7 +21,7 @@ export const generateUser = (
   }
 }
 
-export const getRoleHasPrivilege = (privilege: Privilege) => {
+export const getPrivilegedRole = (privilege: Privilege) => {
   for (const role of Object.values(ROLES)) {
     if (ROLE_PRIVILEGES[role].includes(privilege)) {
       return role
@@ -30,7 +30,7 @@ export const getRoleHasPrivilege = (privilege: Privilege) => {
   throw new Error(`No role has '${privilege}' privilege `)
 }
 
-export const getRoleDoesNotHavePrivilege = (privilege: Privilege) => {
+export const getNonPrivilegedRole = (privilege: Privilege) => {
   for (const role of Object.values(ROLES)) {
     if (!ROLE_PRIVILEGES[role].includes(privilege)) {
       return role

@@ -17,8 +17,8 @@ import {
   generateProject,
   generateProjectType,
   generateUser,
-  getRoleDoesNotHavePrivilege,
-  getRoleHasPrivilege,
+  getNonPrivilegedRole,
+  getPrivilegedRole,
 } from '@tests/fixtures'
 import { StatusCodes } from 'http-status-codes'
 import { PRIVILEGES } from '@src/configs/role.config'
@@ -84,7 +84,7 @@ describe('Project type routes', () => {
     const rawProjectType = generateProjectType()
     beforeEach(async () => {
       privilegedUser = await userService.createUser(
-        generateUser({ role: getRoleHasPrivilege(PRIVILEGES.CREATE_PROJECT_TYPES) }),
+        generateUser({ role: getPrivilegedRole(PRIVILEGES.CREATE_PROJECT_TYPES) }),
       )
       privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
     })
@@ -131,7 +131,7 @@ describe('Project type routes', () => {
     it("should return 403 (forbidden) if caller doesn't have proper privilege", async () => {
       const nonPrivilegeUser = await userService.createUser(
         generateUser({
-          role: getRoleDoesNotHavePrivilege(PRIVILEGES.CREATE_PROJECT_TYPES),
+          role: getNonPrivilegedRole(PRIVILEGES.CREATE_PROJECT_TYPES),
         }),
       )
       const nonPrivilegeAccessToken = tokenService.generateAccessToken(nonPrivilegeUser)
@@ -153,7 +153,7 @@ describe('Project type routes', () => {
       projectType = await projectTypeService.createProjectType(generateProjectType())
 
       privilegedUser = await userService.createUser(
-        generateUser({ role: getRoleHasPrivilege(PRIVILEGES.UPDATE_PROJECT_TYPES) }),
+        generateUser({ role: getPrivilegedRole(PRIVILEGES.UPDATE_PROJECT_TYPES) }),
       )
       privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
     })
@@ -204,7 +204,7 @@ describe('Project type routes', () => {
     it("should return 403 (forbidden) if caller doesn't have needed privileges", async () => {
       const nonPrivilegedUser = await userService.createUser(
         generateUser({
-          role: getRoleDoesNotHavePrivilege(PRIVILEGES.UPDATE_PROJECT_TYPES),
+          role: getNonPrivilegedRole(PRIVILEGES.UPDATE_PROJECT_TYPES),
         }),
       )
       const nonPrivilegedAccessToken = tokenService.generateAccessToken(nonPrivilegedUser)
@@ -238,7 +238,7 @@ describe('Project type routes', () => {
       projectType = await projectTypeService.createProjectType(generateProjectType())
 
       privilegedUser = await userService.createUser(
-        generateUser({ role: getRoleHasPrivilege(PRIVILEGES.DELETE_PROJECT_TYPES) }),
+        generateUser({ role: getPrivilegedRole(PRIVILEGES.DELETE_PROJECT_TYPES) }),
       )
       privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
     })
@@ -277,7 +277,7 @@ describe('Project type routes', () => {
     it("should return 403 (forbidden) if caller doesn't have needed privileges", async () => {
       const nonPrivilegedUser = await userService.createUser(
         generateUser({
-          role: getRoleDoesNotHavePrivilege(PRIVILEGES.DELETE_PROJECT_TYPES),
+          role: getNonPrivilegedRole(PRIVILEGES.DELETE_PROJECT_TYPES),
         }),
       )
       const nonPrivilegedAccessToken = tokenService.generateAccessToken(nonPrivilegedUser)
