@@ -1,1 +1,2 @@
-export * from './to-json'
+export * from './to-json.plugin'
+export * from './paginate.plugin'

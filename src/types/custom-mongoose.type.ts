@@ -5,7 +5,7 @@ import {
   ISampleModel,
   ITokenModel,
   IUserModel,
-} from '../models/interfaces'
+} from '../models'
 
 export type TokenDocument = InstanceType<ITokenModel>
 export type UserDocument = InstanceType<IUserModel>
@@ -19,11 +19,15 @@ export type SortOption<T = { [key: string]: unknown }> = { [K in keyof T]: SortO
 export type SelectOption = Parameters<typeof Query.prototype.select>[0]
 export type PopulateOption = Parameters<typeof Query.prototype.populate>[0]
 export type QueryOptions<DocType = { [key: string]: unknown }> = {
-  sort?: SortOption<Partial<DocType>>
+  sort?: SortOption<Partial<DocType>> | string
   page?: number
   limit?: number
   select?: SelectOption
   populate?: PopulateOption
   lean?: boolean
   checkPaginate?: boolean
+}
+export type PaginateResult<T> = {
+  data: T[]
+  totalPages?: number
 }

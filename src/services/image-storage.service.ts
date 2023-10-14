@@ -3,8 +3,8 @@ import multer, { Multer } from 'multer'
 import cloudinary, { imageStorage } from '../configs/cloudinary.config'
 import { injectable } from 'inversify'
 
-import { StorageService } from './abstracts/storage.service'
-import { IStorageService } from './interfaces'
+import { StorageService } from './storage.service'
+import { IStorageService } from './storage.service.interface'
 
 @injectable()
 export class ImageStorageService extends StorageService implements IStorageService {

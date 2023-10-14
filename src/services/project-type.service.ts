@@ -1,24 +1,28 @@
-import { IProjectType, IProjectTypeModel } from '@src/models/interfaces'
 import { inject, injectable } from 'inversify'
 
-import { ModelService } from './abstracts/model.service'
-import { ProjectType } from '@src/models'
+import { IProjectType, Project, ProjectType } from '@src/models'
 import { ProjectTypeDocument } from '@src/types'
 import { ApiError, validate } from '@src/utils'
 import { projectTypeValidation as validation } from './validations'
-import { IProjectService, IProjectTypeService } from './interfaces'
 import { TYPES } from '@src/constants'
 import { StatusCodes } from 'http-status-codes'
+import { IProjectService } from './project.service.interface'
+import { IProjectTypeService } from './project-type.service.interface'
+import { customId } from './validations/custom.validation'
 
 @injectable()
-export class ProjectTypeService
-  extends ModelService<IProjectType, IProjectTypeModel>
-  implements IProjectTypeService
-{
-  protected Model: IProjectTypeModel = ProjectType
+export class ProjectTypeService implements IProjectTypeService {
+  constructor(@inject(TYPES.PROJECT_SERVICE) protected projectService: IProjectService) {}
 
-  constructor(@inject(TYPES.PROJECT_SERVICE) protected projectService: IProjectService) {
-    super()
+  async getProjectTypeById(projectTypeId: string): Promise<ProjectTypeDocument | null> {
+    if (customId.required().validate(projectTypeId).error) {
+      throw new ApiError(400, 'Project type id is invalid')
+    }
+    return await ProjectType.findById(projectTypeId)
+  }
+
+  async getAllProjectTypes(): Promise<ProjectTypeDocument[]> {
+    return await ProjectType.find()
   }
 
   async createProjectType(
@@ -26,7 +30,7 @@ export class ProjectTypeService
   ): Promise<ProjectTypeDocument> {
     validate(payload, validation.createProjectTypePayload)
 
-    const projectType = await this.Model.create(payload)
+    const projectType = await ProjectType.create(payload)
 
     return projectType
   }
@@ -43,7 +47,7 @@ export class ProjectTypeService
   }
 
   async deleteProjectType(projectType: ProjectTypeDocument): Promise<void> {
-    const projectCount = await this.projectService.countDocuments({
+    const projectCount = await Project.countDocuments({
       projectType: projectType._id,
     })
     if (projectCount > 0) {

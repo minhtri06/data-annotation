@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import { IProjectType } from '@src/models/interfaces'
+import { IProjectType } from '@src/models'
 
 export const generateProjectType = (
   overwriteFields: Partial<IProjectType> = {},

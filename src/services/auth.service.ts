@@ -3,11 +3,13 @@ import { StatusCodes } from 'http-status-codes'
 import { inject, injectable } from 'inversify'
 import moment from 'moment'
 
-import { IAuthService, ITokenService, IUserService } from './interfaces'
 import { UserDocument } from '../types'
 import { TOKEN_TYPES, TYPES } from '../constants'
 import { ApiError } from '@src/utils'
 import ENV_CONFIG from '@src/configs/env.config'
+import { IAuthService } from './auth.service.interface'
+import { ITokenService } from './token.service.interface'
+import { IUserService } from './user.service.interface'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -23,7 +25,7 @@ export class AuthService implements IAuthService {
     user: UserDocument
     authTokens: { accessToken: string; refreshToken: string }
   }> {
-    const user = await this.userService.getOne({ username })
+    const user = await this.userService.getUserByUserName(username)
 
     if (!user) {
       throw createHttpError(
@@ -45,10 +47,11 @@ export class AuthService implements IAuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    const refreshTokenDocument = await this.tokenService.getOneOrFail({
-      body: refreshToken,
-      type: TOKEN_TYPES.REFRESH_TOKEN,
-    })
+    const refreshTokenDocument =
+      await this.tokenService.getRefreshTokenByBody(refreshToken)
+    if (!refreshTokenDocument) {
+      throw new ApiError(404, 'Refresh token not found')
+    }
     refreshTokenDocument.isRevoked = true
     await refreshTokenDocument.save()
   }
@@ -89,10 +92,11 @@ export class AuthService implements IAuthService {
       )
     }
 
-    const refreshTokenDocument = await this.tokenService.getOneOrFail({
-      body: refreshToken,
-      type: TOKEN_TYPES.REFRESH_TOKEN,
-    })
+    const refreshTokenDocument =
+      await this.tokenService.getRefreshTokenByBody(refreshToken)
+    if (!refreshTokenDocument) {
+      throw new ApiError(404, 'Refresh token not found')
+    }
 
     if (refreshTokenDocument.isBlacklisted) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
@@ -113,7 +117,7 @@ export class AuthService implements IAuthService {
       )
     }
 
-    const user = await this.userService.getOneById(userId)
+    const user = await this.userService.getUserById(userId)
     if (!user) {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,

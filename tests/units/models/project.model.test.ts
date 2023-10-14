@@ -1,6 +1,6 @@
 import { PROJECT_STATUS } from '@src/constants'
-import { Project } from '@src/models'
-import { IProject } from '@src/models/interfaces'
+import { IRawProject, Project } from '@src/models'
+import { IProject } from '@src/models'
 import {
   generateAnnotationTaskDivision,
   generateIndividualTextConfig,
@@ -10,7 +10,7 @@ import { setupTestDb } from '@tests/utils'
 
 setupTestDb()
 
-let projectRaw: Partial<IProject>
+let projectRaw: Partial<IRawProject>
 beforeEach(() => {
   projectRaw = generateProject()
 })
@@ -93,9 +93,9 @@ describe('Project model', () => {
     it('should throw an error if save a project with name and project type already exist', async () => {
       await Project.create(projectRaw)
 
-      const projectRaw2: Partial<IProject> = generateProject()
-      projectRaw2.name = projectRaw.name
-      projectRaw2.projectType = projectRaw.projectType
+      const projectRaw2 = generateProject()
+      projectRaw2.name = projectRaw.name as string
+      projectRaw2.projectType = projectRaw.projectType as string
       await expect(Project.create(projectRaw2)).rejects.toThrow()
     })
   })

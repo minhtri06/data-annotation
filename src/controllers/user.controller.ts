@@ -3,7 +3,7 @@ import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { StatusCodes } from 'http-status-codes'
 
-import { IUserService } from '../services/interfaces'
+import { IUserService } from '../services'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
@@ -49,7 +49,10 @@ export const userControllerFactory = (container: Container) => {
       generalMiddleware.validate(validation.getUserById),
     )
     async getUserById(req: CustomRequest<GetUserById>, res: Response) {
-      const user = await this.userService.getOneByIdOrFail(req.params.userId)
+      const user = await this.userService.getUserById(req.params.userId)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+      }
       return res.status(StatusCodes.OK).json({ user })
     }
 
@@ -59,7 +62,10 @@ export const userControllerFactory = (container: Container) => {
       generalMiddleware.validate(validation.updateUserById),
     )
     async updateUserById(req: CustomRequest<UpdateUserById>, res: Response) {
-      const updatedUser = await this.userService.getOneByIdOrFail(req.params.userId)
+      const updatedUser = await this.userService.getUserById(req.params.userId)
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' })
+      }
       await this.userService.updateUser(updatedUser, req.body)
       return res.status(StatusCodes.OK).json({ user: updatedUser })
     }

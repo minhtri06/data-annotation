@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify'
 import { RequestHandler } from 'express'
 import createHttpError from 'http-errors'
 
-import { IStorageService } from '../services/interfaces'
+import { IStorageService } from '@src/services'
 import { TYPES } from '../constants'
 
 export interface IUploadMiddleware {

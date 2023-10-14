@@ -1,8 +1,8 @@
-import { IUser } from '@src/models/interfaces'
+import { IRawUser } from '@src/models'
 
 export type CreateUserPayload = Readonly<
   Pick<
-    IUser,
+    IRawUser,
     'name' | 'username' | 'password' | 'role' | 'dateOfBirth' | 'phoneNumber' | 'address'
   >
 >
@@ -10,7 +10,7 @@ export type CreateUserPayload = Readonly<
 export type UpdateUserPayload = Readonly<
   Partial<
     Pick<
-      IUser,
+      IRawUser,
       'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
     >
   >

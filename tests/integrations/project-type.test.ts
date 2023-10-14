@@ -6,11 +6,7 @@ import supertest, { SuperTest, Test } from 'supertest'
 import setup from '@src/setup'
 import { setupTestDb } from '@tests/utils'
 import container from '@src/configs/inversify.config'
-import {
-  IProjectTypeService,
-  ITokenService,
-  IUserService,
-} from '@src/services/interfaces'
+import { IProjectTypeService, ITokenService, IUserService } from '@src/services'
 import { TYPES } from '@src/constants'
 import { ProjectTypeDocument, UserDocument } from '@src/types'
 import {
@@ -100,7 +96,9 @@ describe('Project type routes', () => {
       expect(projectType).not.toBeUndefined()
       expect(projectType.name).toBe(rawProjectType.name.trim())
 
-      const dbProjectType = await projectTypeService.getOneById(projectType.id as string)
+      const dbProjectType = await projectTypeService.getProjectTypeById(
+        projectType.id as string,
+      )
       expect(dbProjectType).toBeDefined()
       expect(dbProjectType?.name).toBe(rawProjectType.name.trim())
     })
@@ -172,7 +170,9 @@ describe('Project type routes', () => {
         name: updatePayload.name,
       })
 
-      const dbProjectType = await projectTypeService.getOneByIdOrFail(projectType._id)
+      const dbProjectType = await projectTypeService.getProjectTypeById(
+        projectType._id.toHexString(),
+      )
       expect(dbProjectType).toMatchObject({
         name: updatePayload.name,
       })
@@ -249,9 +249,7 @@ describe('Project type routes', () => {
         .set('Authorization', privilegedAccessToken)
         .expect(StatusCodes.NO_CONTENT)
 
-      await expect(
-        projectTypeService.countDocuments({ _id: projectType._id }),
-      ).resolves.toBe(0)
+      await expect(Project.countDocuments({ _id: projectType._id })).resolves.toBe(0)
     })
 
     it("should return 404 (not found) if project type id doesn't exist", async () => {

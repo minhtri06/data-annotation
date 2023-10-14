@@ -1,4 +1,4 @@
-import { UserDocument } from '../../types'
+import { UserDocument } from '../types'
 
 export interface IAuthService {
   login(

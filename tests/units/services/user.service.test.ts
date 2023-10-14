@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs'
 
 import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { IUser } from '@src/models/interfaces'
-import { IUserService } from '@src/services/interfaces'
+import { IRawUser } from '@src/models'
+import { IUserService } from '@src/services'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { User } from '@src/models'
@@ -14,7 +14,7 @@ setupTestDb()
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 
 let rawUser: ReturnType<typeof generateUser> &
-  Partial<Pick<IUser, 'monthlyAnnotation' | 'avatar'>>
+  Partial<Pick<IRawUser, 'monthlyAnnotation' | 'avatar'>>
 beforeEach(() => {
   rawUser = generateUser()
 })
@@ -63,7 +63,7 @@ describe('User service', () => {
         'phoneNumber',
         'address',
       ] as const
-      const rawUser2: Partial<IUser> = { ...rawUser }
+      const rawUser2: Partial<IRawUser> = { ...rawUser }
       for (const field of requiredFields) {
         rawUser2[field] = undefined
         await expect(userService.createUser(rawUser2 as typeof rawUser)).rejects.toThrow()
@@ -101,12 +101,6 @@ describe('User service', () => {
       expect(data).toEqual(expect.any(Array))
       expect(data.length).toBe(3)
       expect(data.map((u) => u.id as string)).toEqual([user1.id, user2.id, adminUser.id])
-    })
-
-    it('should call paginate', async () => {
-      const spy = jest.spyOn(userService, 'paginate')
-      await userService.getUsers()
-      expect(spy).toBeCalled()
     })
 
     it('should filter user based on role', async () => {
@@ -151,7 +145,7 @@ describe('User service', () => {
     })
 
     it('should throw error if update username, avatar, monthlyAnnotation, or invalid field', async () => {
-      let updatePayload: Partial<IUser> = {
+      let updatePayload: Partial<IRawUser> = {
         username: 'newUsername',
       }
       await expect(userService.updateUser(user, updatePayload)).rejects.toThrow()

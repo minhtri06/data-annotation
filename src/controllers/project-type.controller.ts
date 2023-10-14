@@ -11,7 +11,7 @@ import {
 
 import { TYPES } from '@src/constants'
 import { IGeneralMiddleware } from '@src/middlewares'
-import { IProjectTypeService } from '@src/services/interfaces'
+import { IProjectTypeService } from '@src/services'
 import { CustomRequest } from '@src/types'
 import { PRIVILEGES } from '@src/configs/role.config'
 import { projectTypeRequestValidation as validation } from './request-validations'
@@ -33,7 +33,7 @@ export const projectTypeControllerFactory = (container: Container) => {
 
     @httpGet('/', generalMiddleware.auth())
     async getAllProjectTypes(req: CustomRequest, res: Response) {
-      const projectTypes = await this.projectTypeService.getMany()
+      const projectTypes = await this.projectTypeService.getAllProjectTypes()
       return res.status(StatusCodes.OK).json({ projectTypes })
     }
 
@@ -56,9 +56,12 @@ export const projectTypeControllerFactory = (container: Container) => {
       req: CustomRequest<UpdateProjectTypeById>,
       res: Response,
     ) {
-      const projectType = await this.projectTypeService.getOneByIdOrFail(
+      const projectType = await this.projectTypeService.getProjectTypeById(
         req.params.projectTypeId,
       )
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' })
+      }
       await this.projectTypeService.updateProjectType(projectType, req.body)
       return res.status(StatusCodes.OK).json({ projectType })
     }
@@ -72,9 +75,12 @@ export const projectTypeControllerFactory = (container: Container) => {
       req: CustomRequest<DeleteProjectTypeById>,
       res: Response,
     ) {
-      const projectType = await this.projectTypeService.getOneByIdOrFail(
+      const projectType = await this.projectTypeService.getProjectTypeById(
         req.params.projectTypeId,
       )
+      if (!projectType) {
+        return res.status(404).json({ message: 'Project type not found' })
+      }
       await this.projectTypeService.deleteProjectType(projectType)
       return res.status(StatusCodes.NO_CONTENT).send()
     }

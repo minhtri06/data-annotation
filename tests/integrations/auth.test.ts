@@ -7,7 +7,7 @@ import setup from '@src/setup'
 import { setupTestDb } from '@tests/utils'
 import { UserDocument } from '@src/types'
 import container from '@src/configs/inversify.config'
-import { ITokenService, IUserService } from '@src/services/interfaces'
+import { ITokenService, IUserService } from '@src/services'
 import { TYPES } from '@src/constants'
 import { generateUser } from '@tests/fixtures'
 import { StatusCodes } from 'http-status-codes'
@@ -70,9 +70,9 @@ describe('Auth routes', () => {
         .send({ refreshToken: refreshTokenDoc.body })
         .expect(StatusCodes.NO_CONTENT)
 
-      const revokedRefreshTokenDoc = await tokenService.getOne({
-        body: refreshTokenDoc.body,
-      })
+      const revokedRefreshTokenDoc = await tokenService.getRefreshTokenByBody(
+        refreshTokenDoc.body,
+      )
       expect(revokedRefreshTokenDoc?.isRevoked).toBe(true)
     })
 

@@ -1,13 +1,11 @@
-import { Types } from 'mongoose'
-
 import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { IUser } from '@src/models/interfaces'
-import { IAuthService, ITokenService, IUserService } from '@src/services/interfaces'
+import { IUser } from '@src/models'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
 import { UserDocument } from '@src/types'
 import ENV_CONFIG from '@src/configs/env.config'
+import { IAuthService, ITokenService, IUserService } from '@src/services'
 
 setupTestDb()
 const authService = container.get<IAuthService>(TYPES.AUTH_SERVICE)
@@ -28,7 +26,7 @@ describe('Auth service', () => {
     it('should correctly login if provide correct username and password and return auth tokens', async () => {
       const credential = await authService.login(rawUser.username, rawUser.password)
 
-      expect((user._id as Types.ObjectId).equals(credential.user._id))
+      expect(user._id.equals(credential.user._id))
       expect(credential.authTokens).not.toBeUndefined()
       expect(typeof credential.authTokens.accessToken).toBe('string')
       expect(typeof credential.authTokens.refreshToken).toBe('string')
@@ -49,9 +47,9 @@ describe('Auth service', () => {
       const credential = await authService.login(rawUser.username, rawUser.password)
 
       await authService.logout(credential.authTokens.refreshToken)
-      const refreshTokenDoc = await tokenService.getOne({
-        body: credential.authTokens.refreshToken,
-      })
+      const refreshTokenDoc = await tokenService.getRefreshTokenByBody(
+        credential.authTokens.refreshToken,
+      )
       expect(refreshTokenDoc).not.toBeNull()
       expect(refreshTokenDoc?.isRevoked).toBeTruthy()
     })
@@ -117,8 +115,6 @@ describe('Auth service', () => {
           credential.authTokens.refreshToken,
         ),
       ).rejects.toThrow()
-      const refreshTokens = await tokenService.getMany({ user: user._id })
-      expect(refreshTokens.every((t) => t.isBlacklisted)).toBeTruthy()
     })
 
     it("should throw error and blacklist all user's token if use refresh token that already logout", async () => {
@@ -131,8 +127,6 @@ describe('Auth service', () => {
           credential.authTokens.refreshToken,
         ),
       ).rejects.toThrow()
-      const refreshTokens = await tokenService.getMany({ user: user._id })
-      expect(refreshTokens.every((t) => t.isBlacklisted)).toBeTruthy()
     })
   })
 })

@@ -4,9 +4,9 @@ import { controller, httpPost } from 'inversify-express-utils'
 
 import { TYPES } from '@src/constants'
 import { IGeneralMiddleware } from '@src/middlewares'
-import { IProjectService } from '@src/services/interfaces'
+import { IProjectService } from '@src/services'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
-import { CustomRequest, DocumentId } from '@src/types'
+import { CustomRequest } from '@src/types'
 import { projectRequestValidation as validation } from './request-validations'
 import { CreateProject } from './request-schemas'
 import { ApiError } from '@src/utils'
@@ -32,7 +32,7 @@ export const projectControllerFactory = (container: Container) => {
         throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
       }
 
-      const payload: typeof req.body & { manager?: DocumentId } = { ...req.body }
+      const payload: typeof req.body & { manager?: string } = { ...req.body }
       if (req.user.role === ROLES.MANAGER) {
         payload.manager = req.user._id
       }

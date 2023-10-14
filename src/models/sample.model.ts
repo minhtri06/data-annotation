@@ -1,9 +1,88 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, Types, model } from 'mongoose'
 
-import { ISample, ISampleModel } from './interfaces'
-import { toJSON } from './plugins'
+import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
 import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
 import { SampleDocument } from '@src/types'
+
+export interface ISample {
+  _id: Types.ObjectId
+
+  texts: Types.Array<string>
+
+  status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
+
+  annotation: {
+    labelSets: Types.DocumentArray<{
+      selectedLabels: Types.Array<string>
+    }> | null
+
+    generatedTexts: Types.Array<string> | null
+
+    singleTextAnnotation: Types.DocumentArray<{
+      labelSets: Types.DocumentArray<{
+        selectedLabels: Types.Array<string>
+      }> | null
+
+      inlineLabels: Types.DocumentArray<{
+        startAt: number
+        endAt: number
+      }> | null
+    }>
+  }
+
+  comments: Types.DocumentArray<{
+    body: string
+    author: Types.ObjectId
+    createdAt: Date
+  }>
+
+  updatedAt: Date
+  createdAt: Date
+}
+
+export interface IRawSample {
+  texts: string[]
+
+  status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
+
+  annotation: {
+    labelSets:
+      | {
+          selectedLabels: string[]
+        }[]
+      | null
+
+    generatedTexts: string[] | null
+
+    singleTextAnnotation: {
+      labelSets:
+        | {
+            selectedLabels: string[]
+          }[]
+        | null
+
+      inlineLabels:
+        | {
+            startAt: number
+            endAt: number
+          }[]
+        | null
+    }[]
+  }
+
+  comments: {
+    body: string
+    author: string
+    createdAt: Date
+  }[]
+
+  updatedAt: Date
+  createdAt: Date
+}
+
+export interface ISampleModel extends Model<ISample> {
+  paginate: Paginate<ISample>
+}
 
 const sampleSchema = new Schema<ISample>(
   {
@@ -94,6 +173,7 @@ const sampleSchema = new Schema<ISample>(
   },
 )
 
-sampleSchema.plugin(toJSON)
+sampleSchema.plugin(toJSONPlugin)
+sampleSchema.plugin(paginatePlugin)
 
 export const Sample = model<ISample, ISampleModel>(MODEL_NAMES.SAMPLE, sampleSchema)

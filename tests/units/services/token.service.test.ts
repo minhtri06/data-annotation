@@ -1,10 +1,9 @@
-import mongoose from 'mongoose'
 import moment from 'moment'
 import jwt from 'jsonwebtoken'
 
 import { TOKEN_TYPES, TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { ITokenService, IUserService } from '@src/services/interfaces'
+import { ITokenService, IUserService } from '@src/services'
 import ENV_CONFIG from '@src/configs/env.config'
 import { JwtPayload, UserDocument } from '@src/types'
 import { setupTestDb } from '@tests/utils'
@@ -44,7 +43,7 @@ describe('Token service', () => {
       expect(payload.role === user.role).toBeTruthy()
       expect(payload.iat <= moment().unix()).toBeTruthy()
       expect(payload.type === 'access-token').toBeTruthy()
-      expect((user._id as mongoose.Types.ObjectId).equals(payload.sub)).toBeTruthy()
+      expect(user._id.equals(payload.sub)).toBeTruthy()
     })
   })
 

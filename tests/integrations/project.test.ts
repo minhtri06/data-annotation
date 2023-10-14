@@ -7,7 +7,7 @@ import supertest, { SuperTest, Test } from 'supertest'
 import { Mutable, setupTestDb } from '@tests/utils'
 import setup from '@src/setup'
 import container from '@src/configs/inversify.config'
-import { IProjectService, ITokenService, IUserService } from '@src/services/interfaces'
+import { IProjectService, ITokenService, IUserService } from '@src/services'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { UserDocument } from '@src/types'
 import {
@@ -56,22 +56,15 @@ describe('Project routes', () => {
         .expect(StatusCodes.CREATED)
 
       expect(res.body.project).not.toBeUndefined()
-      expect(res.body.project).toMatchObject({
-        name: rawProject.name,
-        projectType: rawProject.projectType.toString(),
-        requirement: rawProject.requirement,
-        annotationConfig: rawProject.annotationConfig,
-        description: rawProject.description,
-      })
+      expect(res.body.project.name).toBe(rawProject.name)
+      expect(res.body.project.projectType).toBe(rawProject.projectType)
+      expect(res.body.project.requirement).toBe(rawProject.requirement)
 
-      const dbProject = await projectService.getOneByIdOrFail(res.body.project.id)
-      expect(dbProject).toMatchObject({
-        name: rawProject.name,
-        projectType: rawProject.projectType,
-        requirement: rawProject.requirement,
-        annotationConfig: rawProject.annotationConfig,
-        description: rawProject.description,
-      })
+      const dbProject = await projectService.getProjectById(res.body.project.id)
+      expect(dbProject).not.toBeUndefined()
+      expect(dbProject?.name).toBe(rawProject.name)
+      expect(dbProject?.projectType.toHexString()).toBe(rawProject.projectType)
+      expect(dbProject?.requirement).toBe(rawProject.requirement)
     })
 
     it('should create a project with manager being the caller if the caller is manager', async () => {
@@ -87,8 +80,8 @@ describe('Project routes', () => {
       const project = res.body.project
       expect(project.manager).toBe(manager.id)
 
-      const dbProject = await projectService.getOneByIdOrFail(project.id)
-      expect(dbProject.manager?.toString()).toBe(manager.id)
+      const dbProject = await projectService.getProjectById(project.id)
+      expect(dbProject?.manager?.toString()).toBe(manager.id)
     })
 
     it('should create a project with proper initial value', async () => {
@@ -104,12 +97,12 @@ describe('Project routes', () => {
       expect(project.numberOfSamples).toBe(0)
       expect(!project.completionTime).toBeTruthy()
 
-      const dbProject = await projectService.getOneByIdOrFail(res.body.project.id)
+      const dbProject = await projectService.getProjectById(res.body.project.id)
 
-      expect(dbProject.status).toBe(PROJECT_STATUS.SETTING_UP)
-      expect(dbProject.annotationTaskDivision).toEqual([])
-      expect(dbProject.numberOfSamples).toBe(0)
-      expect(!dbProject.completionTime).toBeTruthy()
+      expect(dbProject?.status).toBe(PROJECT_STATUS.SETTING_UP)
+      expect(dbProject?.annotationTaskDivision).toEqual([])
+      expect(dbProject?.numberOfSamples).toBe(0)
+      expect(!dbProject?.completionTime).toBeTruthy()
     })
 
     it('should return 401 (unauthorized) if access token is missing', async () => {

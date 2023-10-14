@@ -2,13 +2,13 @@ import { faker } from '@faker-js/faker'
 import mongoose from 'mongoose'
 
 import { SAMPLE_STATUS } from '@src/constants'
-import { ISample } from '@src/models/interfaces'
+import { IRawSample } from '@src/models'
 
 const { ObjectId } = mongoose.Types
 
 export const generateSample = (
-  overwriteFields: Partial<ISample> = {},
-): Omit<ISample, '_id' | 'createdAt' | 'updatedAt' | 'annotation' | 'comments'> => {
+  overwriteFields: Partial<IRawSample> = {},
+): Omit<IRawSample, '_id' | 'createdAt' | 'updatedAt' | 'annotation' | 'comments'> => {
   return {
     texts: [faker.lorem.paragraph(), faker.lorem.paragraph()],
     status: SAMPLE_STATUS.NEW,
@@ -17,10 +17,10 @@ export const generateSample = (
 }
 
 export const generateSampleComments = (length: number) => {
-  const comments: ISample['comments'] = []
+  const comments: IRawSample['comments'] = []
   for (let i = 0; i < length; i++) {
     comments.push({
-      author: new ObjectId(),
+      author: new ObjectId().toHexString(),
       createdAt: new Date(),
       body: faker.lorem.lines(),
     })

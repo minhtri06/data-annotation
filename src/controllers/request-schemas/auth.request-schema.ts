@@ -1,4 +1,4 @@
-import { IUser } from '../../models/interfaces'
+import { IUser } from '@src/models'
 
 export type Login = {
   body: Pick<IUser, 'username' | 'password'>

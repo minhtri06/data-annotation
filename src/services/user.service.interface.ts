@@ -1,15 +1,18 @@
-import { IUser, IUserModel } from '@src/models/interfaces'
 import { QueryOptions, UserDocument } from '@src/types'
-import { IModelService } from './model.service.interface'
-import { CreateUserPayload, UpdateUserPayload } from '../types'
+import { CreateUserPayload, UpdateUserPayload } from './types'
+import { IUser } from '@src/models'
 
-export interface IUserService extends IModelService<IUser, IUserModel> {
+export interface IUserService {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
 
   getUsers(
     queryFilter?: Partial<Pick<IUser, 'role' | 'name' | 'workStatus'>>,
     queryOptions?: QueryOptions,
   ): Promise<{ data: UserDocument[]; totalPage?: number }>
+
+  getUserById(userId: string): Promise<UserDocument | null>
+
+  getUserByUserName(username: string): Promise<UserDocument | null>
 
   createUser(body: CreateUserPayload): Promise<UserDocument>
 

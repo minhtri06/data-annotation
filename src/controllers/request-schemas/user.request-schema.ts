@@ -1,5 +1,5 @@
+import { IUser } from '@src/models'
 import { Role } from '@src/types'
-import { IUser } from '../../models/interfaces'
 
 export type GetUsers = {
   query: {

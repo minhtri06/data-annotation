@@ -4,8 +4,8 @@ import mongoose from 'mongoose'
 
 import container from '@src/configs/inversify.config'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
-import { IProject } from '@src/models/interfaces'
-import { IProjectService, IProjectTypeService } from '@src/services/interfaces'
+import { IRawProject } from '@src/models'
+import { IProjectService, IProjectTypeService } from '@src/services'
 import { CreateProjectPayload, UpdateProjectPayload } from '@src/services/types'
 import { ProjectDocument, ProjectTypeDocument } from '@src/types'
 import { generateProject, generateProjectType } from '@tests/fixtures'
@@ -120,10 +120,14 @@ describe('Project service', () => {
 
     it('should correctly create a new project', async () => {
       const project = await projectService.createProject(rawProject)
-      expect(project).toMatchObject(rawProject)
+      expect(project?.name).toBe(rawProject.name)
+      expect(project?.requirement).toBe(rawProject.requirement)
+      expect(project?.projectType.toHexString()).toBe(rawProject.projectType)
 
-      const dbProject = await projectService.getOneByIdOrFail(project._id)
-      expect(dbProject).toMatchObject(rawProject)
+      const dbProject = await projectService.getProjectById(project._id.toHexString())
+      expect(dbProject?.name).toBe(rawProject.name)
+      expect(dbProject?.requirement).toBe(rawProject.requirement)
+      expect(dbProject?.projectType.toHexString()).toBe(rawProject.projectType)
     })
 
     it('should create a new project with status is setting up', async () => {
@@ -158,7 +162,7 @@ describe('Project service', () => {
     })
 
     it('should throw an error if pass in un-allow fields', async () => {
-      const unAllowData: Partial<IProject> = {
+      const unAllowData: Partial<IRawProject> = {
         status: PROJECT_STATUS.DONE,
         annotationTaskDivision: [],
         numberOfSamples: 123,
@@ -228,7 +232,7 @@ describe('Project service', () => {
       project = await projectService.createProject(generateProject())
       updatePayload = {
         name: 'Translate English',
-        projectType: new mongoose.Types.ObjectId(),
+        projectType: new mongoose.Types.ObjectId().toHexString(),
         requirement: 'Translate English to Vietnamese',
         description: faker.lorem.paragraph(),
         maximumOfAnnotators: 20,
@@ -246,12 +250,14 @@ describe('Project service', () => {
     it('should correctly update a project', async () => {
       await projectService.updateProject(project, updatePayload)
 
-      expect(project).toMatchObject(updatePayload)
+      expect(project.name).toBe(updatePayload.name)
+      expect(project.projectType.toHexString()).toBe(updatePayload.projectType)
       expect(project.status).toBe(PROJECT_STATUS.SETTING_UP)
 
-      const dbProject = await projectService.getOneByIdOrFail(project._id)
-      expect(dbProject).toMatchObject(updatePayload)
-      expect(dbProject.status).toBe(PROJECT_STATUS.SETTING_UP)
+      const dbProject = await projectService.getProjectById(project._id.toHexString())
+      expect(dbProject?.name).toBe(updatePayload.name)
+      expect(dbProject?.projectType.toHexString()).toBe(updatePayload.projectType)
+      expect(dbProject?.status).toBe(PROJECT_STATUS.SETTING_UP)
     })
 
     it('should throw an error if project status is not "setting up"', async () => {

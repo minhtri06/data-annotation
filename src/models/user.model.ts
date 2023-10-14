@@ -1,10 +1,71 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
-import { IUser, IUserModel } from './interfaces'
 import ROLE_PRIVILEGES from '../configs/role.config'
-import { toJSON } from './plugins'
+import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
 import { MODEL_NAMES, USER_WORK_STATUS } from '../constants'
+import { Types } from 'mongoose'
+
+export interface IUser {
+  _id: Types.ObjectId
+
+  name: string
+
+  username: string
+
+  password: string
+
+  role: keyof typeof ROLE_PRIVILEGES
+
+  avatar?: string
+
+  dateOfBirth: Date
+
+  phoneNumber: string
+
+  address: string
+
+  workStatus: (typeof USER_WORK_STATUS)[keyof typeof USER_WORK_STATUS]
+
+  monthlyAnnotation: Types.DocumentArray<{
+    month: number
+    year: number
+    annotationTotal: number
+  }>
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface IRawUser {
+  name: string
+
+  username: string
+
+  password: string
+
+  role: keyof typeof ROLE_PRIVILEGES
+
+  avatar?: string
+
+  dateOfBirth: Date
+
+  phoneNumber: string
+
+  address: string
+
+  workStatus: (typeof USER_WORK_STATUS)[keyof typeof USER_WORK_STATUS]
+
+  monthlyAnnotation: {
+    month: number
+    year: number
+    annotationTotal: number
+  }[]
+}
+
+export interface IUserModel extends Model<IUser> {
+  paginate: Paginate<IUser>
+}
 
 const userSchema = new Schema<IUser>(
   {
@@ -67,7 +128,8 @@ const userSchema = new Schema<IUser>(
   },
 )
 
-userSchema.plugin(toJSON)
+userSchema.plugin(toJSONPlugin)
+userSchema.plugin(paginatePlugin)
 
 userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 8)

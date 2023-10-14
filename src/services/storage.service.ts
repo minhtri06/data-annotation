@@ -2,8 +2,8 @@ import { Request, Response } from 'express'
 import { Multer } from 'multer'
 import util from 'util'
 
-import { IStorageService } from '../interfaces'
 import { injectable } from 'inversify'
+import { IStorageService } from './storage.service.interface'
 
 @injectable()
 export abstract class StorageService implements IStorageService {

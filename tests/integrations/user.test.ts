@@ -7,7 +7,7 @@ import { StatusCodes } from 'http-status-codes'
 import { TYPES, USER_WORK_STATUS } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
-import { ITokenService, IUserService } from '@src/services/interfaces'
+import { ITokenService, IUserService } from '@src/services'
 import setup from '@src/setup'
 import { UserDocument } from '@src/types'
 import { generateUser, getNonPrivilegedRole, getPrivilegedRole } from '@tests/fixtures'
@@ -302,7 +302,7 @@ describe('Users routes', () => {
         workStatus: updatePayload.workStatus,
       })
 
-      const updatedUser = await userService.getOneById(user._id)
+      const updatedUser = await userService.getUserById(user._id.toHexString())
       expect(updatedUser).toBeDefined()
       expect(updatedUser).toMatchObject({
         name: updatePayload.name,

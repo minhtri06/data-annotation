@@ -1,9 +1,9 @@
 import { SAMPLE_STATUS } from '@src/constants'
 import { Sample } from '@src/models'
-import { ISample } from '@src/models/interfaces'
+import { IRawSample } from '@src/models'
 import { generateSample, generateSampleComments } from '@tests/fixtures/sample.fixtures'
 
-let rawSample: Partial<ISample>
+let rawSample: Partial<IRawSample>
 beforeEach(() => {
   rawSample = generateSample()
 })

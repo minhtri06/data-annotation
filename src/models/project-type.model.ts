@@ -1,10 +1,24 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, model } from 'mongoose'
 
-import { IProjectType } from './interfaces'
-import { toJSON } from './plugins'
-import { MODEL_NAMES } from '../constants'
+import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import { MODEL_NAMES } from '@src/constants'
 
-const projectTypeSchema = new Schema<IProjectType>(
+export interface IProjectType {
+  name: string
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface IRawProjectType {
+  name: string
+}
+
+export interface IProjectTypeModel extends Model<IProjectType> {
+  paginate: Paginate<IProjectType>
+}
+
+const projectTypeSchema = new Schema<IProjectType, IProjectTypeModel>(
   {
     name: { type: String, unique: true, trim: true, required: true },
   },
@@ -14,6 +28,10 @@ const projectTypeSchema = new Schema<IProjectType>(
   },
 )
 
-projectTypeSchema.plugin(toJSON)
+projectTypeSchema.plugin(toJSONPlugin)
+projectTypeSchema.plugin(paginatePlugin)
 
-export const ProjectType = model(MODEL_NAMES.PROJECT_TYPE, projectTypeSchema)
+export const ProjectType = model<IProjectType, IProjectTypeModel>(
+  MODEL_NAMES.PROJECT_TYPE,
+  projectTypeSchema,
+)

@@ -2,25 +2,22 @@ import { FilterQuery } from 'mongoose'
 import { inject, injectable } from 'inversify'
 import bcrypt from 'bcryptjs'
 
-import { IStorageService, IUserService } from './interfaces'
-import { ModelService } from './abstracts/model.service'
-import { IUser, IUserModel } from '../models/interfaces'
 import { QueryOptions, UserDocument } from '../types'
 import { TYPES, USER_WORK_STATUS } from '../constants'
-import { User } from '../models'
-import { validate } from '@src/utils'
+import { IUser, User } from '../models'
+import { ApiError, validate } from '@src/utils'
 import { userValidation as validation } from './validations'
 import { CreateUserPayload, UpdateUserPayload } from './types'
+import { IUserService } from './user.service.interface'
+import { IStorageService } from './storage.service.interface'
+import { StatusCodes } from 'http-status-codes'
+import { customId } from './validations/custom.validation'
 
 @injectable()
-export class UserService extends ModelService<IUser, IUserModel> implements IUserService {
-  protected Model: IUserModel = User
-
+export class UserService implements IUserService {
   constructor(
     @inject(TYPES.IMAGE_STORAGE_SERVICE) private imageStorageService: IStorageService,
-  ) {
-    super()
-  }
+  ) {}
 
   async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
     return await bcrypt.compare(rawPassword, hashedPassword)
@@ -40,7 +37,21 @@ export class UserService extends ModelService<IUser, IUserModel> implements IUse
     }
     filter.workStatus = queryFilter.workStatus || USER_WORK_STATUS.ON
 
-    return this.paginate(filter, queryOptions)
+    return User.paginate(filter, queryOptions)
+  }
+
+  async getUserById(userId: string): Promise<UserDocument | null> {
+    if (customId.required().validate(userId).error) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user id')
+    }
+    return await User.findById(userId)
+  }
+
+  async getUserByUserName(username: string): Promise<UserDocument | null> {
+    if (typeof username !== 'string') {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid username')
+    }
+    return await User.findOne({ username })
   }
 
   async createUser(payload: CreateUserPayload): Promise<UserDocument> {

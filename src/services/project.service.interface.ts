@@ -1,14 +1,14 @@
-import { IProject, IProjectModel } from '@src/models/interfaces'
-import { IModelService } from './model.service.interface'
 import { PaginateResult, ProjectDocument } from '@src/types'
 import {
   CreateProjectPayload,
   GetProjectsFilter,
   GetProjectsQueryOptions,
   UpdateProjectPayload,
-} from '../types'
+} from './types'
 
-export interface IProjectService extends IModelService<IProject, IProjectModel> {
+export interface IProjectService {
+  getProjectById(projectId: string): Promise<ProjectDocument | null>
+
   getProjects(
     filter: GetProjectsFilter,
     options: GetProjectsQueryOptions,

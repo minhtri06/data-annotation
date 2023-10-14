@@ -4,7 +4,7 @@ import { controller, httpGet, httpPatch, httpPut } from 'inversify-express-utils
 import createHttpError from 'http-errors'
 
 import { IGeneralMiddleware } from '../middlewares'
-import { IUserService } from '../services/interfaces'
+import { IUserService } from '../services'
 import { CustomRequest, EmptyObject } from '../types'
 import { IUploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../constants'
@@ -26,7 +26,10 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw createHttpError.Unauthorized('Unauthorized')
       }
-      const me = await this.userService.getOneByIdOrFail(req.user._id)
+      const me = await this.userService.getUserById(req.user._id)
+      if (!me) {
+        return res.status(404).json({ message: 'User not found' })
+      }
       return res.status(200).json({ me })
     }
 
@@ -39,7 +42,10 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw createHttpError.Unauthorized('Unauthorized')
       }
-      const me = await this.userService.getOneByIdOrFail(req.user._id)
+      const me = await this.userService.getUserById(req.user._id)
+      if (!me) {
+        return res.status(404).json({ message: 'User not found' })
+      }
       await this.userService.updateUser(me, req.body)
       return res.status(StatusCodes.OK).json({ me })
     }
@@ -56,7 +62,10 @@ export const meControllerFactory = (container: Container) => {
       if (!req.file) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Avatar is required')
       }
-      const user = await this.userService.getOneByIdOrFail(req.user._id)
+      const user = await this.userService.getUserById(req.user._id)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+      }
       await this.userService.updateAvatar(user, req.file.filename)
       return res
         .status(200)

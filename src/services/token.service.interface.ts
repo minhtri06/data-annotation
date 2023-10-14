@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken'
 import { Moment } from 'moment'
 
-import { IToken, ITokenModel } from '@src/models/interfaces/token.interface'
 import { JwtPayload, DocumentId, TokenDocument, UserDocument } from '@src/types'
-import { IModelService } from './model.service.interface'
+import { IToken } from '@src/models'
 
-export interface ITokenService extends IModelService<IToken, ITokenModel> {
+export interface ITokenService {
   generateToken(
     user: UserDocument,
     expires: Moment,
@@ -19,6 +18,8 @@ export interface ITokenService extends IModelService<IToken, ITokenModel> {
   createAuthTokens(
     user: UserDocument,
   ): Promise<{ accessToken: string; refreshToken: string }>
+
+  getRefreshTokenByBody(body: string): Promise<TokenDocument | null>
 
   verifyToken(
     token: string,

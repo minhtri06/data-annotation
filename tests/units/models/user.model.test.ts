@@ -1,4 +1,4 @@
-import { IUser } from '@src/models/interfaces'
+import { IUser } from '@src/models'
 import { User } from '@src/models/user.model'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'

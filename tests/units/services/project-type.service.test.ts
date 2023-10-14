@@ -1,7 +1,7 @@
 import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { Project, ProjectType } from '@src/models'
-import { IProjectTypeService } from '@src/services/interfaces/project-type.service.interface'
+import { IProjectTypeService } from '@src/services/project-type.service.interface'
 import { ProjectTypeDocument } from '@src/types'
 import { generateProject, generateProjectType } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
@@ -50,10 +50,10 @@ describe('Project type service', () => {
     it('should correctly update a project type', async () => {
       await projectTypeService.updateProjectType(projectType, updatePayload)
       expect(projectType.name).toBe(updatePayload.name)
-      const updatedProjectType = await projectTypeService.getOneByIdOrFail(
-        projectType._id,
+      const updatedProjectType = await projectTypeService.getProjectTypeById(
+        projectType._id.toHexString(),
       )
-      expect(updatedProjectType.name).toBe(updatePayload.name)
+      expect(updatedProjectType?.name).toBe(updatePayload.name)
     })
 
     it('should throw error if update with name that already exists', async () => {
@@ -78,7 +78,9 @@ describe('Project type service', () => {
     })
 
     it('should throw error if project type has at least 1 project', async () => {
-      await Project.create(generateProject({ projectType: projectType._id }))
+      await Project.create(
+        generateProject({ projectType: projectType._id.toHexString() }),
+      )
       await expect(projectTypeService.deleteProjectType(projectType)).rejects.toThrow()
     })
   })

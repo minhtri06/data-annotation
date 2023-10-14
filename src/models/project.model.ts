@@ -1,9 +1,111 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, Types, model } from 'mongoose'
 
-import { IProject } from './interfaces'
-import { toJSON } from './plugins'
-import { MODEL_NAMES, PROJECT_STATUS } from '../constants'
+import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
 import { ProjectDocument } from '@src/types'
+
+export interface IProject {
+  _id: Types.ObjectId
+
+  name: string
+
+  projectType: Types.ObjectId
+
+  requirement: string
+
+  description?: string
+
+  manager?: Types.ObjectId
+
+  maximumOfAnnotators: number
+
+  annotationTaskDivision: Types.DocumentArray<{
+    annotator: Types.ObjectId
+    startSample?: number
+    endSample?: number
+  }>
+
+  numberOfSamples: number
+
+  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+
+  completionTime?: Date
+
+  annotationConfig: {
+    hasLabelSets: boolean
+    labelSets: Types.DocumentArray<{
+      isMultiSelected: boolean
+      labels: Types.Array<string>
+    }>
+
+    hasGeneratedTexts: boolean
+
+    individualTextConfigs: Types.DocumentArray<{
+      hasLabelSets: boolean
+      labelSets: Types.DocumentArray<{
+        isMultiSelected: boolean
+        labels: Types.Array<string>
+      }>
+
+      hasInlineLabels: boolean
+      inlineLabels: Types.Array<string>
+    }>
+  }
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface IRawProject {
+  name: string
+
+  projectType: string
+
+  requirement: string
+
+  description?: string
+
+  manager?: string
+
+  maximumOfAnnotators: number
+
+  annotationTaskDivision: {
+    annotator: string
+    startSample?: number
+    endSample?: number
+  }[]
+
+  numberOfSamples: number
+
+  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+
+  completionTime?: Date
+
+  annotationConfig: {
+    hasLabelSets: boolean
+    labelSets: {
+      isMultiSelected: boolean
+      labels: string[]
+    }[]
+
+    hasGeneratedTexts: boolean
+
+    individualTextConfigs: {
+      hasLabelSets: boolean
+      labelSets: {
+        isMultiSelected: boolean
+        labels: string[]
+      }[]
+
+      hasInlineLabels: boolean
+      inlineLabels: string[]
+    }[]
+  }
+}
+
+export interface IProjectModel extends Model<IProject> {
+  paginate: Paginate<IProject>
+}
 
 const projectSchema = new Schema<IProject>(
   {
@@ -178,10 +280,7 @@ const projectSchema = new Schema<IProject>(
 
 projectSchema.index({ name: 1, projectType: 1 }, { unique: true })
 
-projectSchema.plugin(toJSON)
+projectSchema.plugin(toJSONPlugin)
+projectSchema.plugin(paginatePlugin)
 
-projectSchema.pre('save', function (next) {
-  next()
-})
-
-export const Project = model(MODEL_NAMES.PROJECT, projectSchema)
+export const Project = model<IProject, IProjectModel>(MODEL_NAMES.PROJECT, projectSchema)

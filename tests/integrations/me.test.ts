@@ -7,11 +7,12 @@ import { faker } from '@faker-js/faker'
 
 import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { IStorageService, ITokenService, IUserService } from '@src/services/interfaces'
+import { IStorageService, ITokenService, IUserService } from '@src/services'
 import setup from '@src/setup'
 import { UserDocument } from '@src/types'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
+import { User } from '@src/models'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
@@ -61,7 +62,7 @@ describe('Me routes', () => {
 
   describe('PUT /api/v1/me/avatar - Update my avatar', () => {
     afterEach(async () => {
-      const users = await userService.getMany()
+      const users = await User.find()
       for (const user of users) {
         if (user.avatar) {
           await imageStorageService.deleteFile(user.avatar)
@@ -113,7 +114,7 @@ describe('Me routes', () => {
         .send(updatePayload)
         .expect(StatusCodes.OK)
 
-      const updatedProfile = await userService.getOneById(me.id)
+      const updatedProfile = await userService.getUserById(me.id)
       expect(updatedProfile?.toObject()).toMatchObject(updatePayload)
     })
 

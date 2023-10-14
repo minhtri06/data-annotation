@@ -1,7 +1,46 @@
-import { Schema, model } from 'mongoose'
+import { Model, Schema, Types, model } from 'mongoose'
 
-import { IToken, ITokenModel } from './interfaces/token.interface'
-import { MODEL_NAMES, TOKEN_TYPES } from '../constants'
+import { MODEL_NAMES, TOKEN_TYPES } from '@src/constants'
+import { toJSONPlugin } from './plugins'
+
+export interface IToken {
+  _id: Types.ObjectId
+
+  body: string
+
+  user: Types.ObjectId
+
+  type: (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES]
+
+  expires: Date
+
+  isRevoked: boolean
+
+  isUsed: boolean
+
+  isBlacklisted: boolean
+
+  updatedAt: Date
+  createdAt: Date
+}
+
+export interface IRawToken {
+  body: string
+
+  user: string
+
+  type: (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES]
+
+  expires: Date
+
+  isRevoked: boolean
+
+  isUsed: boolean
+
+  isBlacklisted: boolean
+}
+
+export interface ITokenModel extends Model<IToken> {}
 
 const tokenSchema = new Schema<IToken>(
   {
@@ -24,5 +63,7 @@ const tokenSchema = new Schema<IToken>(
     optimisticConcurrency: true,
   },
 )
+
+tokenSchema.plugin(toJSONPlugin)
 
 export const Token = model<IToken, ITokenModel>(MODEL_NAMES.TOKEN, tokenSchema)

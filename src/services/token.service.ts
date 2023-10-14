@@ -3,20 +3,15 @@ import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
 import { injectable } from 'inversify'
 
-import { IToken, ITokenModel } from '../models/interfaces'
-import { ITokenService } from './interfaces'
-import { DocumentId, JwtPayload, TokenDocument, UserDocument } from '../types'
-import ENV_CONFIG from '../configs/env.config'
-import { ModelService } from './abstracts/model.service'
-import { Token } from '../models'
+import { DocumentId, JwtPayload, TokenDocument, UserDocument } from '@src/types'
+import ENV_CONFIG from '@src/configs/env.config'
+import { IToken, Token } from '@src/models'
+import { ITokenService } from './token.service.interface'
+import { ApiError } from '@src/utils'
+import { TOKEN_TYPES } from '@src/constants'
 
 @injectable()
-export class TokenService
-  extends ModelService<IToken, ITokenModel>
-  implements ITokenService
-{
-  Model: ITokenModel = Token
-
+export class TokenService implements ITokenService {
   generateToken(
     user: UserDocument,
     expires: Moment,
@@ -42,7 +37,7 @@ export class TokenService
     const expires = moment().add(ENV_CONFIG.JWT_REFRESH_EXPIRATION_DAYS, 'days')
     const token = this.generateToken(user, expires, 'refresh-token')
 
-    return await this.Model.create({
+    return await Token.create({
       body: token,
       user: user._id,
       type: 'refresh-token',
@@ -62,6 +57,13 @@ export class TokenService
       accessToken,
       refreshToken: refreshToken.body,
     }
+  }
+
+  async getRefreshTokenByBody(body: string): Promise<TokenDocument | null> {
+    if (typeof body !== 'string') {
+      throw new ApiError(400, 'Invalid refresh body')
+    }
+    return await Token.findOne({ body, type: TOKEN_TYPES.REFRESH_TOKEN })
   }
 
   verifyToken(
@@ -85,7 +87,7 @@ export class TokenService
 
   async blacklistAUser(userId: DocumentId): Promise<void> {
     const tokenType: IToken['type'] = 'refresh-token'
-    await this.Model.updateMany(
+    await Token.updateMany(
       {
         user: userId,
         type: tokenType,

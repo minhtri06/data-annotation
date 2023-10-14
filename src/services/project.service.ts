@@ -1,7 +1,4 @@
-import { IProject, IProjectModel } from '@src/models/interfaces'
-import { ModelService } from './abstracts/model.service'
-import { IProjectService } from './interfaces'
-import { Project } from '@src/models'
+import { IRawProject, Project } from '@src/models'
 import {
   CreateProjectPayload,
   GetProjectsFilter,
@@ -13,12 +10,18 @@ import { ApiError, validate } from '@src/utils'
 import { projectValidation as validation } from './validations'
 import { StatusCodes } from 'http-status-codes'
 import { PROJECT_STATUS } from '@src/constants'
+import { IProjectService } from './project.service.interface'
+import { injectable } from 'inversify'
+import { customId } from './validations/custom.validation'
 
-export class ProjectService
-  extends ModelService<IProject, IProjectModel>
-  implements IProjectService
-{
-  protected Model: IProjectModel = Project
+@injectable()
+export class ProjectService implements IProjectService {
+  async getProjectById(projectId: string): Promise<ProjectDocument | null> {
+    if (customId.required().validate(projectId).error) {
+      throw new ApiError(400, 'Project id is invalid')
+    }
+    return Project.findById(projectId)
+  }
 
   async getProjects(
     filter: GetProjectsFilter = {},
@@ -32,11 +35,11 @@ export class ProjectService
       _options.sort = '-createdAt'
     }
 
-    return this.paginate(filter, _options)
+    return Project.paginate(filter, _options)
   }
 
   protected validateAnnotationConfig(
-    annotationConfig: Readonly<IProject['annotationConfig']>,
+    annotationConfig: Readonly<IRawProject['annotationConfig']>,
   ) {
     if (
       !annotationConfig.hasLabelSets &&
@@ -87,12 +90,13 @@ export class ProjectService
 
     this.validateAnnotationConfig(payload.annotationConfig)
 
-    const project = new this.Model(payload)
-
-    project.status = PROJECT_STATUS.SETTING_UP
-    project.numberOfSamples = 0
-    project.annotationTaskDivision = []
-    project.completionTime = undefined
+    const project = new Project({
+      ...payload,
+      status: PROJECT_STATUS.SETTING_UP,
+      numberOfSamples: 0,
+      annotationTaskDivision: [],
+      completionTime: undefined,
+    })
 
     return project.save()
   }

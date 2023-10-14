@@ -1,17 +1,18 @@
 import { faker } from '@faker-js/faker'
 import mongoose from 'mongoose'
 
-import { IProject } from '@src/models/interfaces'
+import { IRawProject } from '@src/models'
 import { CreateProjectPayload } from '@src/services/types'
+import { Mutable } from '@tests/utils'
 
 const { ObjectId } = mongoose.Types
 
 export const generateAnnotationTaskDivision = (length: number) => {
-  const annotationTaskDivision: IProject['annotationTaskDivision'] = []
+  const annotationTaskDivision: IRawProject['annotationTaskDivision'] = []
   let sampleIndex = 0
   for (let i = 0; i < length; i++) {
     annotationTaskDivision.push({
-      annotator: new ObjectId(),
+      annotator: new ObjectId().toHexString(),
       startSample: sampleIndex,
       endSample: sampleIndex + 2,
     })
@@ -21,7 +22,8 @@ export const generateAnnotationTaskDivision = (length: number) => {
 }
 
 export const generateIndividualTextConfig = (length: number) => {
-  const individualTextConfigs: IProject['annotationConfig']['individualTextConfigs'] = []
+  const individualTextConfigs: IRawProject['annotationConfig']['individualTextConfigs'] =
+    []
   for (let i = 0; i < length; i++) {
     individualTextConfigs.push({
       hasInlineLabels: false,
@@ -34,14 +36,14 @@ export const generateIndividualTextConfig = (length: number) => {
 }
 
 export const generateProject = (
-  overwriteFields: Partial<IProject> = {},
-): CreateProjectPayload => {
+  overwriteFields: Partial<CreateProjectPayload> = {},
+): Mutable<CreateProjectPayload> => {
   return {
     name: 'Context labeling abc',
-    projectType: new ObjectId(),
+    projectType: new ObjectId().toHexString(),
     description: faker.lorem.paragraphs(),
     requirement: faker.lorem.lines(),
-    manager: new ObjectId(),
+    manager: new ObjectId().toHexString(),
     maximumOfAnnotators: 4,
     annotationConfig: {
       hasLabelSets: true,

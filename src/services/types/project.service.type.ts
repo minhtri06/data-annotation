@@ -1,6 +1,8 @@
-import { IProject } from '@src/models/interfaces'
+import { IRawProject } from '@src/models'
 
-export type GetProjectsFilter = Readonly<Partial<Pick<IProject, 'name' | 'projectType'>>>
+export type GetProjectsFilter = Readonly<
+  Partial<Pick<IRawProject, 'name' | 'projectType'>>
+>
 
 export type GetProjectsQueryOptions = Readonly<{
   limit?: number
@@ -11,27 +13,27 @@ export type GetProjectsQueryOptions = Readonly<{
 
 export type CreateProjectPayload = Readonly<
   Pick<
-    IProject,
+    IRawProject,
     | 'name'
-    | 'projectType'
     | 'requirement'
     | 'description'
-    | 'manager'
     | 'maximumOfAnnotators'
     | 'annotationConfig'
+    | 'projectType'
+    | 'manager'
   >
 >
 
 export type UpdateProjectPayload = Readonly<
   Partial<
     Pick<
-      IProject,
+      IRawProject,
       | 'name'
-      | 'projectType'
       | 'requirement'
       | 'description'
       | 'maximumOfAnnotators'
       | 'annotationConfig'
+      | 'projectType'
     >
   >
 >
