@@ -1,13 +1,25 @@
 import Joi from 'joi'
 
+import { stringId } from '@src/helpers/validation.helper'
+
+// schema
 export const projectTypeSchema = {
-  name: Joi.string().label('Name'),
+  name: Joi.string(),
 }
 
-export const createProjectTypePayload = Joi.object({
-  name: projectTypeSchema.name.required(),
-}).required()
+// validations
+export const getProjectTypeById = {
+  projectTypeId: stringId.required(),
+}
 
-export const updateProjectTypePayload = Joi.object({
-  name: projectTypeSchema.name,
-}).required()
+export const createProjectType = {
+  payload: Joi.object({
+    name: projectTypeSchema.name.required(),
+  }).required(),
+}
+
+export const updateProjectType = {
+  payload: Joi.object({
+    name: projectTypeSchema.name,
+  }).required(),
+}

@@ -1,36 +1,36 @@
 import { inject, injectable } from 'inversify'
 
-import { IProjectType, Project, ProjectType } from '@src/models'
+import { IProjectModel, IProjectType, IProjectTypeModel } from '@src/models'
 import { ProjectTypeDocument } from '@src/types'
-import { ApiError, validate } from '@src/utils'
 import { projectTypeValidation as validation } from './validations'
 import { TYPES } from '@src/constants'
-import { StatusCodes } from 'http-status-codes'
-import { IProjectService } from './project.service.interface'
 import { IProjectTypeService } from './project-type.service.interface'
-import { customId } from './validations/custom.validation'
+import { NotAllowedException } from './exceptions'
+import { validate } from '@src/helpers'
 
 @injectable()
 export class ProjectTypeService implements IProjectTypeService {
-  constructor(@inject(TYPES.PROJECT_SERVICE) protected projectService: IProjectService) {}
+  constructor(
+    @inject(TYPES.PROJECT_TYPE_MODEL) private ProjectType: IProjectTypeModel,
+    @inject(TYPES.PROJECT_MODEL) private Project: IProjectModel,
+  ) {}
 
   async getProjectTypeById(projectTypeId: string): Promise<ProjectTypeDocument | null> {
-    if (customId.required().validate(projectTypeId).error) {
-      throw new ApiError(400, 'Project type id is invalid')
-    }
-    return await ProjectType.findById(projectTypeId)
+    validate(projectTypeId, validation.getProjectTypeById.projectTypeId)
+
+    return await this.ProjectType.findById(projectTypeId)
   }
 
   async getAllProjectTypes(): Promise<ProjectTypeDocument[]> {
-    return await ProjectType.find()
+    return await this.ProjectType.find()
   }
 
   async createProjectType(
     payload: Readonly<Pick<IProjectType, 'name'>>,
   ): Promise<ProjectTypeDocument> {
-    validate(payload, validation.createProjectTypePayload)
+    validate(payload, validation.createProjectType.payload)
 
-    const projectType = await ProjectType.create(payload)
+    const projectType = await this.ProjectType.create(payload)
 
     return projectType
   }
@@ -39,7 +39,7 @@ export class ProjectTypeService implements IProjectTypeService {
     projectType: ProjectTypeDocument,
     payload: Readonly<Partial<Pick<IProjectType, 'name'>>>,
   ): Promise<void> {
-    validate(payload, validation.updateProjectTypePayload)
+    validate(payload, validation.updateProjectType.payload)
 
     Object.assign(projectType, payload)
 
@@ -47,14 +47,13 @@ export class ProjectTypeService implements IProjectTypeService {
   }
 
   async deleteProjectType(projectType: ProjectTypeDocument): Promise<void> {
-    const projectCount = await Project.countDocuments({
+    const projectCount = await this.Project.countDocuments({
       projectType: projectType._id,
     })
     if (projectCount > 0) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Cannot delete project type because it has projects',
-      )
+      throw new NotAllowedException('Cannot delete project that has projects', {
+        type: 'delete-not-empty-project-type',
+      })
     }
 
     await projectType.deleteOne()

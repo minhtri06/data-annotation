@@ -25,6 +25,18 @@ import {
 } from '../controllers'
 import { IUploadMiddleware, UploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../constants'
+import {
+  IProjectModel,
+  IProjectTypeModel,
+  ISampleModel,
+  ITokenModel,
+  IUserModel,
+  Project,
+  ProjectType,
+  Sample,
+  Token,
+  User,
+} from '@src/models'
 
 const container = new Container()
 
@@ -52,6 +64,13 @@ container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
 // bind middlewares
 container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddleware)
 container.bind<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE).to(UploadMiddleware)
+
+// bind models
+container.bind<IProjectTypeModel>(TYPES.PROJECT_TYPE_MODEL).toConstantValue(ProjectType)
+container.bind<IProjectModel>(TYPES.PROJECT_MODEL).toConstantValue(Project)
+container.bind<ISampleModel>(TYPES.SAMPLE_MODEL).toConstantValue(Sample)
+container.bind<ITokenModel>(TYPES.TOKEN_MODEL).toConstantValue(Token)
+container.bind<IUserModel>(TYPES.USER_MODEL).toConstantValue(User)
 
 // register controllers
 authControllerFactory(container)

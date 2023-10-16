@@ -1,17 +1,16 @@
 import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { controller, httpGet, httpPatch, httpPut } from 'inversify-express-utils'
-import createHttpError from 'http-errors'
 
-import { IGeneralMiddleware } from '../middlewares'
-import { IUserService } from '../services'
-import { CustomRequest, EmptyObject } from '../types'
-import { IUploadMiddleware } from '../middlewares/upload.middleware'
-import { TYPES } from '../constants'
-import { ApiError } from '../utils'
+import { IGeneralMiddleware } from '@src/middlewares'
+import { IUserService } from '@src/services'
+import { CustomRequest, EmptyObject } from '@src/types'
+import { IUploadMiddleware } from '@src/middlewares/upload.middleware'
+import { TYPES } from '@src/constants'
 import { StatusCodes } from 'http-status-codes'
 import { meRequestValidation as validation } from './request-validations'
 import { UpdateMyProfile } from './request-schemas'
+import { Exception, UnauthorizedException } from '@src/services/exceptions'
 
 export const meControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -24,7 +23,7 @@ export const meControllerFactory = (container: Container) => {
     @httpGet('/', generalMiddleware.auth())
     async getMyProfile(req: CustomRequest<EmptyObject>, res: Response) {
       if (!req.user) {
-        throw createHttpError.Unauthorized('Unauthorized')
+        throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
       const me = await this.userService.getUserById(req.user._id)
       if (!me) {
@@ -40,11 +39,11 @@ export const meControllerFactory = (container: Container) => {
     )
     async updateMyProfile(req: CustomRequest<UpdateMyProfile>, res: Response) {
       if (!req.user) {
-        throw createHttpError.Unauthorized('Unauthorized')
+        throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
       const me = await this.userService.getUserById(req.user._id)
       if (!me) {
-        return res.status(404).json({ message: 'User not found' })
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
       }
       await this.userService.updateUser(me, req.body)
       return res.status(StatusCodes.OK).json({ me })
@@ -57,10 +56,10 @@ export const meControllerFactory = (container: Container) => {
     )
     async updateMyAvatar(req: CustomRequest, res: Response) {
       if (!req.user) {
-        throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
+        throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
       if (!req.file) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, 'Avatar is required')
+        throw new Exception('Missing file', { isOperational: false })
       }
       const user = await this.userService.getUserById(req.user._id)
       if (!user) {

@@ -2,7 +2,7 @@ import './configs/module-alias.config'
 
 import setup from './setup'
 import ENV_CONFIG from './configs/env.config'
-import { connectMongoDb, redisClient } from './helpers'
+import { connectMongoDb, redisClient } from './db'
 
 const start = async () => {
   try {

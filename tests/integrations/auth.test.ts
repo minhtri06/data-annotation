@@ -81,7 +81,7 @@ describe('Auth routes', () => {
     })
   })
 
-  describe('POST /api/v1/refresh-tokens', () => {
+  describe('POST /api/v1/auth/refresh-tokens', () => {
     const envConfig = setupTestEnv()
 
     it('should return 200 (ok) and new auth tokens if provided tokens is valid', async () => {

@@ -3,7 +3,9 @@ import Joi from 'joi'
 import { customId } from './custom.validation'
 import { PROJECT_STATUS } from '@src/constants'
 import { querySchema } from './query.validation'
+import { stringId } from '@src/helpers'
 
+// schema
 export const projectSchema = {
   name: Joi.string(),
 
@@ -66,82 +68,91 @@ export const getProjectsQueryOptions = Joi.object({
 const { annotationConfig } = projectSchema
 const { individualTextConfigs } = annotationConfig
 
-export const createProjectPayload = Joi.object({
-  name: projectSchema.name.required(),
+// validations
+export const getProjectById = {
+  projectId: stringId.required(),
+}
 
-  projectType: projectSchema.projectType.required(),
+export const createProject = {
+  payload: Joi.object({
+    name: projectSchema.name.required(),
 
-  requirement: projectSchema.requirement.required(),
+    projectType: projectSchema.projectType.required(),
 
-  description: projectSchema.description,
+    requirement: projectSchema.requirement.required(),
 
-  manager: projectSchema.manager.required(),
+    description: projectSchema.description,
 
-  maximumOfAnnotators: projectSchema.maximumOfAnnotators.required(),
+    manager: projectSchema.manager.required(),
 
-  annotationConfig: Joi.object({
-    hasLabelSets: annotationConfig.hasLabelSets.required(),
-    labelSets: Joi.array()
-      .items({
-        isMultiSelected: annotationConfig.labelSets.isMultiSelected.required(),
-        labels: annotationConfig.labelSets.labels.required(),
-      })
-      .required(),
+    maximumOfAnnotators: projectSchema.maximumOfAnnotators.required(),
 
-    hasGeneratedTexts: annotationConfig.hasGeneratedTexts.required(),
+    annotationConfig: Joi.object({
+      hasLabelSets: annotationConfig.hasLabelSets.required(),
+      labelSets: Joi.array()
+        .items({
+          isMultiSelected: annotationConfig.labelSets.isMultiSelected.required(),
+          labels: annotationConfig.labelSets.labels.required(),
+        })
+        .required(),
 
-    individualTextConfigs: Joi.array()
-      .items({
-        hasLabelSets: individualTextConfigs.hasLabelSets.required(),
-        labelSets: Joi.array()
-          .items({
-            isMultiSelected: individualTextConfigs.labelSets.isMultiSelected.required(),
-            labels: individualTextConfigs.labelSets.labels.required(),
-          })
-          .required(),
+      hasGeneratedTexts: annotationConfig.hasGeneratedTexts.required(),
 
-        hasInlineLabels: individualTextConfigs.hasInlineLabels.required(),
-        inlineLabels: individualTextConfigs.inlineLabels.required(),
-      })
-      .required(),
+      individualTextConfigs: Joi.array()
+        .items({
+          hasLabelSets: individualTextConfigs.hasLabelSets.required(),
+          labelSets: Joi.array()
+            .items({
+              isMultiSelected: individualTextConfigs.labelSets.isMultiSelected.required(),
+              labels: individualTextConfigs.labelSets.labels.required(),
+            })
+            .required(),
+
+          hasInlineLabels: individualTextConfigs.hasInlineLabels.required(),
+          inlineLabels: individualTextConfigs.inlineLabels.required(),
+        })
+        .required(),
+    }).required(),
   }).required(),
-}).required()
+}
 
-export const updateProjectPayload = Joi.object({
-  name: projectSchema.name,
+export const updateProject = {
+  payload: Joi.object({
+    name: projectSchema.name,
 
-  projectType: projectSchema.projectType,
+    projectType: projectSchema.projectType,
 
-  requirement: projectSchema.requirement,
+    requirement: projectSchema.requirement,
 
-  description: projectSchema.description,
+    description: projectSchema.description,
 
-  maximumOfAnnotators: projectSchema.maximumOfAnnotators,
+    maximumOfAnnotators: projectSchema.maximumOfAnnotators,
 
-  annotationConfig: Joi.object({
-    hasLabelSets: annotationConfig.hasLabelSets.required(),
-    labelSets: Joi.array()
-      .items({
-        isMultiSelected: annotationConfig.labelSets.isMultiSelected.required(),
-        labels: annotationConfig.labelSets.labels.required(),
-      })
-      .required(),
+    annotationConfig: Joi.object({
+      hasLabelSets: annotationConfig.hasLabelSets.required(),
+      labelSets: Joi.array()
+        .items({
+          isMultiSelected: annotationConfig.labelSets.isMultiSelected.required(),
+          labels: annotationConfig.labelSets.labels.required(),
+        })
+        .required(),
 
-    hasGeneratedTexts: annotationConfig.hasGeneratedTexts.required(),
+      hasGeneratedTexts: annotationConfig.hasGeneratedTexts.required(),
 
-    individualTextConfigs: Joi.array()
-      .items({
-        hasLabelSets: individualTextConfigs.hasLabelSets.required(),
-        labelSets: Joi.array()
-          .items({
-            isMultiSelected: individualTextConfigs.labelSets.isMultiSelected.required(),
-            labels: individualTextConfigs.labelSets.labels.required(),
-          })
-          .required(),
+      individualTextConfigs: Joi.array()
+        .items({
+          hasLabelSets: individualTextConfigs.hasLabelSets.required(),
+          labelSets: Joi.array()
+            .items({
+              isMultiSelected: individualTextConfigs.labelSets.isMultiSelected.required(),
+              labels: individualTextConfigs.labelSets.labels.required(),
+            })
+            .required(),
 
-        hasInlineLabels: individualTextConfigs.hasInlineLabels.required(),
-        inlineLabels: individualTextConfigs.inlineLabels.required(),
-      })
-      .required(),
-  }).required(),
-})
+          hasInlineLabels: individualTextConfigs.hasInlineLabels.required(),
+          inlineLabels: individualTextConfigs.inlineLabels.required(),
+        })
+        .required(),
+    }).required(),
+  }),
+}

@@ -3,7 +3,9 @@ import Joi from 'joi'
 import { ROLES } from '@src/configs/role.config'
 import { customId } from './custom.validation'
 import { USER_WORK_STATUS } from '@src/constants'
+import { stringId } from '@src/helpers/validation.helper'
 
+// schema
 export const userSchema = {
   _id: customId,
 
@@ -26,6 +28,11 @@ export const userSchema = {
   avatar: Joi.string(),
 
   workStatus: Joi.string().valid(...Object.values(USER_WORK_STATUS)),
+}
+
+// validations
+export const getUserById = {
+  userId: stringId.required(),
 }
 
 export const createUserPayload = Joi.object({

@@ -1,10 +1,10 @@
-import createHttpError from 'http-errors'
 import multer, { Multer } from 'multer'
 import cloudinary, { imageStorage } from '../configs/cloudinary.config'
 import { injectable } from 'inversify'
 
 import { StorageService } from './storage.service'
 import { IStorageService } from './storage.service.interface'
+import { ValidationException } from './exceptions'
 
 @injectable()
 export class ImageStorageService extends StorageService implements IStorageService {
@@ -19,7 +19,7 @@ export class ImageStorageService extends StorageService implements IStorageServi
       fileFilter: (req, file, cb) => {
         const [type] = file.mimetype.split('/')
         if (type !== 'image') {
-          cb(createHttpError.BadRequest('Invalid image'))
+          cb(new ValidationException('Invalid image', { type: 'invalid-image-upload' }))
         }
         cb(null, true)
       },

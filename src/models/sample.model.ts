@@ -1,6 +1,6 @@
 import { Model, Schema, Types, model } from 'mongoose'
 
-import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
 import { SampleDocument } from '@src/types'
 
@@ -175,5 +175,6 @@ const sampleSchema = new Schema<ISample>(
 
 sampleSchema.plugin(toJSONPlugin)
 sampleSchema.plugin(paginatePlugin)
+sampleSchema.plugin(handleErrorPlugin)
 
 export const Sample = model<ISample, ISampleModel>(MODEL_NAMES.SAMPLE, sampleSchema)

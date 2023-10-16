@@ -60,8 +60,11 @@ export const projectTypeControllerFactory = (container: Container) => {
         req.params.projectTypeId,
       )
       if (!projectType) {
-        return res.status(404).json({ message: 'Project type not found' })
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Project type not found' })
       }
+
       await this.projectTypeService.updateProjectType(projectType, req.body)
       return res.status(StatusCodes.OK).json({ projectType })
     }
@@ -79,8 +82,11 @@ export const projectTypeControllerFactory = (container: Container) => {
         req.params.projectTypeId,
       )
       if (!projectType) {
-        return res.status(404).json({ message: 'Project type not found' })
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Project type not found' })
       }
+
       await this.projectTypeService.deleteProjectType(projectType)
       return res.status(StatusCodes.NO_CONTENT).send()
     }

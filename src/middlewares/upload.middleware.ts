@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify'
 import { RequestHandler } from 'express'
-import createHttpError from 'http-errors'
 
 import { IStorageService } from '@src/services'
 import { TYPES } from '../constants'
+import { StatusCodes } from 'http-status-codes'
 
 export interface IUploadMiddleware {
   uploadSingle(
@@ -29,9 +29,11 @@ export class UploadMiddleware implements IUploadMiddleware {
     return (async (req, res, next) => {
       await storage.uploadSingle(req, fieldName)
       if (required && !req.file) {
-        next(createHttpError.BadRequest(`'${fieldName}' field is required in form-data`))
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: `'${fieldName}' field is required in form-data` })
       }
-      next()
+      return next()
     }) as RequestHandler
   }
 }

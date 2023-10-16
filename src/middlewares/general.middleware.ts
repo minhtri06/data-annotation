@@ -1,7 +1,5 @@
 import { ErrorRequestHandler, RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import createHttpError from 'http-errors'
-import { Error as MongooseError } from 'mongoose'
 import jwt from 'jsonwebtoken'
 import Joi from 'joi'
 import { injectable } from 'inversify'
@@ -9,8 +7,16 @@ import { injectable } from 'inversify'
 import envConfig from '@src/configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
-import { ApiError, camelCaseToNormalText } from '../utils'
+import { omitFields } from '@src/utils'
 import { RequestSchema } from '../controllers/request-schemas'
+import ENV_CONFIG from '@src/configs/env.config'
+import {
+  Exception,
+  ForbiddenException,
+  UnauthorizedException,
+  ValidationException,
+} from '@src/services/exceptions'
+import { exceptionToStatusCode } from '@src/helpers'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -35,30 +41,37 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     next,
   ) => {
-    if (err instanceof createHttpError.HttpError) {
-      return res
-        .status(err.statusCode)
-        .json({ message: err.message, type: err.headers?.type })
-    }
-    if (err instanceof ApiError) {
-      const { statusCode, type, message } = err
-      return res.status(statusCode).json({ message, type })
-    }
+    const isOnProduction = ENV_CONFIG.NODE_ENV === 'prod'
 
-    if (err instanceof MongooseError.ValidationError) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        // Show message of the first error
-        message: err.errors[Object.keys(err.errors)[0]].message,
-        type: 'validation-error',
-      })
-    }
+    if (err instanceof Exception) {
+      if (isOnProduction) {
+        const statusCode = exceptionToStatusCode(err)
+        const response = omitFields(err, 'name', 'isOperational', 'stack')
 
-    if (err.code === 11000 && err.keyValue) {
-      const { keyValue } = err
-      const message = Object.keys(keyValue)
-        .map((key) => `${camelCaseToNormalText(key)} '${keyValue[key]}' already exists`)
-        .join(', ')
-      return res.status(StatusCodes.BAD_REQUEST).json({ message })
+        if (err instanceof UnauthorizedException) {
+          return res.status(statusCode).json({ message: 'Unauthorized' })
+        }
+
+        if (!err.isOperational) {
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ message: 'Internal server error' })
+        }
+
+        return res.status(statusCode).json(response)
+      } else {
+        const statusCode = exceptionToStatusCode(err)
+        const response = omitFields(err, 'name', 'isOperational')
+
+        if (!err.isOperational) {
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json(isOnProduction ? { message: 'Internal server error' } : response)
+        }
+
+        response.stack = undefined
+        return res.status(statusCode).json(response)
+      }
     }
 
     if (envConfig.NODE_ENV !== 'prod') {
@@ -79,7 +92,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     required?: boolean
   } = {}): ReqHandler => {
     return (req, res, next) => {
-      const unauthorizedError = createHttpError.Unauthorized('Unauthorized!')
+      const unauthorizedError = new UnauthorizedException('Unauthorized')
 
       let accessToken = req.headers['authorization']
       accessToken = accessToken?.split(' ')[1]
@@ -108,7 +121,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         if (
           !requiredPrivileges.every((privilege) => userPrivileges.includes(privilege))
         ) {
-          next(createHttpError.Forbidden('Forbidden'))
+          next(new ForbiddenException('Forbidden'))
         }
       }
 
@@ -131,12 +144,15 @@ export class GeneralMiddleware implements IGeneralMiddleware {
 
     return (req, res, next) => {
       const validation = validationSchema.validate(req, {
-        errors: { wrap: { label: '' }, label: 'key' },
+        errors: { wrap: { label: "'" }, label: 'path' },
       })
       if (validation.error) {
         return next(
-          new ApiError(StatusCodes.BAD_REQUEST, validation.error.message, {
-            type: 'validation-error',
+          new ValidationException(validation.error.message, {
+            details: validation.error.details.map((detail) => ({
+              message: detail.message,
+              path: detail.context?.label as string,
+            })),
           }),
         )
       }

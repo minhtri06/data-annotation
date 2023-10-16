@@ -11,4 +11,11 @@ export const TYPES = {
   // middlewares
   GENERAL_MIDDLEWARE: Symbol('general-middleware'),
   UPLOAD_MIDDLEWARE: Symbol('upload-middleware'),
+
+  // models
+  PROJECT_TYPE_MODEL: Symbol('project-type-model'),
+  PROJECT_MODEL: Symbol('project-model'),
+  SAMPLE_MODEL: Symbol('sample-model'),
+  TOKEN_MODEL: Symbol('token-model'),
+  USER_MODEL: Symbol('user-model'),
 } as const

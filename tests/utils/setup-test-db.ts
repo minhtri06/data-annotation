@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-import { connectMongoDb, redisClient } from '@src/helpers'
+import { connectMongoDb, redisClient } from '@src/db'
 
 export const setupTestDb = () => {
   beforeAll(async () => {

@@ -13,7 +13,7 @@ import ENV_CONFIG from './configs/env.config'
 import { IGeneralMiddleware } from './middlewares'
 import container from './configs/inversify.config'
 import { TYPES } from './constants'
-import { redisClient } from './helpers'
+import { redisClient } from './db'
 
 const setup = () => {
   // init inversify server

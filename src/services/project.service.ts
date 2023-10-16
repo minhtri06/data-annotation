@@ -1,4 +1,4 @@
-import { IRawProject, Project } from '@src/models'
+import { IProjectModel, IRawProject } from '@src/models'
 import {
   CreateProjectPayload,
   GetProjectsFilter,
@@ -6,21 +6,20 @@ import {
   UpdateProjectPayload,
 } from './types'
 import { PaginateResult, ProjectDocument } from '@src/types'
-import { ApiError, validate } from '@src/utils'
 import { projectValidation as validation } from './validations'
-import { StatusCodes } from 'http-status-codes'
-import { PROJECT_STATUS } from '@src/constants'
+import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { IProjectService } from './project.service.interface'
-import { injectable } from 'inversify'
-import { customId } from './validations/custom.validation'
+import { inject, injectable } from 'inversify'
+import { validate } from '@src/helpers'
+import { Exception, ValidationException } from './exceptions'
 
 @injectable()
 export class ProjectService implements IProjectService {
+  constructor(@inject(TYPES.PROJECT_MODEL) private Project: IProjectModel) {}
+
   async getProjectById(projectId: string): Promise<ProjectDocument | null> {
-    if (customId.required().validate(projectId).error) {
-      throw new ApiError(400, 'Project id is invalid')
-    }
-    return Project.findById(projectId)
+    validate(projectId, validation.getProjectById.projectId)
+    return this.Project.findById(projectId)
   }
 
   async getProjects(
@@ -35,7 +34,7 @@ export class ProjectService implements IProjectService {
       _options.sort = '-createdAt'
     }
 
-    return Project.paginate(filter, _options)
+    return this.Project.paginate(filter, _options)
   }
 
   protected validateAnnotationConfig(
@@ -48,14 +47,13 @@ export class ProjectService implements IProjectService {
         return !individualTextConfig.hasLabelSets && !individualTextConfig.hasInlineLabels
       })
     ) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Project has no annotation config', {
-        type: 'has-no-annotation',
+      throw new ValidationException('Project has no annotation config', {
+        type: 'project-has-no-annotation',
       })
     }
 
     if (annotationConfig.hasLabelSets && annotationConfig.labelSets.length === 0) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
+      throw new ValidationException(
         'annotationConfig.hasLabelSets is tru but annotationConfig.labelSets is empty',
         { type: 'conflict-annotation-config' },
       )
@@ -66,8 +64,7 @@ export class ProjectService implements IProjectService {
         individualTextConfig.hasLabelSets &&
         individualTextConfig.labelSets.length === 0
       ) {
-        throw new ApiError(
-          StatusCodes.BAD_REQUEST,
+        throw new ValidationException(
           `At annotationConfig.individualTextConfig[${i}], hasLabelSets is true but labelSets is empty`,
           { type: 'conflict-annotation-config' },
         )
@@ -76,8 +73,7 @@ export class ProjectService implements IProjectService {
         individualTextConfig.inlineLabels &&
         individualTextConfig.inlineLabels.length === 0
       ) {
-        throw new ApiError(
-          StatusCodes.BAD_REQUEST,
+        throw new ValidationException(
           'At annotationConfig.individualTextConfig[${i}], inlineLabels is true but inlineLabels is empty',
           { type: 'conflict-annotation-config' },
         )
@@ -86,11 +82,11 @@ export class ProjectService implements IProjectService {
   }
 
   async createProject(payload: CreateProjectPayload): Promise<ProjectDocument> {
-    validate(payload, validation.createProjectPayload)
+    validate(payload, validation.createProject.payload)
 
     this.validateAnnotationConfig(payload.annotationConfig)
 
-    const project = new Project({
+    const project = new this.Project({
       ...payload,
       status: PROJECT_STATUS.SETTING_UP,
       numberOfSamples: 0,
@@ -105,15 +101,11 @@ export class ProjectService implements IProjectService {
     project: ProjectDocument,
     payload: UpdateProjectPayload,
   ): Promise<void> {
-    validate(payload, validation.updateProjectPayload)
-
     if (project.isModified()) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        'Project is modified before update',
-        { type: 'project-modified-before-update' },
-      )
+      throw new Exception('Project is modified before call update')
     }
+
+    validate(payload, validation.updateProject.payload)
 
     if (payload.annotationConfig) {
       this.validateAnnotationConfig(payload.annotationConfig)

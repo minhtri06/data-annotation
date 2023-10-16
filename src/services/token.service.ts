@@ -1,17 +1,18 @@
-import createHttpError from 'http-errors'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 
 import { DocumentId, JwtPayload, TokenDocument, UserDocument } from '@src/types'
 import ENV_CONFIG from '@src/configs/env.config'
-import { IToken, Token } from '@src/models'
+import { IToken, ITokenModel } from '@src/models'
 import { ITokenService } from './token.service.interface'
-import { ApiError } from '@src/utils'
-import { TOKEN_TYPES } from '@src/constants'
+import { TOKEN_TYPES, TYPES } from '@src/constants'
+import { UnauthorizedException } from './exceptions/unauthorized.exception'
 
 @injectable()
 export class TokenService implements ITokenService {
+  constructor(@inject(TYPES.TOKEN_MODEL) private Token: ITokenModel) {}
+
   generateToken(
     user: UserDocument,
     expires: Moment,
@@ -37,7 +38,7 @@ export class TokenService implements ITokenService {
     const expires = moment().add(ENV_CONFIG.JWT_REFRESH_EXPIRATION_DAYS, 'days')
     const token = this.generateToken(user, expires, 'refresh-token')
 
-    return await Token.create({
+    return await this.Token.create({
       body: token,
       user: user._id,
       type: 'refresh-token',
@@ -60,10 +61,7 @@ export class TokenService implements ITokenService {
   }
 
   async getRefreshTokenByBody(body: string): Promise<TokenDocument | null> {
-    if (typeof body !== 'string') {
-      throw new ApiError(400, 'Invalid refresh body')
-    }
-    return await Token.findOne({ body, type: TOKEN_TYPES.REFRESH_TOKEN })
+    return await this.Token.findOne({ body, type: TOKEN_TYPES.REFRESH_TOKEN })
   }
 
   verifyToken(
@@ -74,12 +72,16 @@ export class TokenService implements ITokenService {
     try {
       const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
       if (payload.type !== type) {
-        throw createHttpError.Unauthorized(`Invalid ${type} token`)
+        throw new UnauthorizedException(
+          ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'Invalid token type',
+        )
       }
       return payload
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {
-        throw createHttpError.Unauthorized(error.message)
+        throw new UnauthorizedException(
+          ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : error.message,
+        )
       }
       throw error
     }
@@ -87,7 +89,7 @@ export class TokenService implements ITokenService {
 
   async blacklistAUser(userId: DocumentId): Promise<void> {
     const tokenType: IToken['type'] = 'refresh-token'
-    await Token.updateMany(
+    await this.Token.updateMany(
       {
         user: userId,
         type: tokenType,

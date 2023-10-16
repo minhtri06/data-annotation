@@ -1,6 +1,6 @@
 import { Model, Schema, model } from 'mongoose'
 
-import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES } from '@src/constants'
 
 export interface IProjectType {
@@ -30,6 +30,7 @@ const projectTypeSchema = new Schema<IProjectType, IProjectTypeModel>(
 
 projectTypeSchema.plugin(toJSONPlugin)
 projectTypeSchema.plugin(paginatePlugin)
+projectTypeSchema.plugin(handleErrorPlugin)
 
 export const ProjectType = model<IProjectType, IProjectTypeModel>(
   MODEL_NAMES.PROJECT_TYPE,

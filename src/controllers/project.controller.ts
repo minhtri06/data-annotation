@@ -9,7 +9,6 @@ import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { CustomRequest } from '@src/types'
 import { projectRequestValidation as validation } from './request-validations'
 import { CreateProject } from './request-schemas'
-import { ApiError } from '@src/utils'
 import { StatusCodes } from 'http-status-codes'
 
 export const projectControllerFactory = (container: Container) => {
@@ -29,7 +28,7 @@ export const projectControllerFactory = (container: Container) => {
     )
     async createProject(req: CustomRequest<CreateProject>, res: Response) {
       if (!req.user) {
-        throw new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized')
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Unauthorized' })
       }
 
       const payload: typeof req.body & { manager?: string } = { ...req.body }

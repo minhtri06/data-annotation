@@ -8,7 +8,7 @@ import { CustomRequest } from '@src/types'
 import { IGeneralMiddleware } from '@src/middlewares'
 import { Login, Logout, RefreshTokens } from './request-schemas'
 import { authRequestValidation as validation } from './request-validations'
-import { TYPES } from '../constants'
+import { TYPES } from '@src/constants'
 
 export const authControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -25,7 +25,9 @@ export const authControllerFactory = (container: Container) => {
     async login(req: CustomRequest<Login>, res: Response) {
       const { username, password } = req.body
       const { user, authTokens } = await this.authService.login(username, password)
-      return res.status(200).json({ message: 'Login successfully', user, authTokens })
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: 'Login successfully', user, authTokens })
     }
 
     @httpPost('/logout', generalMiddleware.validate(validation.logout))

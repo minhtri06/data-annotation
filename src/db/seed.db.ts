@@ -1,12 +1,12 @@
-import '../configs/module-alias.config'
+import '@src/configs/module-alias.config'
 import 'reflect-metadata'
 
 import mongoose from 'mongoose'
-import { connectMongoDb } from './connect-mongodb'
+import { connectMongoDb } from './mongo.db'
 
-import container from '../configs/inversify.config'
-import { IUserService } from '../services/interfaces'
-import { TYPES } from '../constants'
+import container from '@src/configs/inversify.config'
+import { IUserService } from '@src/services'
+import { TYPES } from '@src/constants'
 
 const seedUser = async () => {
   const userService = container.get<IUserService>(TYPES.USER_SERVICE)

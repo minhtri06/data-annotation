@@ -2,25 +2,29 @@ import { FilterQuery } from 'mongoose'
 import { inject, injectable } from 'inversify'
 import bcrypt from 'bcryptjs'
 
-import { QueryOptions, UserDocument } from '../types'
-import { TYPES, USER_WORK_STATUS } from '../constants'
-import { IUser, User } from '../models'
-import { ApiError, validate } from '@src/utils'
+import { QueryOptions, UserDocument } from '@src/types'
+import { TYPES, USER_WORK_STATUS } from '@src/constants'
+import { IUser, IUserModel } from '@src/models'
+import { validate } from '@src/helpers'
 import { userValidation as validation } from './validations'
 import { CreateUserPayload, UpdateUserPayload } from './types'
 import { IUserService } from './user.service.interface'
 import { IStorageService } from './storage.service.interface'
-import { StatusCodes } from 'http-status-codes'
-import { customId } from './validations/custom.validation'
 
 @injectable()
 export class UserService implements IUserService {
   constructor(
     @inject(TYPES.IMAGE_STORAGE_SERVICE) private imageStorageService: IStorageService,
+    @inject(TYPES.USER_MODEL) private User: IUserModel,
   ) {}
 
   async comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean> {
     return await bcrypt.compare(rawPassword, hashedPassword)
+  }
+
+  async getUserById(userId: string): Promise<UserDocument | null> {
+    validate(userId, validation.getUserById.userId)
+    return await this.User.findById(userId)
   }
 
   async getUsers(
@@ -37,27 +41,17 @@ export class UserService implements IUserService {
     }
     filter.workStatus = queryFilter.workStatus || USER_WORK_STATUS.ON
 
-    return User.paginate(filter, queryOptions)
-  }
-
-  async getUserById(userId: string): Promise<UserDocument | null> {
-    if (customId.required().validate(userId).error) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user id')
-    }
-    return await User.findById(userId)
+    return this.User.paginate(filter, queryOptions)
   }
 
   async getUserByUserName(username: string): Promise<UserDocument | null> {
-    if (typeof username !== 'string') {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid username')
-    }
-    return await User.findOne({ username })
+    return await this.User.findOne({ username })
   }
 
   async createUser(payload: CreateUserPayload): Promise<UserDocument> {
     validate(payload, validation.createUserPayload)
 
-    const user = new User(payload)
+    const user = new this.User(payload)
 
     return await user.save()
   }

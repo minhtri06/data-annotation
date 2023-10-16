@@ -50,9 +50,11 @@ export const userControllerFactory = (container: Container) => {
     )
     async getUserById(req: CustomRequest<GetUserById>, res: Response) {
       const user = await this.userService.getUserById(req.params.userId)
+
       if (!user) {
         return res.status(404).json({ message: 'User not found' })
       }
+
       return res.status(StatusCodes.OK).json({ user })
     }
 
@@ -63,6 +65,7 @@ export const userControllerFactory = (container: Container) => {
     )
     async updateUserById(req: CustomRequest<UpdateUserById>, res: Response) {
       const updatedUser = await this.userService.getUserById(req.params.userId)
+
       if (!updatedUser) {
         return res.status(404).json({ message: 'User not found' })
       }

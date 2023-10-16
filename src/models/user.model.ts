@@ -1,8 +1,8 @@
 import { Model, Schema, model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
-import ROLE_PRIVILEGES from '../configs/role.config'
-import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import ROLE_PRIVILEGES from '@src/configs/role.config'
+import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, USER_WORK_STATUS } from '../constants'
 import { Types } from 'mongoose'
 
@@ -130,6 +130,7 @@ const userSchema = new Schema<IUser>(
 
 userSchema.plugin(toJSONPlugin)
 userSchema.plugin(paginatePlugin)
+userSchema.plugin(handleErrorPlugin)
 
 userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 8)

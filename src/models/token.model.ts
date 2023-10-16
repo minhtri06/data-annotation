@@ -1,7 +1,7 @@
 import { Model, Schema, Types, model } from 'mongoose'
 
 import { MODEL_NAMES, TOKEN_TYPES } from '@src/constants'
-import { toJSONPlugin } from './plugins'
+import { toJSONPlugin, handleErrorPlugin } from './plugins'
 
 export interface IToken {
   _id: Types.ObjectId
@@ -65,5 +65,6 @@ const tokenSchema = new Schema<IToken>(
 )
 
 tokenSchema.plugin(toJSONPlugin)
+tokenSchema.plugin(handleErrorPlugin)
 
 export const Token = model<IToken, ITokenModel>(MODEL_NAMES.TOKEN, tokenSchema)

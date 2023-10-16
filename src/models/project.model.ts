@@ -1,6 +1,6 @@
 import { Model, Schema, Types, model } from 'mongoose'
 
-import { Paginate, paginatePlugin, toJSONPlugin } from './plugins'
+import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
 import { ProjectDocument } from '@src/types'
 
@@ -282,5 +282,6 @@ projectSchema.index({ name: 1, projectType: 1 }, { unique: true })
 
 projectSchema.plugin(toJSONPlugin)
 projectSchema.plugin(paginatePlugin)
+projectSchema.plugin(handleErrorPlugin)
 
 export const Project = model<IProject, IProjectModel>(MODEL_NAMES.PROJECT, projectSchema)
