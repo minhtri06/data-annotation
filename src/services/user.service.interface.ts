@@ -1,12 +1,11 @@
 import { QueryOptions, UserDocument } from '@src/types'
-import { CreateUserPayload, UpdateUserPayload } from './types'
-import { IUser } from '@src/models'
+import { IRawUser } from '@src/models'
 
 export interface IUserService {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
 
   getUsers(
-    queryFilter?: Partial<Pick<IUser, 'role' | 'name' | 'workStatus'>>,
+    queryFilter?: Partial<Pick<IRawUser, 'role' | 'name' | 'workStatus'>>,
     queryOptions?: QueryOptions,
   ): Promise<{ data: UserDocument[]; totalPage?: number }>
 
@@ -20,3 +19,21 @@ export interface IUserService {
 
   updateAvatar(user: UserDocument, newAvatar: string): Promise<void>
 }
+
+// * parameter types
+
+export type CreateUserPayload = Readonly<
+  Pick<
+    IRawUser,
+    'name' | 'username' | 'password' | 'role' | 'dateOfBirth' | 'phoneNumber' | 'address'
+  >
+>
+
+export type UpdateUserPayload = Readonly<
+  Partial<
+    Pick<
+      IRawUser,
+      'address' | 'dateOfBirth' | 'name' | 'password' | 'phoneNumber' | 'workStatus'
+    >
+  >
+>

@@ -1,12 +1,10 @@
 import { inject, injectable } from 'inversify'
 
-import { IProjectModel, IProjectType, IProjectTypeModel } from '@src/models'
+import { IProjectModel, IProjectTypeModel, IRawProjectType } from '@src/models'
 import { ProjectTypeDocument } from '@src/types'
-import { projectTypeValidation as validation } from './validations'
 import { TYPES } from '@src/constants'
 import { IProjectTypeService } from './project-type.service.interface'
 import { NotAllowedException } from './exceptions'
-import { validate } from '@src/helpers'
 
 @injectable()
 export class ProjectTypeService implements IProjectTypeService {
@@ -16,8 +14,6 @@ export class ProjectTypeService implements IProjectTypeService {
   ) {}
 
   async getProjectTypeById(projectTypeId: string): Promise<ProjectTypeDocument | null> {
-    validate(projectTypeId, validation.getProjectTypeById.projectTypeId)
-
     return await this.ProjectType.findById(projectTypeId)
   }
 
@@ -26,10 +22,8 @@ export class ProjectTypeService implements IProjectTypeService {
   }
 
   async createProjectType(
-    payload: Readonly<Pick<IProjectType, 'name'>>,
+    payload: Readonly<Pick<IRawProjectType, 'name'>>,
   ): Promise<ProjectTypeDocument> {
-    validate(payload, validation.createProjectType.payload)
-
     const projectType = await this.ProjectType.create(payload)
 
     return projectType
@@ -37,10 +31,8 @@ export class ProjectTypeService implements IProjectTypeService {
 
   async updateProjectType(
     projectType: ProjectTypeDocument,
-    payload: Readonly<Partial<Pick<IProjectType, 'name'>>>,
+    payload: Readonly<Partial<Pick<IRawProjectType, 'name'>>>,
   ): Promise<void> {
-    validate(payload, validation.updateProjectType.payload)
-
     Object.assign(projectType, payload)
 
     await projectType.save()

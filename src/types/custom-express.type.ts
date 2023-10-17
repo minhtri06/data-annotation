@@ -1,7 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { RequestSchema } from '../controllers/request-schemas'
 import { IUser } from '@src/models'
+
+export type RequestSchema = {
+  body?: object
+  params?: object
+  query?: object
+}
 
 export type CustomRequest<ReqSchema extends RequestSchema = RequestSchema> = Request<
   Exclude<RequestSchema['params'], undefined>,

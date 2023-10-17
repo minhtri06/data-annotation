@@ -43,7 +43,7 @@ export interface ISample {
 export interface IRawSample {
   texts: string[]
 
-  status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
+  status: string
 
   annotation: {
     labelSets:
@@ -90,7 +90,10 @@ const sampleSchema = new Schema<ISample>(
       type: [String],
       validate: function (texts: []) {
         if (texts.length === 0) {
-          throw new Error('Sample must have at least one test')
+          throw new Error('Sample must have at least one text')
+        }
+        if (texts.length > 50) {
+          throw new Error('Sample cannot have greater than 50 texts')
         }
       },
       required: true,
@@ -102,7 +105,7 @@ const sampleSchema = new Schema<ISample>(
       validate: function (status: ISample['status']) {
         const sample = this as unknown as SampleDocument
         if (sample.isNew && status !== SAMPLE_STATUS.NEW) {
-          throw new Error("Newly created sample's status must be new status")
+          throw new Error("Newly created sample's status must be 'new'")
         }
       },
       required: true,

@@ -14,12 +14,7 @@ import { IGeneralMiddleware } from '@src/middlewares'
 import { IProjectTypeService } from '@src/services'
 import { CustomRequest } from '@src/types'
 import { PRIVILEGES } from '@src/configs/role.config'
-import { projectTypeRequestValidation as validation } from './request-validations'
-import {
-  CreateProjectType,
-  DeleteProjectTypeById,
-  UpdateProjectTypeById,
-} from './request-schemas'
+import { projectTypeSchema as schema } from './schemas'
 
 export const projectTypeControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -40,9 +35,9 @@ export const projectTypeControllerFactory = (container: Container) => {
     @httpPost(
       '/',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_PROJECT_TYPES] }),
-      generalMiddleware.validate(validation.createProjectType),
+      generalMiddleware.validate(schema.createProjectType),
     )
-    async createProjectType(req: CustomRequest<CreateProjectType>, res: Response) {
+    async createProjectType(req: CustomRequest<schema.CreateProjectType>, res: Response) {
       const projectType = await this.projectTypeService.createProjectType(req.body)
       return res.status(StatusCodes.CREATED).json({ projectType })
     }
@@ -50,10 +45,10 @@ export const projectTypeControllerFactory = (container: Container) => {
     @httpPatch(
       '/:projectTypeId',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.UPDATE_PROJECT_TYPES] }),
-      generalMiddleware.validate(validation.updateProjectTypeById),
+      generalMiddleware.validate(schema.updateProjectTypeById),
     )
     async updateProjectTypeById(
-      req: CustomRequest<UpdateProjectTypeById>,
+      req: CustomRequest<schema.UpdateProjectTypeById>,
       res: Response,
     ) {
       const projectType = await this.projectTypeService.getProjectTypeById(
@@ -72,10 +67,10 @@ export const projectTypeControllerFactory = (container: Container) => {
     @httpDelete(
       '/:projectTypeId',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.DELETE_PROJECT_TYPES] }),
-      generalMiddleware.validate(validation.deleteProjectTypeById),
+      generalMiddleware.validate(schema.deleteProjectTypeById),
     )
     async deleteProjectTypeById(
-      req: CustomRequest<DeleteProjectTypeById>,
+      req: CustomRequest<schema.DeleteProjectTypeById>,
       res: Response,
     ) {
       const projectType = await this.projectTypeService.getProjectTypeById(

@@ -7,8 +7,7 @@ import { IUserService } from '../services'
 import { IGeneralMiddleware } from '../middlewares'
 import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
-import { CreateUser, GetUserById, GetUsers, UpdateUserById } from './request-schemas'
-import { userRequestValidation as validation } from './request-validations'
+import { userSchema as schema } from './schemas'
 import { TYPES } from '../constants'
 
 export const userControllerFactory = (container: Container) => {
@@ -18,12 +17,8 @@ export const userControllerFactory = (container: Container) => {
   class UserController {
     constructor(@inject(TYPES.USER_SERVICE) private userService: IUserService) {}
 
-    @httpGet(
-      '/',
-      generalMiddleware.auth(),
-      generalMiddleware.validate(validation.getUsers),
-    )
-    async getUsers(req: CustomRequest<GetUsers>, res: Response) {
+    @httpGet('/', generalMiddleware.auth(), generalMiddleware.validate(schema.getUsers))
+    async getUsers(req: CustomRequest<schema.GetUsers>, res: Response) {
       const { role, name, workStatus } = req.query
       const { limit, page, checkPaginate } = req.query
       const result = await this.userService.getUsers(
@@ -36,9 +31,9 @@ export const userControllerFactory = (container: Container) => {
     @httpPost(
       '/',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_USERS] }),
-      generalMiddleware.validate(validation.createUser),
+      generalMiddleware.validate(schema.createUser),
     )
-    async createUser(req: CustomRequest<CreateUser>, res: Response) {
+    async createUser(req: CustomRequest<schema.CreateUser>, res: Response) {
       const user = await this.userService.createUser(req.body)
       return res.status(StatusCodes.CREATED).json({ user })
     }
@@ -46,9 +41,9 @@ export const userControllerFactory = (container: Container) => {
     @httpGet(
       '/:userId',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.GET_USERS] }),
-      generalMiddleware.validate(validation.getUserById),
+      generalMiddleware.validate(schema.getUserById),
     )
-    async getUserById(req: CustomRequest<GetUserById>, res: Response) {
+    async getUserById(req: CustomRequest<schema.GetUserById>, res: Response) {
       const user = await this.userService.getUserById(req.params.userId)
 
       if (!user) {
@@ -61,9 +56,9 @@ export const userControllerFactory = (container: Container) => {
     @httpPatch(
       '/:userId',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.UPDATE_USERS] }),
-      generalMiddleware.validate(validation.updateUserById),
+      generalMiddleware.validate(schema.updateUserById),
     )
-    async updateUserById(req: CustomRequest<UpdateUserById>, res: Response) {
+    async updateUserById(req: CustomRequest<schema.UpdateUserById>, res: Response) {
       const updatedUser = await this.userService.getUserById(req.params.userId)
 
       if (!updatedUser) {

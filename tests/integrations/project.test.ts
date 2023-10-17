@@ -7,7 +7,12 @@ import supertest, { SuperTest, Test } from 'supertest'
 import { Mutable, setupTestDb } from '@tests/utils'
 import setup from '@src/setup'
 import container from '@src/configs/inversify.config'
-import { IProjectService, ITokenService, IUserService } from '@src/services'
+import {
+  CreateProjectPayload,
+  IProjectService,
+  ITokenService,
+  IUserService,
+} from '@src/services'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { UserDocument } from '@src/types'
 import {
@@ -17,7 +22,6 @@ import {
   getPrivilegedRole,
 } from '@tests/fixtures'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
-import { CreateProjectPayload } from '@src/services/types'
 import { StatusCodes } from 'http-status-codes'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)

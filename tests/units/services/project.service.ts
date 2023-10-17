@@ -5,8 +5,12 @@ import mongoose from 'mongoose'
 import container from '@src/configs/inversify.config'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import { IRawProject } from '@src/models'
-import { IProjectService, IProjectTypeService } from '@src/services'
-import { CreateProjectPayload, UpdateProjectPayload } from '@src/services/types'
+import {
+  CreateProjectPayload,
+  IProjectService,
+  IProjectTypeService,
+  UpdateProjectPayload,
+} from '@src/services'
 import { ProjectDocument, ProjectTypeDocument } from '@src/types'
 import { generateProject, generateProjectType } from '@tests/fixtures'
 import { Mutable, setupTestDb } from '@tests/utils'

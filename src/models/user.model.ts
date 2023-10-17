@@ -44,7 +44,7 @@ export interface IRawUser {
 
   password: string
 
-  role: keyof typeof ROLE_PRIVILEGES
+  role: string
 
   avatar?: string
 
@@ -54,7 +54,7 @@ export interface IRawUser {
 
   address: string
 
-  workStatus: (typeof USER_WORK_STATUS)[keyof typeof USER_WORK_STATUS]
+  workStatus: string
 
   monthlyAnnotation: {
     month: number

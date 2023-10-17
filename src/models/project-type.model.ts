@@ -20,7 +20,14 @@ export interface IProjectTypeModel extends Model<IProjectType> {
 
 const projectTypeSchema = new Schema<IProjectType, IProjectTypeModel>(
   {
-    name: { type: String, unique: true, trim: true, required: true },
+    name: {
+      type: String,
+      unique: true,
+      trim: true,
+      required: true,
+      maxlength: 100,
+      minlength: 1,
+    },
   },
   {
     timestamps: true,

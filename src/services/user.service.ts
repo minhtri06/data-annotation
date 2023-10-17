@@ -5,10 +5,11 @@ import bcrypt from 'bcryptjs'
 import { QueryOptions, UserDocument } from '@src/types'
 import { TYPES, USER_WORK_STATUS } from '@src/constants'
 import { IUser, IUserModel } from '@src/models'
-import { validate } from '@src/helpers'
-import { userValidation as validation } from './validations'
-import { CreateUserPayload, UpdateUserPayload } from './types'
-import { IUserService } from './user.service.interface'
+import {
+  CreateUserPayload,
+  IUserService,
+  UpdateUserPayload,
+} from './user.service.interface'
 import { IStorageService } from './storage.service.interface'
 
 @injectable()
@@ -23,7 +24,6 @@ export class UserService implements IUserService {
   }
 
   async getUserById(userId: string): Promise<UserDocument | null> {
-    validate(userId, validation.getUserById.userId)
     return await this.User.findById(userId)
   }
 
@@ -49,16 +49,12 @@ export class UserService implements IUserService {
   }
 
   async createUser(payload: CreateUserPayload): Promise<UserDocument> {
-    validate(payload, validation.createUserPayload)
-
     const user = new this.User(payload)
 
     return await user.save()
   }
 
   async updateUser(user: UserDocument, payload: UpdateUserPayload): Promise<void> {
-    validate(payload, validation.updateUserPayload)
-
     Object.assign(user, payload)
 
     await user.save()

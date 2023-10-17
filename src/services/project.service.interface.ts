@@ -1,10 +1,6 @@
 import { PaginateResult, ProjectDocument } from '@src/types'
-import {
-  CreateProjectPayload,
-  GetProjectsFilter,
-  GetProjectsQueryOptions,
-  UpdateProjectPayload,
-} from './types'
+
+import { IRawProject } from '@src/models'
 
 export interface IProjectService {
   getProjectById(projectId: string): Promise<ProjectDocument | null>
@@ -18,3 +14,42 @@ export interface IProjectService {
 
   updateProject(project: ProjectDocument, payload: UpdateProjectPayload): Promise<void>
 }
+
+// * Parameter types
+export type GetProjectsFilter = Readonly<
+  Partial<Pick<IRawProject, 'name' | 'projectType'>>
+>
+
+export type GetProjectsQueryOptions = Readonly<{
+  limit?: number
+  page?: number
+  checkPaginate?: boolean
+  sort?: string
+}>
+
+export type CreateProjectPayload = Readonly<
+  Pick<
+    IRawProject,
+    | 'name'
+    | 'requirement'
+    | 'description'
+    | 'maximumOfAnnotators'
+    | 'annotationConfig'
+    | 'projectType'
+    | 'manager'
+  >
+>
+
+export type UpdateProjectPayload = Readonly<
+  Partial<
+    Pick<
+      IRawProject,
+      | 'name'
+      | 'requirement'
+      | 'description'
+      | 'maximumOfAnnotators'
+      | 'annotationConfig'
+      | 'projectType'
+    >
+  >
+>

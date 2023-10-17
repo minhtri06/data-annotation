@@ -8,7 +8,6 @@ import envConfig from '@src/configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
 import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
 import { omitFields } from '@src/utils'
-import { RequestSchema } from '../controllers/request-schemas'
 import ENV_CONFIG from '@src/configs/env.config'
 import {
   Exception,
@@ -25,7 +24,13 @@ export interface IGeneralMiddleware {
 
   auth(options?: { requiredPrivileges?: Privilege[]; required?: boolean }): RequestHandler
 
-  validate(requestSchemaMap: CustomSchemaMap<RequestSchema>): RequestHandler
+  validate(
+    requestSchemaMap: CustomSchemaMap<{
+      body?: object
+      params?: object
+      query?: object
+    }>,
+  ): RequestHandler
 }
 
 @injectable()
@@ -130,11 +135,17 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     }
   }
 
-  public validate = (requestSchemaMap: CustomSchemaMap<RequestSchema>): ReqHandler => {
+  public validate = (
+    requestSchemaMap: CustomSchemaMap<{
+      body?: object
+      params?: object
+      query?: object
+    }>,
+  ): ReqHandler => {
     const strictRequestSchemaMap = {
-      body: requestSchemaMap.body || {},
-      query: requestSchemaMap.query || {},
-      params: requestSchemaMap.params || {},
+      body: Joi.object(requestSchemaMap.body || {}).required(),
+      query: Joi.object(requestSchemaMap.query || {}).required(),
+      params: Joi.object(requestSchemaMap.params || {}).required(),
     }
     const validationSchema = Joi.object<typeof strictRequestSchemaMap>(
       strictRequestSchemaMap,

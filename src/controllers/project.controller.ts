@@ -7,8 +7,7 @@ import { IGeneralMiddleware } from '@src/middlewares'
 import { IProjectService } from '@src/services'
 import { PRIVILEGES, ROLES } from '@src/configs/role.config'
 import { CustomRequest } from '@src/types'
-import { projectRequestValidation as validation } from './request-validations'
-import { CreateProject } from './request-schemas'
+import { projectSchema as schema } from './schemas'
 import { StatusCodes } from 'http-status-codes'
 
 export const projectControllerFactory = (container: Container) => {
@@ -24,9 +23,9 @@ export const projectControllerFactory = (container: Container) => {
     @httpPost(
       '/',
       generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_PROJECT] }),
-      generalMiddleware.validate(validation.createProject),
+      generalMiddleware.validate(schema.createProject),
     )
-    async createProject(req: CustomRequest<CreateProject>, res: Response) {
+    async createProject(req: CustomRequest<schema.CreateProject>, res: Response) {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Unauthorized' })
       }

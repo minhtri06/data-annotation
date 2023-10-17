@@ -3,6 +3,7 @@ import { Model, Schema, Types, model } from 'mongoose'
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
 import { ProjectDocument } from '@src/types'
+import { ValidationException } from '@src/services/exceptions'
 
 export interface IProject {
   _id: Types.ObjectId
@@ -77,7 +78,7 @@ export interface IRawProject {
 
   numberOfSamples: number
 
-  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+  status: string
 
   completionTime?: Date
 
@@ -198,18 +199,7 @@ const projectSchema = new Schema<IProject>(
 
     annotationConfig: {
       type: {
-        hasLabelSets: {
-          type: Boolean,
-          default: false,
-          validate: function (value: boolean) {
-            const sampleTextConfig =
-              this as unknown as ProjectDocument['annotationConfig']
-            if (value && sampleTextConfig.labelSets.length === 0) {
-              throw new Error('hasLabelSets is true but got 0 labelSets')
-            }
-          },
-          required: true,
-        },
+        hasLabelSets: { type: Boolean, default: false, required: true },
         labelSets: {
           type: [
             {
@@ -225,20 +215,7 @@ const projectSchema = new Schema<IProject>(
 
         individualTextConfigs: [
           {
-            hasLabelSets: {
-              type: Boolean,
-              default: false,
-              validate: function (value: boolean) {
-                const individualTextConfigs =
-                  this as unknown as IProject['annotationConfig']['individualTextConfigs'][number]
-                if (value && individualTextConfigs.labelSets) {
-                  throw new Error(
-                    'hasLabelSets (individualTextConfigs) equals to true but provide 0 labelSets',
-                  )
-                }
-              },
-              required: true,
-            },
+            hasLabelSets: { type: Boolean, default: false, required: true },
             labelSets: {
               type: [
                 {
@@ -250,26 +227,61 @@ const projectSchema = new Schema<IProject>(
               required: true,
             },
 
-            hasInlineLabels: {
-              type: Boolean,
-              required: true,
-              default: false,
-              validate: function (hasInlineLabels: boolean) {
-                const individualTextConfigs =
-                  this as unknown as IProject['annotationConfig']['individualTextConfigs'][number]
-                if (hasInlineLabels && individualTextConfigs.inlineLabels.length === 0) {
-                  throw new Error(
-                    'inlineLabels equals to true but provide 0 inlineLabels',
-                  )
-                }
-              },
-            },
+            hasInlineLabels: { type: Boolean, required: true, default: false },
             inlineLabels: { type: [String], default: [], required: true },
           },
         ],
       },
       default: {},
       required: true,
+      validate: function (annotationConfig: IProject['annotationConfig']) {
+        // must have at least one annotation
+        if (
+          !annotationConfig.hasLabelSets &&
+          !annotationConfig.hasGeneratedTexts &&
+          annotationConfig.individualTextConfigs.every(
+            (individualTextConfig) =>
+              !individualTextConfig.hasLabelSets && !individualTextConfig.hasInlineLabels,
+          )
+        ) {
+          throw new ValidationException('Project has no annotation config', {
+            type: 'project-with-no-annotation',
+          })
+        }
+
+        // check conflict config
+        if (annotationConfig.hasLabelSets && annotationConfig.labelSets.length === 0) {
+          throw new Error(
+            'annotationConfig.hasLabelSets is tru but annotationConfig.labelSets is empty',
+          )
+        }
+
+        // check conflict config in each individualTextConfigs
+        for (let i = 0; i < annotationConfig.individualTextConfigs.length; i++) {
+          const individualTextConfig = annotationConfig.individualTextConfigs[i]
+          if (
+            individualTextConfig.hasLabelSets &&
+            individualTextConfig.labelSets.length === 0
+          ) {
+            throw new Error(
+              `hasLabelSets (individualTextConfig[${i}]) is true but labelSets is empty`,
+            )
+          }
+          if (
+            individualTextConfig.inlineLabels &&
+            individualTextConfig.inlineLabels.length === 0
+          ) {
+            throw new Error(
+              `inlineLabels (individualTextConfig[${i}]) is true but inlineLabels is empty`,
+            )
+          }
+        }
+
+        // check number of individualTextConfigs
+        if (annotationConfig.individualTextConfigs.length > 50) {
+          throw new Error("Number of 'individualTextConfigs' must less than or equal 50")
+        }
+      },
     },
   },
   {

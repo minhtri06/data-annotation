@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker'
 import mongoose from 'mongoose'
 
 import { IRawProject } from '@src/models'
-import { CreateProjectPayload } from '@src/services/types'
 import { Mutable } from '@tests/utils'
+import { CreateProjectPayload } from '@src/services'
 
 const { ObjectId } = mongoose.Types
 

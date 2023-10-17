@@ -29,7 +29,7 @@ export interface IRawToken {
 
   user: string
 
-  type: (typeof TOKEN_TYPES)[keyof typeof TOKEN_TYPES]
+  type: string
 
   expires: Date
 

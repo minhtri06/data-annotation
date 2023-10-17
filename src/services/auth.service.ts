@@ -55,7 +55,6 @@ export class AuthService implements IAuthService {
     accessToken: string,
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const isOnProduction = ENV_CONFIG.NODE_ENV === 'prod'
     accessToken = accessToken.slice(7)
     const accessPayload = this.tokenService.verifyToken(
       accessToken,
@@ -70,34 +69,24 @@ export class AuthService implements IAuthService {
 
     const now = moment().unix()
     if (accessPayload.exp > now) {
-      throw new UnauthorizedException(
-        isOnProduction ? 'Unauthorized' : 'Access token has not expired yet',
-      )
+      throw new UnauthorizedException('Access token has not expired yet')
     }
     if (refreshPayload.exp < now) {
-      throw new UnauthorizedException(
-        isOnProduction ? 'Unauthorized' : 'Refresh token is expired',
-      )
+      throw new UnauthorizedException('Refresh token is expired')
     }
 
     if (refreshPayload.sub !== accessPayload.sub) {
-      throw new UnauthorizedException(
-        isOnProduction ? 'Unauthorized' : 'Access token sub is not refresh token sub',
-      )
+      throw new UnauthorizedException('Access token sub is not refresh token sub')
     }
 
     const refreshTokenDocument =
       await this.tokenService.getRefreshTokenByBody(refreshToken)
     if (!refreshTokenDocument) {
-      throw new UnauthorizedException(
-        isOnProduction ? 'Unauthorized' : 'Refresh token not found',
-      )
+      throw new UnauthorizedException('Refresh token not found')
     }
 
     if (refreshTokenDocument.isBlacklisted) {
-      throw new UnauthorizedException(
-        isOnProduction ? 'Unauthorized' : 'Refresh token is blacklisted',
-      )
+      throw new UnauthorizedException('Refresh token is blacklisted')
     }
 
     const userId = refreshPayload.sub
@@ -116,7 +105,7 @@ export class AuthService implements IAuthService {
 
     const user = await this.userService.getUserById(userId)
     if (!user) {
-      throw new UnauthorizedException(isOnProduction ? 'Unauthorized' : 'User not found')
+      throw new UnauthorizedException('User not found')
     }
 
     refreshTokenDocument.isUsed = true

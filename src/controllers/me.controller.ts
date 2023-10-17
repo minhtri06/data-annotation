@@ -4,12 +4,11 @@ import { controller, httpGet, httpPatch, httpPut } from 'inversify-express-utils
 
 import { IGeneralMiddleware } from '@src/middlewares'
 import { IUserService } from '@src/services'
-import { CustomRequest, EmptyObject } from '@src/types'
+import { CustomRequest } from '@src/types'
 import { IUploadMiddleware } from '@src/middlewares/upload.middleware'
 import { TYPES } from '@src/constants'
 import { StatusCodes } from 'http-status-codes'
-import { meRequestValidation as validation } from './request-validations'
-import { UpdateMyProfile } from './request-schemas'
+import { meSchema as schema } from './schemas'
 import { Exception, UnauthorizedException } from '@src/services/exceptions'
 
 export const meControllerFactory = (container: Container) => {
@@ -21,7 +20,7 @@ export const meControllerFactory = (container: Container) => {
     constructor(@inject(TYPES.USER_SERVICE) private userService: IUserService) {}
 
     @httpGet('/', generalMiddleware.auth())
-    async getMyProfile(req: CustomRequest<EmptyObject>, res: Response) {
+    async getMyProfile(req: CustomRequest, res: Response) {
       if (!req.user) {
         throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
@@ -35,9 +34,9 @@ export const meControllerFactory = (container: Container) => {
     @httpPatch(
       '/',
       generalMiddleware.auth(),
-      generalMiddleware.validate(validation.updateMyProfile),
+      generalMiddleware.validate(schema.updateMyProfile),
     )
-    async updateMyProfile(req: CustomRequest<UpdateMyProfile>, res: Response) {
+    async updateMyProfile(req: CustomRequest<schema.UpdateMyProfile>, res: Response) {
       if (!req.user) {
         throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }

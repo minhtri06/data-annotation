@@ -6,8 +6,7 @@ import { StatusCodes } from 'http-status-codes'
 import { IAuthService, ITokenService, IUserService } from '@src/services'
 import { CustomRequest } from '@src/types'
 import { IGeneralMiddleware } from '@src/middlewares'
-import { Login, Logout, RefreshTokens } from './request-schemas'
-import { authRequestValidation as validation } from './request-validations'
+import { authSchema as schema } from './schemas'
 import { TYPES } from '@src/constants'
 
 export const authControllerFactory = (container: Container) => {
@@ -21,8 +20,8 @@ export const authControllerFactory = (container: Container) => {
       @inject(TYPES.TOKEN_SERVICE) private tokenService: ITokenService,
     ) {}
 
-    @httpPost('/login', generalMiddleware.validate(validation.login))
-    async login(req: CustomRequest<Login>, res: Response) {
+    @httpPost('/login', generalMiddleware.validate(schema.login))
+    async login(req: CustomRequest<schema.Login>, res: Response) {
       const { username, password } = req.body
       const { user, authTokens } = await this.authService.login(username, password)
       return res
@@ -30,15 +29,15 @@ export const authControllerFactory = (container: Container) => {
         .json({ message: 'Login successfully', user, authTokens })
     }
 
-    @httpPost('/logout', generalMiddleware.validate(validation.logout))
-    async logout(req: CustomRequest<Logout>, res: Response) {
+    @httpPost('/logout', generalMiddleware.validate(schema.logout))
+    async logout(req: CustomRequest<schema.Logout>, res: Response) {
       const { refreshToken } = req.body
       await this.authService.logout(refreshToken)
       return res.status(StatusCodes.NO_CONTENT).send()
     }
 
-    @httpPost('/refresh-tokens', generalMiddleware.validate(validation.refreshTokens))
-    async refreshTokens(req: CustomRequest<RefreshTokens>, res: Response) {
+    @httpPost('/refresh-tokens', generalMiddleware.validate(schema.refreshTokens))
+    async refreshTokens(req: CustomRequest<schema.RefreshTokens>, res: Response) {
       const { accessToken, refreshToken } = req.body
       const authTokens = await this.authService.refreshAuthTokens(
         accessToken,
