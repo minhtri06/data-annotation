@@ -15,7 +15,12 @@ import {
   TokenService,
   UserService,
 } from '../services'
-import { GeneralMiddleware, IGeneralMiddleware } from '../middlewares'
+import {
+  GeneralMiddleware,
+  IGeneralMiddleware,
+  IUploadMiddleware,
+  UploadMiddleware,
+} from '../middlewares'
 import {
   authControllerFactory,
   meControllerFactory,
@@ -23,7 +28,6 @@ import {
   projectTypeControllerFactory,
   userControllerFactory,
 } from '../controllers'
-import { IUploadMiddleware, UploadMiddleware } from '../middlewares/upload.middleware'
 import { TYPES } from '../constants'
 import {
   IProjectModel,
