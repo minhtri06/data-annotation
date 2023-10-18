@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request } from 'express'
 
 import { IUser } from '@src/models'
 
@@ -17,9 +17,3 @@ export type CustomRequest<ReqSchema extends RequestSchema = RequestSchema> = Req
   Pick<ReqSchema, 'body' | 'params' | 'query'> & {
     user?: { _id: string; role: IUser['role'] }
   }
-
-export type ReqHandler<ReqSchema extends RequestSchema = RequestSchema> = (
-  req: CustomRequest<ReqSchema>,
-  res: Response,
-  next: NextFunction,
-) => Promise<Response | void> | Response | void

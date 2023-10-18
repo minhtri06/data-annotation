@@ -1,5 +1,5 @@
-import { IProjectModel } from '@src/models'
-import { PaginateResult, ProjectDocument } from '@src/types'
+import { IProjectModel, ProjectDocument } from '@src/models'
+import { PaginateResult } from '@src/types'
 import { PROJECT_STATUS, TYPES } from '@src/constants'
 import {
   CreateProjectPayload,
@@ -9,7 +9,6 @@ import {
   UpdateProjectPayload,
 } from './project.service.interface'
 import { inject, injectable } from 'inversify'
-import { Exception } from './exceptions'
 import { validateSortFields } from '@src/helpers'
 
 @injectable()
@@ -46,10 +45,6 @@ export class ProjectService implements IProjectService {
     project: ProjectDocument,
     payload: UpdateProjectPayload,
   ): Promise<void> {
-    if (project.isModified()) {
-      throw new Exception('Project is modified before call update')
-    }
-
     Object.assign(project, payload)
 
     await project.save()

@@ -9,6 +9,7 @@ import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
 import { userSchema as schema } from './schemas'
 import { TYPES } from '../constants'
+import { pickFields } from '@src/utils'
 
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
@@ -19,12 +20,9 @@ export const userControllerFactory = (container: Container) => {
 
     @httpGet('/', generalMiddleware.auth(), generalMiddleware.validate(schema.getUsers))
     async getUsers(req: CustomRequest<schema.GetUsers>, res: Response) {
-      const { role, name, workStatus } = req.query
-      const { limit, page, checkPaginate } = req.query
-      const result = await this.userService.getUsers(
-        { role, name, workStatus },
-        { limit, page, checkPaginate },
-      )
+      const filter = pickFields(req.query, 'name', 'role', 'workStatus')
+      const options = pickFields(req.query, 'limit', 'page', 'checkPaginate')
+      const result = await this.userService.getUsers(filter, options)
       return res.status(StatusCodes.OK).json(result)
     }
 

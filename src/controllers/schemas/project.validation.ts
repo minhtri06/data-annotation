@@ -3,7 +3,17 @@ import Joi from 'joi'
 import { CustomSchemaMap } from '@src/types'
 import { querySchema, stringId } from './custom.schema'
 
-export const getProjects = {
+export type GetProjects = {
+  query: {
+    name: string
+    projectType: string
+    limit: number
+    page: number
+    checkPaginate: boolean
+    sort: string
+  }
+}
+export const getProjects: CustomSchemaMap<GetProjects> = {
   query: {
     name: Joi.string(),
     projectType: stringId,

@@ -67,6 +67,8 @@ export interface IUserModel extends Model<IUser> {
   paginate: Paginate<IUser>
 }
 
+export type UserDocument = InstanceType<IUserModel>
+
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, trim: true, required: true },
@@ -133,7 +135,9 @@ userSchema.plugin(paginatePlugin)
 userSchema.plugin(handleErrorPlugin)
 
 userSchema.pre('save', async function (next) {
-  this.password = await bcrypt.hash(this.password, 8)
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8)
+  }
   next()
 })
 

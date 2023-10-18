@@ -2,11 +2,12 @@ import { FilterQuery } from 'mongoose'
 import { inject, injectable } from 'inversify'
 import bcrypt from 'bcryptjs'
 
-import { QueryOptions, UserDocument } from '@src/types'
 import { TYPES, USER_WORK_STATUS } from '@src/constants'
-import { IUser, IUserModel } from '@src/models'
+import { IRawUser, IUserModel, UserDocument } from '@src/models'
 import {
   CreateUserPayload,
+  GetUsersFilter,
+  GetUsersOptions,
   IUserService,
   UpdateUserPayload,
 } from './user.service.interface'
@@ -28,20 +29,19 @@ export class UserService implements IUserService {
   }
 
   async getUsers(
-    queryFilter: Partial<Pick<IUser, 'role' | 'name' | 'workStatus'>> = {},
-    queryOptions: QueryOptions = {},
+    queryFilter: GetUsersFilter = {},
+    queryOptions: GetUsersOptions = {},
   ): Promise<{ data: UserDocument[]; totalPage?: number }> {
-    const filter: FilterQuery<IUser> = {}
-
-    if (queryFilter.role) {
-      filter.role = queryFilter.role as string
+    const filter: FilterQuery<IRawUser> = {
+      workStatus: USER_WORK_STATUS.ON,
+      ...queryFilter,
     }
-    if (queryFilter.name) {
+
+    if (filter.name) {
       filter.name = { $regex: queryFilter.name, $options: 'i' }
     }
-    filter.workStatus = queryFilter.workStatus || USER_WORK_STATUS.ON
 
-    return this.User.paginate(filter, queryOptions)
+    return await this.User.paginate(filter, queryOptions)
   }
 
   async getUserByUserName(username: string): Promise<UserDocument | null> {

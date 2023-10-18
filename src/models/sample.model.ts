@@ -2,7 +2,6 @@ import { Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
-import { SampleDocument } from '@src/types'
 
 export interface ISample {
   _id: Types.ObjectId
@@ -83,6 +82,8 @@ export interface IRawSample {
 export interface ISampleModel extends Model<ISample> {
   paginate: Paginate<ISample>
 }
+
+export type SampleDocument = InstanceType<ISampleModel>
 
 const sampleSchema = new Schema<ISample>(
   {

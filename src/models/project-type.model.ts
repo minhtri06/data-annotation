@@ -18,6 +18,8 @@ export interface IProjectTypeModel extends Model<IProjectType> {
   paginate: Paginate<IProjectType>
 }
 
+export type ProjectTypeDocument = InstanceType<IProjectTypeModel>
+
 const projectTypeSchema = new Schema<IProjectType, IProjectTypeModel>(
   {
     name: {

@@ -1,6 +1,6 @@
-import { PaginateResult, ProjectDocument } from '@src/types'
+import { PaginateResult } from '@src/types'
 
-import { IRawProject } from '@src/models'
+import { IRawProject, ProjectDocument } from '@src/models'
 
 export interface IProjectService {
   getProjectById(projectId: string): Promise<ProjectDocument | null>
@@ -19,7 +19,6 @@ export interface IProjectService {
 export type GetProjectsFilter = Readonly<
   Partial<Pick<IRawProject, 'name' | 'projectType'>>
 >
-
 export type GetProjectsQueryOptions = Readonly<{
   limit?: number
   page?: number

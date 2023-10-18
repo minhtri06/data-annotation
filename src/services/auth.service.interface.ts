@@ -1,4 +1,4 @@
-import { UserDocument } from '../types'
+import { UserDocument } from '@src/models'
 
 export interface IAuthService {
   login(

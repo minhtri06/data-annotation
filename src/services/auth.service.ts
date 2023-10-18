@@ -1,13 +1,12 @@
 import { inject, injectable } from 'inversify'
 import moment from 'moment'
 
-import { UserDocument } from '@src/types'
 import { TOKEN_TYPES, TYPES } from '@src/constants'
-import ENV_CONFIG from '@src/configs/env.config'
 import { IAuthService } from './auth.service.interface'
 import { ITokenService } from './token.service.interface'
 import { IUserService } from './user.service.interface'
 import { UnauthorizedException } from './exceptions/unauthorized.exception'
+import { UserDocument } from '@src/models'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -45,6 +44,7 @@ export class AuthService implements IAuthService {
   async logout(refreshToken: string): Promise<void> {
     const refreshTokenDocument =
       await this.tokenService.getRefreshTokenByBody(refreshToken)
+
     if (refreshTokenDocument) {
       refreshTokenDocument.isRevoked = true
       await refreshTokenDocument.save()
@@ -55,28 +55,29 @@ export class AuthService implements IAuthService {
     accessToken: string,
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    accessToken = accessToken.slice(7)
-    const accessPayload = this.tokenService.verifyToken(
+    accessToken = accessToken.slice(7) // remove 'Bearer '
+
+    const accessTokenPayload = this.tokenService.verifyToken(
       accessToken,
       TOKEN_TYPES.ACCESS_TOKEN,
       { ignoreExpiration: true },
     )
-    const refreshPayload = this.tokenService.verifyToken(
+    const refreshTokenPayload = this.tokenService.verifyToken(
       refreshToken,
       TOKEN_TYPES.REFRESH_TOKEN,
       { ignoreExpiration: true },
     )
 
     const now = moment().unix()
-    if (accessPayload.exp > now) {
+    if (accessTokenPayload.exp > now) {
       throw new UnauthorizedException('Access token has not expired yet')
     }
-    if (refreshPayload.exp < now) {
+    if (refreshTokenPayload.exp < now) {
       throw new UnauthorizedException('Refresh token is expired')
     }
 
-    if (refreshPayload.sub !== accessPayload.sub) {
-      throw new UnauthorizedException('Access token sub is not refresh token sub')
+    if (refreshTokenPayload.sub !== accessTokenPayload.sub) {
+      throw new UnauthorizedException("Token's sub does not match")
     }
 
     const refreshTokenDocument =
@@ -89,18 +90,14 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException('Refresh token is blacklisted')
     }
 
-    const userId = refreshPayload.sub
+    const userId = refreshTokenPayload.sub
     if (refreshTokenDocument.isUsed || refreshTokenDocument.isRevoked) {
       // Blacklist this token and all usable refresh tokens of that user
       refreshTokenDocument.isBlacklisted = true
       await refreshTokenDocument.save()
       await this.tokenService.blacklistAUser(userId)
 
-      throw new UnauthorizedException(
-        ENV_CONFIG.NODE_ENV === 'prod'
-          ? 'Unauthorized'
-          : 'Refresh has been used or revoked',
-      )
+      throw new UnauthorizedException('Refresh token has been used or revoked')
     }
 
     const user = await this.userService.getUserById(userId)
@@ -110,6 +107,6 @@ export class AuthService implements IAuthService {
 
     refreshTokenDocument.isUsed = true
     await refreshTokenDocument.save()
-    return this.tokenService.createAuthTokens(user)
+    return await this.tokenService.createAuthTokens(user)
   }
 }

@@ -1,9 +1,12 @@
 import { inject, injectable } from 'inversify'
 
-import { IProjectModel, IProjectTypeModel, IRawProjectType } from '@src/models'
-import { ProjectTypeDocument } from '@src/types'
+import { IProjectModel, IProjectTypeModel, ProjectTypeDocument } from '@src/models'
 import { TYPES } from '@src/constants'
-import { IProjectTypeService } from './project-type.service.interface'
+import {
+  CreateProjectTypePayload,
+  IProjectTypeService,
+  UpdateProjectTypePayload,
+} from './project-type.service.interface'
 import { NotAllowedException } from './exceptions'
 
 @injectable()
@@ -22,16 +25,14 @@ export class ProjectTypeService implements IProjectTypeService {
   }
 
   async createProjectType(
-    payload: Readonly<Pick<IRawProjectType, 'name'>>,
+    payload: CreateProjectTypePayload,
   ): Promise<ProjectTypeDocument> {
-    const projectType = await this.ProjectType.create(payload)
-
-    return projectType
+    return await this.ProjectType.create(payload)
   }
 
   async updateProjectType(
     projectType: ProjectTypeDocument,
-    payload: Readonly<Partial<Pick<IRawProjectType, 'name'>>>,
+    payload: UpdateProjectTypePayload,
   ): Promise<void> {
     Object.assign(projectType, payload)
 

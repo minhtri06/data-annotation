@@ -4,4 +4,4 @@ export const MODEL_NAMES = {
   SAMPLE: 'Sample',
   TOKEN: 'Token',
   USER: 'User',
-}
+} as const

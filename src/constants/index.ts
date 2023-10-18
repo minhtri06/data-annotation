@@ -1,3 +1,3 @@
-export * from './inversify-identifiers'
-export * from './model-names'
-export * from './others'
+export * from './inversify.constant'
+export * from './model-names.constant'
+export * from './others.constant'

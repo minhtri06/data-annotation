@@ -2,7 +2,6 @@ import { Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
-import { ProjectDocument } from '@src/types'
 import { ValidationException } from '@src/services/exceptions'
 
 export interface IProject {
@@ -107,6 +106,8 @@ export interface IRawProject {
 export interface IProjectModel extends Model<IProject> {
   paginate: Paginate<IProject>
 }
+
+export type ProjectDocument = InstanceType<IProjectModel>
 
 const projectSchema = new Schema<IProject>(
   {

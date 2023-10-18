@@ -1,26 +1,33 @@
-import { QueryOptions, UserDocument } from '@src/types'
-import { IRawUser } from '@src/models'
+import { IRawUser, UserDocument } from '@src/models'
 
 export interface IUserService {
   comparePassword(hashedPassword: string, rawPassword: string): Promise<boolean>
 
-  getUsers(
-    queryFilter?: Partial<Pick<IRawUser, 'role' | 'name' | 'workStatus'>>,
-    queryOptions?: QueryOptions,
-  ): Promise<{ data: UserDocument[]; totalPage?: number }>
-
   getUserById(userId: string): Promise<UserDocument | null>
+
+  getUsers(
+    filter?: GetUsersFilter,
+    options?: GetUsersOptions,
+  ): Promise<{ data: UserDocument[]; totalPage?: number }>
 
   getUserByUserName(username: string): Promise<UserDocument | null>
 
-  createUser(body: CreateUserPayload): Promise<UserDocument>
+  createUser(payload: CreateUserPayload): Promise<UserDocument>
 
-  updateUser(user: UserDocument, updateBody: UpdateUserPayload): Promise<void>
+  updateUser(user: UserDocument, payload: UpdateUserPayload): Promise<void>
 
   updateAvatar(user: UserDocument, newAvatar: string): Promise<void>
 }
 
 // * parameter types
+export type GetUsersFilter = Readonly<
+  Partial<Pick<IRawUser, 'role' | 'name' | 'workStatus'>>
+>
+export type GetUsersOptions = Readonly<{
+  limit?: number
+  page?: number
+  checkPaginate?: boolean
+}>
 
 export type CreateUserPayload = Readonly<
   Pick<

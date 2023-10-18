@@ -2,12 +2,12 @@ import jwt, { VerifyOptions } from 'jsonwebtoken'
 import moment, { Moment } from 'moment'
 import { inject, injectable } from 'inversify'
 
-import { DocumentId, JwtPayload, TokenDocument, UserDocument } from '@src/types'
 import ENV_CONFIG from '@src/configs/env.config'
-import { IToken, ITokenModel } from '@src/models'
+import { IToken, ITokenModel, TokenDocument, UserDocument } from '@src/models'
 import { ITokenService } from './token.service.interface'
 import { TOKEN_TYPES, TYPES } from '@src/constants'
 import { UnauthorizedException } from './exceptions/unauthorized.exception'
+import { JwtPayload } from '@src/types'
 
 @injectable()
 export class TokenService implements ITokenService {
@@ -19,7 +19,7 @@ export class TokenService implements ITokenService {
     type: 'access-token' | 'refresh-token',
   ): string {
     const payload: JwtPayload = {
-      sub: user._id.toString(),
+      sub: user._id.toHexString(),
       role: user.role,
       iat: moment().unix(),
       exp: expires.unix(),
@@ -31,17 +31,17 @@ export class TokenService implements ITokenService {
 
   generateAccessToken(user: UserDocument): string {
     const expires = moment().add(ENV_CONFIG.JWT_ACCESS_EXPIRATION_MINUTES, 'minutes')
-    return `Bearer ${this.generateToken(user, expires, 'access-token')}`
+    return `Bearer ${this.generateToken(user, expires, TOKEN_TYPES.ACCESS_TOKEN)}`
   }
 
   async createRefreshToken(user: UserDocument): Promise<TokenDocument> {
     const expires = moment().add(ENV_CONFIG.JWT_REFRESH_EXPIRATION_DAYS, 'days')
-    const token = this.generateToken(user, expires, 'refresh-token')
+    const token = this.generateToken(user, expires, TOKEN_TYPES.REFRESH_TOKEN)
 
     return await this.Token.create({
       body: token,
       user: user._id,
-      type: 'refresh-token',
+      type: TOKEN_TYPES.REFRESH_TOKEN,
       expires: expires.toDate(),
       isRevoked: false,
       isUsed: false,
@@ -53,10 +53,10 @@ export class TokenService implements ITokenService {
     user: UserDocument,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(user)
-    const refreshToken = await this.createRefreshToken(user)
+    const refreshTokenDocument = await this.createRefreshToken(user)
     return {
       accessToken,
-      refreshToken: refreshToken.body,
+      refreshToken: refreshTokenDocument.body,
     }
   }
 
@@ -66,33 +66,28 @@ export class TokenService implements ITokenService {
 
   verifyToken(
     token: string,
-    type: 'access-token' | 'refresh-token',
+    type: IToken['type'],
     options: VerifyOptions = {},
   ): JwtPayload {
     try {
       const payload = jwt.verify(token, ENV_CONFIG.JWT_SECRET, options) as JwtPayload
       if (payload.type !== type) {
-        throw new UnauthorizedException(
-          ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : 'Invalid token type',
-        )
+        throw new UnauthorizedException('Invalid token type')
       }
       return payload
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {
-        throw new UnauthorizedException(
-          ENV_CONFIG.NODE_ENV === 'prod' ? 'Unauthorized' : error.message,
-        )
+        throw new UnauthorizedException(error.message)
       }
       throw error
     }
   }
 
-  async blacklistAUser(userId: DocumentId): Promise<void> {
-    const tokenType: IToken['type'] = 'refresh-token'
+  async blacklistAUser(userId: string): Promise<void> {
     await this.Token.updateMany(
       {
         user: userId,
-        type: tokenType,
+        type: TOKEN_TYPES.REFRESH_TOKEN,
         isUsed: false,
         isRevoked: false,
       },

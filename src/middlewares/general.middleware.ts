@@ -6,7 +6,13 @@ import { injectable } from 'inversify'
 
 import envConfig from '@src/configs/env.config'
 import ROLE_PRIVILEGES from '../configs/role.config'
-import { CustomSchemaMap, JwtPayload, Privilege, ReqHandler } from '../types'
+import {
+  CustomRequest,
+  CustomSchemaMap,
+  JwtPayload,
+  Privilege,
+  RequestSchema,
+} from '../types'
 import { omitFields } from '@src/utils'
 import ENV_CONFIG from '@src/configs/env.config'
 import {
@@ -24,18 +30,12 @@ export interface IGeneralMiddleware {
 
   auth(options?: { requiredPrivileges?: Privilege[]; required?: boolean }): RequestHandler
 
-  validate(
-    requestSchemaMap: CustomSchemaMap<{
-      body?: object
-      params?: object
-      query?: object
-    }>,
-  ): RequestHandler
+  validate(requestSchemaMap: CustomSchemaMap<RequestSchema>): RequestHandler
 }
 
 @injectable()
 export class GeneralMiddleware implements IGeneralMiddleware {
-  public handleNotFound: ReqHandler = (req, res) => {
+  public handleNotFound: RequestHandler = (req, res) => {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
@@ -95,8 +95,8 @@ export class GeneralMiddleware implements IGeneralMiddleware {
   }: {
     requiredPrivileges?: Privilege[]
     required?: boolean
-  } = {}): ReqHandler => {
-    return (req, res, next) => {
+  } = {}): RequestHandler => {
+    return (req: CustomRequest, res, next) => {
       const unauthorizedError = new UnauthorizedException('Unauthorized')
 
       let accessToken = req.headers['authorization']
@@ -136,12 +136,8 @@ export class GeneralMiddleware implements IGeneralMiddleware {
   }
 
   public validate = (
-    requestSchemaMap: CustomSchemaMap<{
-      body?: object
-      params?: object
-      query?: object
-    }>,
-  ): ReqHandler => {
+    requestSchemaMap: CustomSchemaMap<RequestSchema>,
+  ): RequestHandler => {
     const strictRequestSchemaMap = {
       body: Joi.object(requestSchemaMap.body || {}).required(),
       query: Joi.object(requestSchemaMap.query || {}).required(),
@@ -156,8 +152,10 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     return (req, res, next) => {
       const validation = validationSchema.validate(req, {
         errors: { wrap: { label: "'" }, label: 'path' },
+        abortEarly: false,
       })
       if (validation.error) {
+        console.log(validation.error.details)
         return next(
           new ValidationException(validation.error.message, {
             details: validation.error.details.map((detail) => ({
@@ -167,9 +165,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           }),
         )
       }
-      for (const key of ['body', 'params', 'query'] as const) {
-        req[key] = validation.value[key]
-      }
+
       return next()
     }
   }

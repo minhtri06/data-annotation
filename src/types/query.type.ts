@@ -1,19 +1,4 @@
-import { Query, SortOrder, Types } from 'mongoose'
-import {
-  IProjectModel,
-  IProjectTypeModel,
-  ISampleModel,
-  ITokenModel,
-  IUserModel,
-} from '../models'
-
-export type TokenDocument = InstanceType<ITokenModel>
-export type UserDocument = InstanceType<IUserModel>
-export type ProjectTypeDocument = InstanceType<IProjectTypeModel>
-export type ProjectDocument = InstanceType<IProjectModel>
-export type SampleDocument = InstanceType<ISampleModel>
-
-export type DocumentId = Types.ObjectId | string
+import { Query, SortOrder } from 'mongoose'
 
 export type SortOption<T = { [key: string]: unknown }> = { [K in keyof T]: SortOrder }
 export type SelectOption = Parameters<typeof Query.prototype.select>[0]

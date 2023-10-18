@@ -42,6 +42,8 @@ export interface IRawToken {
 
 export interface ITokenModel extends Model<IToken> {}
 
+export type TokenDocument = InstanceType<ITokenModel>
+
 const tokenSchema = new Schema<IToken>(
   {
     body: { type: String, index: true, required: true },
