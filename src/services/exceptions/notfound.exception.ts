@@ -7,11 +7,11 @@ export class NotfoundException extends Exception {
     message: string,
     {
       type,
-      isOperational,
+      isOperational = true,
       model,
     }: { type?: string; isOperational?: boolean; model?: string } = {},
   ) {
-    super(message, { type: type || 'not-found', isOperational })
+    super(message, { type, isOperational })
     this.model = model
   }
 }

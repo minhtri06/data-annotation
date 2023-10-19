@@ -7,11 +7,11 @@ export class DuplicateKeyException extends Exception {
     message: string,
     {
       type,
-      isOperational,
+      isOperational = true,
       path,
     }: { type?: string; isOperational?: boolean; path?: string } = {},
   ) {
-    super(message, { type: type || 'duplicate-key', isOperational })
+    super(message, { type, isOperational })
     this.path = path
   }
 }

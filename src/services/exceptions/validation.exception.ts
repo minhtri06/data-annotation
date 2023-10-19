@@ -9,8 +9,8 @@ export class ValidationException extends Exception {
   constructor(
     message: string,
     {
-      type,
-      isOperational,
+      type = 'validation',
+      isOperational = true,
       details,
     }: {
       type?: string
@@ -21,7 +21,7 @@ export class ValidationException extends Exception {
       }[]
     } = {},
   ) {
-    super(message, { type: type || 'validation', isOperational })
+    super(message, { type, isOperational })
     this.details = details
   }
 }
