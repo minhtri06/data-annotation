@@ -24,7 +24,7 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
-      const me = await this.userService.getUserById(req.user._id)
+      const me = await this.userService.getUserById(req.user.id)
       if (!me) {
         return res.status(404).json({ message: 'User not found' })
       }
@@ -40,7 +40,7 @@ export const meControllerFactory = (container: Container) => {
       if (!req.user) {
         throw new UnauthorizedException('Unauthorized', { isOperational: false })
       }
-      const me = await this.userService.getUserById(req.user._id)
+      const me = await this.userService.getUserById(req.user.id)
       if (!me) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
       }
@@ -60,7 +60,7 @@ export const meControllerFactory = (container: Container) => {
       if (!req.file) {
         throw new Exception('Missing file', { isOperational: false })
       }
-      const user = await this.userService.getUserById(req.user._id)
+      const user = await this.userService.getUserById(req.user.id)
       if (!user) {
         return res.status(404).json({ message: 'User not found' })
       }

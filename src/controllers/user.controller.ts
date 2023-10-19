@@ -5,14 +5,15 @@ import { StatusCodes } from 'http-status-codes'
 
 import { IUserService } from '../services'
 import { IGeneralMiddleware } from '../middlewares'
-import { PRIVILEGES } from '../configs/role.config'
 import { CustomRequest } from '../types'
 import { userSchema as schema } from './schemas'
 import { TYPES } from '../constants'
 import { pickFields } from '@src/utils'
+import { ROLES } from '@src/configs/role.config'
 
 export const userControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const { ADMIN } = ROLES
 
   @controller('/users')
   class UserController {
@@ -28,7 +29,7 @@ export const userControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_USERS] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN] }),
       generalMiddleware.validate(schema.createUser),
     )
     async createUser(req: CustomRequest<schema.CreateUser>, res: Response) {
@@ -38,7 +39,7 @@ export const userControllerFactory = (container: Container) => {
 
     @httpGet(
       '/:userId',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.GET_USERS] }),
+      generalMiddleware.auth(),
       generalMiddleware.validate(schema.getUserById),
     )
     async getUserById(req: CustomRequest<schema.GetUserById>, res: Response) {
@@ -53,7 +54,7 @@ export const userControllerFactory = (container: Container) => {
 
     @httpPatch(
       '/:userId',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.UPDATE_USERS] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN] }),
       generalMiddleware.validate(schema.updateUserById),
     )
     async updateUserById(req: CustomRequest<schema.UpdateUserById>, res: Response) {

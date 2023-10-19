@@ -9,10 +9,9 @@ import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { IStorageService, ITokenService, IUserService } from '@src/services'
 import setup from '@src/setup'
-import { UserDocument } from '@src/types'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
-import { User } from '@src/models'
+import { User, UserDocument } from '@src/models'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)

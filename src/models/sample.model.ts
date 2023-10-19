@@ -1,4 +1,4 @@
-import { Model, Schema, Types, model } from 'mongoose'
+import { HydratedDocument, Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
@@ -83,7 +83,7 @@ export interface ISampleModel extends Model<ISample> {
   paginate: Paginate<ISample>
 }
 
-export type SampleDocument = InstanceType<ISampleModel>
+export type SampleDocument = HydratedDocument<ISample>
 
 const sampleSchema = new Schema<ISample>(
   {

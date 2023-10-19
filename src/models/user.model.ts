@@ -1,7 +1,7 @@
-import { Model, Schema, model } from 'mongoose'
+import { HydratedDocument, Model, Schema, model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
-import ROLE_PRIVILEGES from '@src/configs/role.config'
+import { ROLES } from '@src/configs/role.config'
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, USER_WORK_STATUS } from '../constants'
 import { Types } from 'mongoose'
@@ -15,7 +15,7 @@ export interface IUser {
 
   password: string
 
-  role: keyof typeof ROLE_PRIVILEGES
+  role: (typeof ROLES)[keyof typeof ROLES]
 
   avatar?: string
 
@@ -67,7 +67,7 @@ export interface IUserModel extends Model<IUser> {
   paginate: Paginate<IUser>
 }
 
-export type UserDocument = InstanceType<IUserModel>
+export type UserDocument = HydratedDocument<IUser>
 
 const userSchema = new Schema<IUser>(
   {
@@ -88,7 +88,7 @@ const userSchema = new Schema<IUser>(
 
     role: {
       type: String,
-      enum: { values: Object.keys(ROLE_PRIVILEGES), message: 'Invalid role' },
+      enum: { values: Object.values(ROLES), message: 'Invalid role' },
       required: true,
     },
 

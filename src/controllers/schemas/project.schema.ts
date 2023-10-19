@@ -2,6 +2,7 @@ import Joi from 'joi'
 
 import { CustomSchemaMap } from '@src/types'
 import { querySchema, stringId } from './custom.schema'
+import { IRawProject } from '@src/models'
 
 export type GetProjects = {
   query: {
@@ -99,7 +100,34 @@ export const createProject: CustomSchemaMap<CreateProject> = {
   },
 }
 
-export const updateProjectById = {
+export type GetProjectById = {
+  params: {
+    projectId: string
+  }
+}
+export const getProjectById: CustomSchemaMap<GetProjectById> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
+export type UpdateProjectById = {
+  params: {
+    projectId: string
+  }
+  body: Partial<
+    Pick<
+      IRawProject,
+      | 'name'
+      | 'projectType'
+      | 'requirement'
+      | 'description'
+      | 'maximumOfAnnotators'
+      | 'annotationConfig'
+    >
+  >
+}
+export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
   params: {
     projectId: stringId.required(),
   },

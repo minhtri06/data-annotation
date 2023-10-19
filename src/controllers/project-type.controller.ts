@@ -13,11 +13,12 @@ import { TYPES } from '@src/constants'
 import { IGeneralMiddleware } from '@src/middlewares'
 import { IProjectTypeService } from '@src/services'
 import { CustomRequest } from '@src/types'
-import { PRIVILEGES } from '@src/configs/role.config'
+import { ROLES } from '@src/configs/role.config'
 import { projectTypeSchema as schema } from './schemas'
 
 export const projectTypeControllerFactory = (container: Container) => {
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const { ADMIN } = ROLES
 
   @controller('/project-types')
   class ProjectTypeController {
@@ -34,7 +35,7 @@ export const projectTypeControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_PROJECT_TYPES] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN] }),
       generalMiddleware.validate(schema.createProjectType),
     )
     async createProjectType(req: CustomRequest<schema.CreateProjectType>, res: Response) {
@@ -44,7 +45,7 @@ export const projectTypeControllerFactory = (container: Container) => {
 
     @httpPatch(
       '/:projectTypeId',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.UPDATE_PROJECT_TYPES] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN] }),
       generalMiddleware.validate(schema.updateProjectTypeById),
     )
     async updateProjectTypeById(
@@ -66,7 +67,7 @@ export const projectTypeControllerFactory = (container: Container) => {
 
     @httpDelete(
       '/:projectTypeId',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.DELETE_PROJECT_TYPES] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN] }),
       generalMiddleware.validate(schema.deleteProjectTypeById),
     )
     async deleteProjectTypeById(

@@ -5,14 +5,7 @@ import Joi from 'joi'
 import { injectable } from 'inversify'
 
 import envConfig from '@src/configs/env.config'
-import ROLE_PRIVILEGES from '../configs/role.config'
-import {
-  CustomRequest,
-  CustomSchemaMap,
-  JwtPayload,
-  Privilege,
-  RequestSchema,
-} from '../types'
+import { CustomRequest, CustomSchemaMap, JwtPayload, RequestSchema, Role } from '../types'
 import { omitFields } from '@src/utils'
 import ENV_CONFIG from '@src/configs/env.config'
 import {
@@ -28,7 +21,7 @@ export interface IGeneralMiddleware {
 
   handleException: ErrorRequestHandler
 
-  auth(options?: { requiredPrivileges?: Privilege[]; required?: boolean }): RequestHandler
+  auth(options?: { requiredRoles?: Role[]; isRequired?: boolean }): RequestHandler
 
   validate(requestSchemaMap: CustomSchemaMap<RequestSchema>): RequestHandler
 }
@@ -90,23 +83,21 @@ export class GeneralMiddleware implements IGeneralMiddleware {
   }
 
   public auth = ({
-    requiredPrivileges = [],
-    required = true,
+    requiredRoles,
+    isRequired = true,
   }: {
-    requiredPrivileges?: Privilege[]
-    required?: boolean
+    requiredRoles?: Role[]
+    isRequired?: boolean
   } = {}): RequestHandler => {
     return (req: CustomRequest, res, next) => {
-      const unauthorizedError = new UnauthorizedException('Unauthorized')
-
       let accessToken = req.headers['authorization']
       accessToken = accessToken?.split(' ')[1]
 
       if (!accessToken) {
-        if (!required) {
+        if (!isRequired) {
           return next()
         } else {
-          return next(unauthorizedError)
+          return next(new UnauthorizedException('Unauthorized'))
         }
       }
 
@@ -114,23 +105,18 @@ export class GeneralMiddleware implements IGeneralMiddleware {
       try {
         payload = jwt.verify(accessToken, envConfig.JWT_SECRET) as JwtPayload
       } catch (error) {
-        if (!required) {
+        if (!isRequired) {
           return next()
         } else {
-          return next(unauthorizedError)
+          return next(new UnauthorizedException('Unauthorized'))
         }
       }
 
-      if (requiredPrivileges.length !== 0) {
-        const userPrivileges = ROLE_PRIVILEGES[payload.role]
-        if (
-          !requiredPrivileges.every((privilege) => userPrivileges.includes(privilege))
-        ) {
-          next(new ForbiddenException('Forbidden'))
-        }
+      if (requiredRoles && !requiredRoles.includes(payload.role)) {
+        next(new ForbiddenException('Forbidden'))
       }
 
-      req.user = { _id: payload.sub, role: payload.role }
+      req.user = { id: payload.sub, role: payload.role }
       return next()
     }
   }
@@ -155,7 +141,6 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         abortEarly: false,
       })
       if (validation.error) {
-        console.log(validation.error.details)
         return next(
           new ValidationException(validation.error.message, {
             details: validation.error.details.map((detail) => ({

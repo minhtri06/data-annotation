@@ -41,6 +41,10 @@ import {
   Token,
   User,
 } from '@src/models'
+import {
+  IProjectMiddleware,
+  ProjectMiddleware,
+} from '@src/middlewares/project.middleware'
 
 const container = new Container()
 
@@ -68,6 +72,7 @@ container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
 // bind middlewares
 container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddleware)
 container.bind<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE).to(UploadMiddleware)
+container.bind<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE).to(ProjectMiddleware)
 
 // bind models
 container.bind<IProjectTypeModel>(TYPES.PROJECT_TYPE_MODEL).toConstantValue(ProjectType)

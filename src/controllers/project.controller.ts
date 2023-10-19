@@ -1,18 +1,23 @@
 import { Response } from 'express'
 import { Container, inject } from 'inversify'
-import { controller, httpGet, httpPost } from 'inversify-express-utils'
+import { controller, httpGet, httpPatch, httpPost } from 'inversify-express-utils'
 
 import { TYPES } from '@src/constants'
 import { IGeneralMiddleware } from '@src/middlewares'
 import { IProjectService } from '@src/services'
-import { PRIVILEGES, ROLES } from '@src/configs/role.config'
+import { ROLES } from '@src/configs/role.config'
 import { CustomRequest } from '@src/types'
 import { projectSchema as schema } from './schemas'
 import { StatusCodes } from 'http-status-codes'
 import { pickFields } from '@src/utils'
+import { IProjectMiddleware } from '@src/middlewares/project.middleware'
+import { Exception } from '@src/services/exceptions'
 
 export const projectControllerFactory = (container: Container) => {
+  const { ADMIN, MANAGER } = ROLES
+
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const projectMiddleware = container.get<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE)
 
   @controller('/projects')
   class ProjectController {
@@ -35,7 +40,7 @@ export const projectControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
-      generalMiddleware.auth({ requiredPrivileges: [PRIVILEGES.CREATE_PROJECT] }),
+      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
       generalMiddleware.validate(schema.createProject),
     )
     async createProject(req: CustomRequest<schema.CreateProject>, res: Response) {
@@ -44,12 +49,37 @@ export const projectControllerFactory = (container: Container) => {
       }
 
       const payload: typeof req.body & { manager?: string } = { ...req.body }
-      if (req.user.role === ROLES.MANAGER) {
-        payload.manager = req.user._id
+      if (req.user.role === MANAGER) {
+        payload.manager = req.user.id
       }
 
       const project = await this.projectService.createProject(payload)
       return res.status(StatusCodes.CREATED).json({ project })
+    }
+
+    @httpGet(
+      '/:projectId',
+      generalMiddleware.auth(),
+      generalMiddleware.validate(schema.getProjectById),
+      projectMiddleware.getProjectById,
+    )
+    getProjectById(req: CustomRequest<schema.GetProjectById>, res: Response) {
+      return res.status(StatusCodes.OK).json({ project: req.data?.project })
+    }
+
+    @httpPatch(
+      '/:projectId',
+      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
+      generalMiddleware.validate(schema.updateProjectById),
+      projectMiddleware.getProjectById,
+      projectMiddleware.requireToBeProjectManager(),
+    )
+    async updateProjectById(req: CustomRequest<schema.UpdateProjectById>, res: Response) {
+      if (!req.data?.project) {
+        throw new Exception('Project is required')
+      }
+      await this.projectService.updateProject(req.data.project, req.body)
+      return res.status(StatusCodes.NO_CONTENT).send()
     }
   }
 

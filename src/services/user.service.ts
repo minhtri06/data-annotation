@@ -50,7 +50,6 @@ export class UserService implements IUserService {
 
   async createUser(payload: CreateUserPayload): Promise<UserDocument> {
     const user = new this.User(payload)
-
     return await user.save()
   }
 

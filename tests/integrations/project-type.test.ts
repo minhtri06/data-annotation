@@ -2,24 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Application } from 'express'
 import supertest, { SuperTest, Test } from 'supertest'
+import mongoose from 'mongoose'
 
 import setup from '@src/setup'
 import { setupTestDb } from '@tests/utils'
 import container from '@src/configs/inversify.config'
 import { IProjectTypeService, ITokenService, IUserService } from '@src/services'
 import { TYPES } from '@src/constants'
-import { ProjectTypeDocument, UserDocument } from '@src/types'
-import {
-  generateProject,
-  generateProjectType,
-  generateUser,
-  getNonPrivilegedRole,
-  getPrivilegedRole,
-} from '@tests/fixtures'
+import { generateProject, generateProjectType, generateUser } from '@tests/fixtures'
 import { StatusCodes } from 'http-status-codes'
-import { PRIVILEGES } from '@src/configs/role.config'
-import mongoose from 'mongoose'
-import { Project } from '@src/models'
+import { Project, ProjectTypeDocument, UserDocument } from '@src/models'
+import { ROLES } from '@src/configs/role.config'
 
 const projectTypeService = container.get<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE)
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
@@ -75,20 +68,18 @@ describe('Project type routes', () => {
   })
 
   describe('POST /api/v1/project-types - Create project type', () => {
-    let privilegedUser: UserDocument
-    let privilegedAccessToken: string
+    let adminUser: UserDocument
+    let adminAccessToken: string
     const rawProjectType = generateProjectType()
     beforeEach(async () => {
-      privilegedUser = await userService.createUser(
-        generateUser({ role: getPrivilegedRole(PRIVILEGES.CREATE_PROJECT_TYPES) }),
-      )
-      privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
+      adminUser = await userService.createUser(generateUser({ role: ROLES.ADMIN }))
+      adminAccessToken = tokenService.generateAccessToken(adminUser)
     })
 
     it('should return 201 (created) and correctly create a project type', async () => {
       const res = await request
         .post('/api/v1/project-types')
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(rawProjectType)
         .expect(StatusCodes.CREATED)
 
@@ -106,7 +97,7 @@ describe('Project type routes', () => {
     it('should return 400 (bad request) if required fields is missing', async () => {
       await request
         .post('/api/v1/project-types')
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send({})
         .expect(StatusCodes.BAD_REQUEST)
     })
@@ -114,7 +105,7 @@ describe('Project type routes', () => {
     it('should return 400 (bad request) if send invalid fields', async () => {
       await request
         .post('/api/v1/project-types')
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send({ ...rawProjectType, invalidField: 'invalid-fields' })
         .expect(StatusCodes.BAD_REQUEST)
     })
@@ -127,15 +118,11 @@ describe('Project type routes', () => {
     })
 
     it("should return 403 (forbidden) if caller doesn't have proper privilege", async () => {
-      const nonPrivilegeUser = await userService.createUser(
-        generateUser({
-          role: getNonPrivilegedRole(PRIVILEGES.CREATE_PROJECT_TYPES),
-        }),
-      )
-      const nonPrivilegeAccessToken = tokenService.generateAccessToken(nonPrivilegeUser)
+      const manager = await userService.createUser(generateUser({ role: ROLES.MANAGER }))
+      const managerAccessToken = tokenService.generateAccessToken(manager)
       await request
         .post('/api/v1/project-types')
-        .set('Authorization', nonPrivilegeAccessToken)
+        .set('Authorization', managerAccessToken)
         .send(rawProjectType)
         .expect(StatusCodes.FORBIDDEN)
     })
@@ -144,22 +131,20 @@ describe('Project type routes', () => {
   describe('PATCH /api/v1/project-types/:projectTypeId - Update project type by id', () => {
     let projectType: ProjectTypeDocument
 
-    let privilegedUser: UserDocument
-    let privilegedAccessToken: string
+    let adminUser: UserDocument
+    let adminAccessToken: string
     const updatePayload = generateProjectType()
     beforeEach(async () => {
       projectType = await projectTypeService.createProjectType(generateProjectType())
 
-      privilegedUser = await userService.createUser(
-        generateUser({ role: getPrivilegedRole(PRIVILEGES.UPDATE_PROJECT_TYPES) }),
-      )
-      privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
+      adminUser = await userService.createUser(generateUser({ role: ROLES.ADMIN }))
+      adminAccessToken = tokenService.generateAccessToken(adminUser)
     })
 
     it('should return 200 (ok) and correctly update a project types', async () => {
       const res = await request
         .patch('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.OK)
 
@@ -181,7 +166,7 @@ describe('Project type routes', () => {
     it("should return 404 (not found) if project type id doesn't exist", async () => {
       await request
         .patch('/api/v1/project-types/' + new mongoose.Types.ObjectId().toHexString())
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.NOT_FOUND)
     })
@@ -189,7 +174,7 @@ describe('Project type routes', () => {
     it('should return 400 (bad request) if send un-allow fields', async () => {
       await request
         .patch('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send({ ...updatePayload, unAllowField: 'abc' })
         .expect(StatusCodes.BAD_REQUEST)
     })
@@ -201,17 +186,13 @@ describe('Project type routes', () => {
         .expect(StatusCodes.UNAUTHORIZED)
     })
 
-    it("should return 403 (forbidden) if caller doesn't have needed privileges", async () => {
-      const nonPrivilegedUser = await userService.createUser(
-        generateUser({
-          role: getNonPrivilegedRole(PRIVILEGES.UPDATE_PROJECT_TYPES),
-        }),
-      )
-      const nonPrivilegedAccessToken = tokenService.generateAccessToken(nonPrivilegedUser)
+    it('should return 403 (forbidden) if caller is non-admin', async () => {
+      const manager = await userService.createUser(generateUser({ role: ROLES.MANAGER }))
+      const managerAccessToken = tokenService.generateAccessToken(manager)
 
       await request
         .patch('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', nonPrivilegedAccessToken)
+        .set('Authorization', managerAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.FORBIDDEN)
     })
@@ -223,7 +204,7 @@ describe('Project type routes', () => {
       updatePayload.name = projectType2.name
       await request
         .patch('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.BAD_REQUEST)
     })
@@ -232,21 +213,19 @@ describe('Project type routes', () => {
   describe('DELETE /api/v1/project-types/:projectTypeId - Delete project type by id', () => {
     let projectType: ProjectTypeDocument
 
-    let privilegedUser: UserDocument
-    let privilegedAccessToken: string
+    let admin: UserDocument
+    let adminAccessToken: string
     beforeEach(async () => {
       projectType = await projectTypeService.createProjectType(generateProjectType())
 
-      privilegedUser = await userService.createUser(
-        generateUser({ role: getPrivilegedRole(PRIVILEGES.DELETE_PROJECT_TYPES) }),
-      )
-      privilegedAccessToken = tokenService.generateAccessToken(privilegedUser)
+      admin = await userService.createUser(generateUser({ role: ROLES.ADMIN }))
+      adminAccessToken = tokenService.generateAccessToken(admin)
     })
 
     it('should return 204 (no content) and correctly delete a project type', async () => {
       await request
         .delete('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .expect(StatusCodes.NO_CONTENT)
 
       await expect(Project.countDocuments({ _id: projectType._id })).resolves.toBe(0)
@@ -255,14 +234,14 @@ describe('Project type routes', () => {
     it("should return 404 (not found) if project type id doesn't exist", async () => {
       await request
         .delete('/api/v1/project-types/' + new mongoose.Types.ObjectId().toHexString())
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .expect(StatusCodes.NOT_FOUND)
     })
 
     it('should return 400 (bad request) if project type id is invalid', async () => {
       await request
         .delete('/api/v1/project-types/' + 'invalid-id')
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .expect(StatusCodes.BAD_REQUEST)
     })
 
@@ -272,17 +251,13 @@ describe('Project type routes', () => {
         .expect(StatusCodes.UNAUTHORIZED)
     })
 
-    it("should return 403 (forbidden) if caller doesn't have needed privileges", async () => {
-      const nonPrivilegedUser = await userService.createUser(
-        generateUser({
-          role: getNonPrivilegedRole(PRIVILEGES.DELETE_PROJECT_TYPES),
-        }),
-      )
-      const nonPrivilegedAccessToken = tokenService.generateAccessToken(nonPrivilegedUser)
+    it('should return 403 (forbidden) if caller is non-admin', async () => {
+      const manager = await userService.createUser(generateUser({ role: ROLES.MANAGER }))
+      const managerAccessToken = tokenService.generateAccessToken(manager)
 
       await request
         .delete('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', nonPrivilegedAccessToken)
+        .set('Authorization', managerAccessToken)
         .expect(StatusCodes.FORBIDDEN)
     })
 
@@ -290,7 +265,7 @@ describe('Project type routes', () => {
       await Project.create(generateProject({ projectType: projectType.id }))
       await request
         .delete('/api/v1/project-types/' + projectType.id)
-        .set('Authorization', privilegedAccessToken)
+        .set('Authorization', adminAccessToken)
         .expect(StatusCodes.BAD_REQUEST)
     })
   })

@@ -5,13 +5,13 @@ import supertest, { SuperTest } from 'supertest'
 
 import setup from '@src/setup'
 import { setupTestDb } from '@tests/utils'
-import { UserDocument } from '@src/types'
 import container from '@src/configs/inversify.config'
 import { ITokenService, IUserService } from '@src/services'
 import { TYPES } from '@src/constants'
 import { generateUser } from '@tests/fixtures'
 import { StatusCodes } from 'http-status-codes'
 import { setupTestEnv } from '@tests/utils/setup-test-env'
+import { UserDocument } from '@src/models'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)

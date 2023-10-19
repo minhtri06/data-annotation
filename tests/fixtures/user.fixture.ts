@@ -1,9 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { USER_WORK_STATUS } from '@src/constants'
-import ROLE_PRIVILEGES, { ROLES } from '@src/configs/role.config'
 
 import { IUser } from '@src/models'
-import { Privilege } from '@src/types'
 
 export const generateUser = (
   overwriteFields: Partial<IUser> = {},
@@ -19,22 +17,4 @@ export const generateUser = (
     workStatus: USER_WORK_STATUS.ON,
     ...overwriteFields,
   }
-}
-
-export const getPrivilegedRole = (privilege: Privilege) => {
-  for (const role of Object.values(ROLES)) {
-    if (ROLE_PRIVILEGES[role].includes(privilege)) {
-      return role
-    }
-  }
-  throw new Error(`No role has '${privilege}' privilege `)
-}
-
-export const getNonPrivilegedRole = (privilege: Privilege) => {
-  for (const role of Object.values(ROLES)) {
-    if (!ROLE_PRIVILEGES[role].includes(privilege)) {
-      return role
-    }
-  }
-  throw new Error(`No role that does not have '${privilege}' privilege`)
 }

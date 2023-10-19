@@ -1,4 +1,4 @@
-import { Model, Schema, Types, model } from 'mongoose'
+import { HydratedDocument, Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
 import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
@@ -107,7 +107,7 @@ export interface IProjectModel extends Model<IProject> {
   paginate: Paginate<IProject>
 }
 
-export type ProjectDocument = InstanceType<IProjectModel>
+export type ProjectDocument = HydratedDocument<IProject>
 
 const projectSchema = new Schema<IProject>(
   {

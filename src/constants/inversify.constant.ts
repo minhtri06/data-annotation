@@ -11,6 +11,7 @@ export const TYPES = {
   // middlewares
   GENERAL_MIDDLEWARE: Symbol('general-middleware'),
   UPLOAD_MIDDLEWARE: Symbol('upload-middleware'),
+  PROJECT_MIDDLEWARE: Symbol('project-middleware'),
 
   // models
   PROJECT_TYPE_MODEL: Symbol('project-type-model'),

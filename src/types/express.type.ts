@@ -1,6 +1,12 @@
 import { Request } from 'express'
 
-import { IUser } from '@src/models'
+import {
+  IUser,
+  ProjectDocument,
+  ProjectTypeDocument,
+  SampleDocument,
+  UserDocument,
+} from '@src/models'
 
 export type RequestSchema = {
   body?: object
@@ -9,11 +15,17 @@ export type RequestSchema = {
 }
 
 export type CustomRequest<ReqSchema extends RequestSchema = RequestSchema> = Request<
-  Exclude<RequestSchema['params'], undefined>,
   object,
-  Exclude<RequestSchema['body'], undefined>,
-  Exclude<RequestSchema['query'], undefined>
+  object,
+  object,
+  object
 > &
   Pick<ReqSchema, 'body' | 'params' | 'query'> & {
-    user?: { _id: string; role: IUser['role'] }
+    user?: { id: string; role: IUser['role'] }
+    data?: {
+      projectType?: ProjectTypeDocument
+      project?: ProjectDocument
+      sample?: SampleDocument
+      user?: UserDocument
+    }
   }

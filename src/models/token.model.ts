@@ -1,4 +1,4 @@
-import { Model, Schema, Types, model } from 'mongoose'
+import { HydratedDocument, Model, Schema, Types, model } from 'mongoose'
 
 import { MODEL_NAMES, TOKEN_TYPES } from '@src/constants'
 import { toJSONPlugin, handleErrorPlugin } from './plugins'
@@ -42,7 +42,7 @@ export interface IRawToken {
 
 export interface ITokenModel extends Model<IToken> {}
 
-export type TokenDocument = InstanceType<ITokenModel>
+export type TokenDocument = HydratedDocument<IToken>
 
 const tokenSchema = new Schema<IToken>(
   {

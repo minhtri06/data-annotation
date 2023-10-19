@@ -6,13 +6,12 @@ import { StatusCodes } from 'http-status-codes'
 
 import { TYPES, USER_WORK_STATUS } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { PRIVILEGES, ROLES } from '@src/configs/role.config'
+import { ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services'
 import setup from '@src/setup'
-import { UserDocument } from '@src/types'
-import { generateUser, getNonPrivilegedRole, getPrivilegedRole } from '@tests/fixtures'
+import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
-import { User } from '@src/models'
+import { User, UserDocument } from '@src/models'
 import { getObjectKeys } from '@src/utils'
 import mongoose from 'mongoose'
 import { faker } from '@faker-js/faker'
@@ -165,7 +164,7 @@ describe('Users routes', () => {
       })
     })
 
-    it('should return 403 (forbidden) if caller is not admin', async () => {
+    it('should return 403 (forbidden) if caller is non-admin', async () => {
       const user = await userService.createUser(generateUser())
       const accessToken = tokenService.generateAccessToken(user)
 
@@ -270,8 +269,8 @@ describe('Users routes', () => {
   })
 
   describe('PATCH /api/v1/users/:userId - Update user by id', () => {
-    let caller: UserDocument
-    let callerAccessToken: string
+    let admin: UserDocument
+    let adminAccessToken: string
     let user: UserDocument
     const updatePayload = {
       name: faker.person.fullName(),
@@ -281,17 +280,16 @@ describe('Users routes', () => {
       workStatus: USER_WORK_STATUS.OFF,
     }
     beforeEach(async () => {
-      const role = getPrivilegedRole(PRIVILEGES.UPDATE_USERS)
-      caller = await userService.createUser(generateUser({ role }))
+      admin = await userService.createUser(generateUser({ role: ROLES.ADMIN }))
       user = await userService.createUser(generateUser())
 
-      callerAccessToken = tokenService.generateAccessToken(caller)
+      adminAccessToken = tokenService.generateAccessToken(admin)
     })
 
     it('should return 200 (ok) and correctly update user info', async () => {
       const res = await request
         .patch('/api/v1/users/' + user.id)
-        .set('Authorization', callerAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.OK)
 
@@ -320,15 +318,15 @@ describe('Users routes', () => {
         .expect(StatusCodes.UNAUTHORIZED)
     })
 
-    it("should return 403 (forbidden) if caller does't have proper privilege", async () => {
-      caller = await userService.createUser(
-        generateUser({ role: getNonPrivilegedRole(PRIVILEGES.UPDATE_USERS) }),
+    it('should return 403 (forbidden) if caller is non-admin', async () => {
+      const annotator = await userService.createUser(
+        generateUser({ role: ROLES.ANNOTATOR }),
       )
-      callerAccessToken = tokenService.generateAccessToken(caller)
+      const annotatorAccessToken = tokenService.generateAccessToken(annotator)
 
       await request
         .patch('/api/v1/users/' + user.id)
-        .set('Authorization', callerAccessToken)
+        .set('Authorization', annotatorAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.FORBIDDEN)
     })
@@ -342,7 +340,7 @@ describe('Users routes', () => {
       for (const payload of unAllowedUpdatePayloads) {
         await request
           .patch('/api/v1/users/' + user.id)
-          .set('Authorization', callerAccessToken)
+          .set('Authorization', adminAccessToken)
           .send(payload)
           .expect(StatusCodes.BAD_REQUEST)
       }
@@ -351,7 +349,7 @@ describe('Users routes', () => {
     it('should return 404 (not found) if user id not exist', async () => {
       await request
         .patch('/api/v1/users/' + new mongoose.Types.ObjectId().toHexString())
-        .set('Authorization', callerAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.NOT_FOUND)
     })
@@ -359,7 +357,7 @@ describe('Users routes', () => {
     it('should return 400 (bad request) if id is not valid', async () => {
       await request
         .patch('/api/v1/users/' + 'invalid-mongodb-id')
-        .set('Authorization', callerAccessToken)
+        .set('Authorization', adminAccessToken)
         .send(updatePayload)
         .expect(StatusCodes.BAD_REQUEST)
     })
