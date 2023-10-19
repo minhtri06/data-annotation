@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Container, interfaces } from 'inversify'
+import { Container } from 'inversify'
 
 import {
   IAuthService,
@@ -14,21 +14,21 @@ import {
   ProjectTypeService,
   TokenService,
   UserService,
-} from '../services'
+} from '@src/services'
 import {
   GeneralMiddleware,
   IGeneralMiddleware,
   IUploadMiddleware,
   UploadMiddleware,
-} from '../middlewares'
+} from '@src/middlewares'
 import {
   authControllerFactory,
   meControllerFactory,
   projectControllerFactory,
   projectTypeControllerFactory,
   userControllerFactory,
-} from '../controllers'
-import { TYPES } from '../constants'
+} from '@src/controllers'
+import { TYPES } from '@src/constants'
 import {
   IProjectModel,
   IProjectTypeModel,
@@ -45,6 +45,8 @@ import {
   IProjectMiddleware,
   ProjectMiddleware,
 } from '@src/middlewares/project.middleware'
+import { Multer } from 'multer'
+import { imageUploader } from './cloudinary.config'
 
 const container = new Container()
 
@@ -53,17 +55,6 @@ container.bind<IAuthService>(TYPES.AUTH_SERVICE).to(AuthService)
 container
   .bind<IStorageService>(TYPES.IMAGE_STORAGE_SERVICE)
   .toConstantValue(new ImageStorageService())
-container
-  .bind<interfaces.Factory<IStorageService>>(TYPES.STORAGE_SERVICE_FACTORY)
-  .toFactory<IStorageService, ['image']>((context) => {
-    return (fileType) => {
-      if (fileType === 'image') {
-        return context.container.get<IStorageService>(TYPES.IMAGE_STORAGE_SERVICE)
-      } else {
-        throw new Error('storage not implemented')
-      }
-    }
-  })
 container.bind<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE).to(ProjectTypeService)
 container.bind<IProjectService>(TYPES.PROJECT_SERVICE).to(ProjectService)
 container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
@@ -80,6 +71,9 @@ container.bind<IProjectModel>(TYPES.PROJECT_MODEL).toConstantValue(Project)
 container.bind<ISampleModel>(TYPES.SAMPLE_MODEL).toConstantValue(Sample)
 container.bind<ITokenModel>(TYPES.TOKEN_MODEL).toConstantValue(Token)
 container.bind<IUserModel>(TYPES.USER_MODEL).toConstantValue(User)
+
+// bind uploaders
+container.bind<Multer>(TYPES.IMAGE_UPLOADER).toConstantValue(imageUploader)
 
 // register controllers
 authControllerFactory(container)

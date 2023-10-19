@@ -251,10 +251,19 @@ const projectSchema = new Schema<IProject>(
         }
 
         // check conflict config
-        if (annotationConfig.hasLabelSets && annotationConfig.labelSets.length === 0) {
-          throw new Error(
-            'annotationConfig.hasLabelSets is tru but annotationConfig.labelSets is empty',
-          )
+        if (annotationConfig.hasLabelSets) {
+          if (annotationConfig.labelSets.length === 0) {
+            throw new Error(
+              'annotationConfig.hasLabelSets is true but annotationConfig.labelSets is empty',
+            )
+          }
+          annotationConfig.labelSets.forEach((labelSet, index) => {
+            if (labelSet.labels.length === 0) {
+              throw new Error(
+                `annotationConfig.hasLabelSets is true but annotationConfig.labelSets[${index}].labels is empty`,
+              )
+            }
+          })
         }
 
         // check conflict config in each individualTextConfigs

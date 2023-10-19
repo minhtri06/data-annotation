@@ -15,8 +15,15 @@ import { validateSortFields } from '@src/helpers'
 export class ProjectService implements IProjectService {
   constructor(@inject(TYPES.PROJECT_MODEL) private Project: IProjectModel) {}
 
-  async getProjectById(projectId: string): Promise<ProjectDocument | null> {
-    return await this.Project.findById(projectId)
+  async getProjectById(
+    projectId: string,
+    { populate }: { populate?: string } = {},
+  ): Promise<ProjectDocument | null> {
+    const query = this.Project.findById(projectId)
+    if (populate) {
+      void query.populate(populate)
+    }
+    return await query
   }
 
   async getProjects(

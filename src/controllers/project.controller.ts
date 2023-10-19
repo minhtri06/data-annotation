@@ -61,10 +61,15 @@ export const projectControllerFactory = (container: Container) => {
       '/:projectId',
       generalMiddleware.auth(),
       generalMiddleware.validate(schema.getProjectById),
-      projectMiddleware.getProjectById,
     )
-    getProjectById(req: CustomRequest<schema.GetProjectById>, res: Response) {
-      return res.status(StatusCodes.OK).json({ project: req.data?.project })
+    async getProjectById(req: CustomRequest<schema.GetProjectById>, res: Response) {
+      const project = await this.projectService.getProjectById(req.params.projectId, {
+        populate: 'projectType manager',
+      })
+      if (!project) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
+      }
+      return res.status(StatusCodes.OK).json({ project })
     }
 
     @httpPatch(

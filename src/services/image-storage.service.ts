@@ -2,17 +2,14 @@ import multer, { Multer } from 'multer'
 import cloudinary, { imageStorage } from '../configs/cloudinary.config'
 import { injectable } from 'inversify'
 
-import { StorageService } from './storage.service'
 import { IStorageService } from './storage.service.interface'
 import { ValidationException } from './exceptions'
 
 @injectable()
-export class ImageStorageService extends StorageService implements IStorageService {
+export class ImageStorageService implements IStorageService {
   protected uploader: Multer
 
   constructor() {
-    super()
-
     this.uploader = multer({
       storage: imageStorage,
       limits: { fileSize: 2 * 1024 * 1024 },

@@ -48,11 +48,7 @@ export const meControllerFactory = (container: Container) => {
       return res.status(StatusCodes.OK).json({ me })
     }
 
-    @httpPut(
-      '/avatar',
-      generalMiddleware.auth(),
-      uploadMiddleware.uploadSingle('image', 'avatar'),
-    )
+    @httpPut('/avatar', generalMiddleware.auth(), uploadMiddleware.uploadImage('avatar'))
     async updateMyAvatar(req: CustomRequest, res: Response) {
       if (!req.user) {
         throw new UnauthorizedException('Unauthorized', { isOperational: false })

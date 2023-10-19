@@ -19,4 +19,8 @@ export const TYPES = {
   SAMPLE_MODEL: Symbol('sample-model'),
   TOKEN_MODEL: Symbol('token-model'),
   USER_MODEL: Symbol('user-model'),
+
+  // uploader
+  IMAGE_UPLOADER: Symbol('image-uploader'),
+  DATA_FILE_UPLOADER: Symbol('data-file-uploader'),
 } as const

@@ -167,6 +167,6 @@ export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
           inlineLabels: Joi.array().items(Joi.string()).required(),
         })
         .required(),
-    }).required(),
+    }),
   },
 }

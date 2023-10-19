@@ -11,6 +11,7 @@ export const generateSample = (
 ): Omit<IRawSample, '_id' | 'createdAt' | 'updatedAt' | 'annotation' | 'comments'> => {
   return {
     texts: [faker.lorem.paragraph(), faker.lorem.paragraph()],
+    project: new mongoose.Types.ObjectId().toHexString(),
     status: SAMPLE_STATUS.NEW,
     ...overwriteFields,
   }

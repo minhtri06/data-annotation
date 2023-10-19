@@ -3,7 +3,10 @@ import { PaginateResult } from '@src/types'
 import { IRawProject, ProjectDocument } from '@src/models'
 
 export interface IProjectService {
-  getProjectById(projectId: string): Promise<ProjectDocument | null>
+  getProjectById(
+    projectId: string,
+    options?: { populate?: string },
+  ): Promise<ProjectDocument | null>
 
   getProjects(
     filter: GetProjectsFilter,

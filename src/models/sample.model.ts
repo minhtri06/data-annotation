@@ -10,6 +10,8 @@ export interface ISample {
 
   status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
 
+  project: Types.ObjectId
+
   annotation: {
     labelSets: Types.DocumentArray<{
       selectedLabels: Types.Array<string>
@@ -43,6 +45,8 @@ export interface IRawSample {
   texts: string[]
 
   status: string
+
+  project: string
 
   annotation: {
     labelSets:
@@ -100,9 +104,12 @@ const sampleSchema = new Schema<ISample>(
       required: true,
     },
 
+    project: { type: Schema.Types.ObjectId, required: true },
+
     status: {
       type: String,
       enum: Object.values(SAMPLE_STATUS),
+      default: SAMPLE_STATUS.NEW,
       validate: function (status: ISample['status']) {
         const sample = this as unknown as SampleDocument
         if (sample.isNew && status !== SAMPLE_STATUS.NEW) {
