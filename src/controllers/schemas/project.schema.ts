@@ -170,3 +170,14 @@ export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
     }),
   },
 }
+
+export type UploadSamples = {
+  params: {
+    projectId: string
+  }
+}
+export const uploadSamples: CustomSchemaMap<UploadSamples> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}

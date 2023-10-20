@@ -11,12 +11,13 @@ import {
   IUserService,
   UpdateUserPayload,
 } from './user.service.interface'
-import { IStorageService } from './storage.service.interface'
+import { IImageStorageService } from './image-storage.service.interface'
 
 @injectable()
 export class UserService implements IUserService {
   constructor(
-    @inject(TYPES.IMAGE_STORAGE_SERVICE) private imageStorageService: IStorageService,
+    @inject(TYPES.IMAGE_STORAGE_SERVICE)
+    private imageStorageService: IImageStorageService,
     @inject(TYPES.USER_MODEL) private User: IUserModel,
   ) {}
 

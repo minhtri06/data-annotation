@@ -5,7 +5,7 @@ import {
   IAuthService,
   IProjectService,
   IProjectTypeService,
-  IStorageService,
+  IImageStorageService,
   ITokenService,
   IUserService,
   AuthService,
@@ -14,6 +14,8 @@ import {
   ProjectTypeService,
   TokenService,
   UserService,
+  ISampleStorageService,
+  SampleStorageService,
 } from '@src/services'
 import {
   GeneralMiddleware,
@@ -45,25 +47,10 @@ import {
   IProjectMiddleware,
   ProjectMiddleware,
 } from '@src/middlewares/project.middleware'
-import { Multer } from 'multer'
-import { imageUploader } from './cloudinary.config'
+import { ISampleService } from '@src/services/sample.service.interface'
+import { SampleService } from '@src/services/sample.service'
 
 const container = new Container()
-
-// bind services
-container.bind<IAuthService>(TYPES.AUTH_SERVICE).to(AuthService)
-container
-  .bind<IStorageService>(TYPES.IMAGE_STORAGE_SERVICE)
-  .toConstantValue(new ImageStorageService())
-container.bind<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE).to(ProjectTypeService)
-container.bind<IProjectService>(TYPES.PROJECT_SERVICE).to(ProjectService)
-container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
-container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
-
-// bind middlewares
-container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddleware)
-container.bind<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE).to(UploadMiddleware)
-container.bind<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE).to(ProjectMiddleware)
 
 // bind models
 container.bind<IProjectTypeModel>(TYPES.PROJECT_TYPE_MODEL).toConstantValue(ProjectType)
@@ -72,8 +59,24 @@ container.bind<ISampleModel>(TYPES.SAMPLE_MODEL).toConstantValue(Sample)
 container.bind<ITokenModel>(TYPES.TOKEN_MODEL).toConstantValue(Token)
 container.bind<IUserModel>(TYPES.USER_MODEL).toConstantValue(User)
 
-// bind uploaders
-container.bind<Multer>(TYPES.IMAGE_UPLOADER).toConstantValue(imageUploader)
+// bind services
+container.bind<IAuthService>(TYPES.AUTH_SERVICE).to(AuthService)
+container
+  .bind<IImageStorageService>(TYPES.IMAGE_STORAGE_SERVICE)
+  .toConstantValue(new ImageStorageService())
+container.bind<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE).to(ProjectTypeService)
+container.bind<IProjectService>(TYPES.PROJECT_SERVICE).to(ProjectService)
+container.bind<ISampleService>(TYPES.SAMPLE_SERVICE).to(SampleService)
+container
+  .bind<ISampleStorageService>(TYPES.SAMPLE_STORAGE_SERVICE)
+  .to(SampleStorageService)
+container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
+container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
+
+// bind middlewares
+container.bind<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE).to(GeneralMiddleware)
+container.bind<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE).to(UploadMiddleware)
+container.bind<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE).to(ProjectMiddleware)
 
 // register controllers
 authControllerFactory(container)

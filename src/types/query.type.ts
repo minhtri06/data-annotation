@@ -5,6 +5,7 @@ export type SelectOption = Parameters<typeof Query.prototype.select>[0]
 export type PopulateOption = Parameters<typeof Query.prototype.populate>[0]
 export type QueryOptions<DocType = { [key: string]: unknown }> = {
   sort?: SortOption<Partial<DocType>> | string
+  skip?: number
   page?: number
   limit?: number
   select?: SelectOption

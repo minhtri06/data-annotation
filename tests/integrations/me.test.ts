@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker'
 
 import { TYPES } from '@src/constants'
 import container from '@src/configs/inversify.config'
-import { IStorageService, ITokenService, IUserService } from '@src/services'
+import { IImageStorageService, ITokenService, IUserService } from '@src/services'
 import setup from '@src/setup'
 import { generateUser } from '@tests/fixtures'
 import { setupTestDb } from '@tests/utils'
@@ -15,7 +15,9 @@ import { User, UserDocument } from '@src/models'
 
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
-const imageStorageService = container.get<IStorageService>(TYPES.IMAGE_STORAGE_SERVICE)
+const imageStorageService = container.get<IImageStorageService>(
+  TYPES.IMAGE_STORAGE_SERVICE,
+)
 
 setupTestDb()
 
@@ -74,7 +76,7 @@ describe('Me routes', () => {
       const res = await request
         .put('/api/v1/me/avatar')
         .set('Authorization', accessToken)
-        .attach('avatar', avatarPath)
+        .attach('image:avatar', avatarPath)
         .expect(StatusCodes.OK)
 
       expect(typeof res.body.avatar).toBe('string')
@@ -86,7 +88,7 @@ describe('Me routes', () => {
       const res = await request
         .put('/api/v1/me/avatar')
         .set('Authorization', accessToken)
-        .attach('avatar', avatarPath)
+        .attach('image:avatar', avatarPath)
         .expect(StatusCodes.OK)
       const oldAvatar = res.body.avatar as string
 
@@ -94,7 +96,7 @@ describe('Me routes', () => {
       await request
         .put('/api/v1/me/avatar')
         .set('Authorization', accessToken)
-        .attach('avatar', avatarPath)
+        .attach('image:avatar', avatarPath)
         .expect(StatusCodes.OK)
       await expect(imageStorageService.checkExist(oldAvatar)).resolves.toBeFalsy()
     }, 20000)

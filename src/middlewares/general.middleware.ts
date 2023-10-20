@@ -2,11 +2,11 @@ import { ErrorRequestHandler, RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import Joi from 'joi'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 
 import envConfig from '@src/configs/env.config'
 import { CustomRequest, CustomSchemaMap, JwtPayload, RequestSchema, Role } from '../types'
-import { omitFields } from '@src/utils'
+import { pickFields } from '@src/utils'
 import ENV_CONFIG from '@src/configs/env.config'
 import {
   Exception,
@@ -15,6 +15,8 @@ import {
   ValidationException,
 } from '@src/services/exceptions'
 import { exceptionToStatusCode } from '@src/helpers'
+import { TYPES } from '@src/constants'
+import { IImageStorageService, ISampleStorageService } from '@src/services'
 
 export interface IGeneralMiddleware {
   handleNotFound: RequestHandler
@@ -28,11 +30,18 @@ export interface IGeneralMiddleware {
 
 @injectable()
 export class GeneralMiddleware implements IGeneralMiddleware {
+  constructor(
+    @inject(TYPES.IMAGE_STORAGE_SERVICE)
+    private imageStorageService: IImageStorageService,
+    @inject(TYPES.SAMPLE_STORAGE_SERVICE)
+    private sampleStorageService: ISampleStorageService,
+  ) {}
+
   public handleNotFound: RequestHandler = (req, res) => {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'Route not found' })
   }
 
-  public handleException: ErrorRequestHandler = (
+  public handleException: ErrorRequestHandler = async (
     err: Error & { code?: number; keyValue?: { [key: string]: string } },
     req,
     res,
@@ -41,10 +50,29 @@ export class GeneralMiddleware implements IGeneralMiddleware {
   ) => {
     const isOnProduction = ENV_CONFIG.NODE_ENV === 'prod'
 
+    if (req.file) {
+      console.log('delete file')
+      const [storageName] = req.file.fieldname.split(':')
+      if (storageName === this.imageStorageService.storageName) {
+        await this.imageStorageService.deleteFile(req.file.filename)
+      }
+      if (storageName === this.sampleStorageService.storageName) {
+        await this.sampleStorageService.deleteFile(req.file.filename)
+      }
+    }
+
     if (err instanceof Exception) {
+      const responseFields = [
+        'message',
+        'type',
+        'details',
+        'path',
+        'model',
+      ] as (keyof typeof err)[]
+
       if (isOnProduction) {
         const statusCode = exceptionToStatusCode(err)
-        const response = omitFields(err, 'name', 'isOperational', 'stack')
+        const response = pickFields(err, ...responseFields)
 
         if (err instanceof UnauthorizedException) {
           return res.status(statusCode).json({ message: 'Unauthorized' })
@@ -59,7 +87,7 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         return res.status(statusCode).json(response)
       } else {
         const statusCode = exceptionToStatusCode(err)
-        const response = omitFields(err, 'name', 'isOperational')
+        const response = pickFields(err, ...responseFields, 'stack')
 
         if (!err.isOperational) {
           return res

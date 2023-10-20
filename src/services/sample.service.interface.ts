@@ -1,7 +1,11 @@
-import { IRawSample, SampleDocument } from '@src/models'
+import { SampleDocument } from '@src/models'
+import { PaginateResult } from '@src/types'
 
 export interface ISampleService {
-  addSample(projectId: string, payload: AddSamplesPayloads): Promise<SampleDocument[]>
-}
+  getSamplesOfProject(
+    filter: { projectId: string },
+    options: { skip?: number; page?: number; limit?: number },
+  ): Promise<PaginateResult<SampleDocument>>
 
-export type AddSamplesPayloads = Readonly<Pick<IRawSample, 'texts'>>[]
+  addSamplesFromFile(projectId: string, filename: string): Promise<void>
+}

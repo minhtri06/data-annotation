@@ -14,8 +14,9 @@ export const paginatePlugin = (schema: Schema) => {
     filter: FilterQuery<T> = {},
     {
       sort,
-      page,
-      limit,
+      page = 1,
+      limit = ENV_CONFIG.DEFAULT_PAGE_LIMIT,
+      skip = 0,
       select,
       populate,
       lean,
@@ -37,9 +38,7 @@ export const paginatePlugin = (schema: Schema) => {
       void query.lean()
     }
 
-    page = page || 1
-    limit = limit || ENV_CONFIG.DEFAULT_PAGE_LIMIT
-    const skip = (page - 1) * limit
+    skip = skip + (page - 1) * limit
 
     void query.skip(skip).limit(limit)
 

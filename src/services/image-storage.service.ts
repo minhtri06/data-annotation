@@ -1,27 +1,26 @@
-import multer, { Multer } from 'multer'
 import cloudinary, { imageStorage } from '../configs/cloudinary.config'
 import { injectable } from 'inversify'
 
-import { IStorageService } from './storage.service.interface'
+import { IImageStorageService } from './image-storage.service.interface'
+import multer, { Multer } from 'multer'
 import { ValidationException } from './exceptions'
 
 @injectable()
-export class ImageStorageService implements IStorageService {
-  protected uploader: Multer
+export class ImageStorageService implements IImageStorageService {
+  storageName = 'image'
 
-  constructor() {
-    this.uploader = multer({
-      storage: imageStorage,
-      limits: { fileSize: 2 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
-        const [type] = file.mimetype.split('/')
-        if (type !== 'image') {
-          cb(new ValidationException('Invalid image', { type: 'invalid-image-upload' }))
-        }
-        cb(null, true)
-      },
-    })
-  }
+  uploader: Multer = multer({
+    storage: imageStorage,
+    limits: { fileSize: 2 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const [type] = file.mimetype.split('/')
+      if (type !== 'image') {
+        cb(new ValidationException('Invalid image', { type: 'invalid-image-upload' }))
+      }
+
+      cb(null, true)
+    },
+  })
 
   async deleteFile(filename: string) {
     await cloudinary.uploader.destroy(filename)

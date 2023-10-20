@@ -3,7 +3,7 @@ import { Container, inject } from 'inversify'
 import { controller, httpGet, httpPatch, httpPost } from 'inversify-express-utils'
 
 import { TYPES } from '@src/constants'
-import { IGeneralMiddleware } from '@src/middlewares'
+import { IGeneralMiddleware, IUploadMiddleware } from '@src/middlewares'
 import { IProjectService } from '@src/services'
 import { ROLES } from '@src/configs/role.config'
 import { CustomRequest } from '@src/types'
@@ -12,18 +12,21 @@ import { StatusCodes } from 'http-status-codes'
 import { pickFields } from '@src/utils'
 import { IProjectMiddleware } from '@src/middlewares/project.middleware'
 import { Exception } from '@src/services/exceptions'
+import { ISampleService } from '@src/services/sample.service.interface'
 
 export const projectControllerFactory = (container: Container) => {
   const { ADMIN, MANAGER } = ROLES
 
   const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const uploadMiddleware = container.get<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE)
   const projectMiddleware = container.get<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE)
 
   @controller('/projects')
   class ProjectController {
     constructor(
       @inject(TYPES.PROJECT_SERVICE)
-      protected projectService: IProjectService,
+      private projectService: IProjectService,
+      @inject(TYPES.SAMPLE_SERVICE) private sampleService: ISampleService,
     ) {}
 
     @httpGet(
@@ -85,6 +88,20 @@ export const projectControllerFactory = (container: Container) => {
       }
       await this.projectService.updateProject(req.data.project, req.body)
       return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPost(
+      '/:projectId/samples/upload-samples',
+      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
+      generalMiddleware.validate(schema.uploadSamples),
+      uploadMiddleware.uploadSample('sample:sample-data'),
+    )
+    async uploadSamples(req: CustomRequest<schema.UploadSamples>, res: Response) {
+      if (!req.file) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Data is required' })
+      }
+      await this.sampleService.addSamplesFromFile(req.params.projectId, req.file.filename)
+      return res.status(StatusCodes.OK).json({ message: 'Upload successfully' })
     }
   }
 
