@@ -14,16 +14,18 @@ import {
   CreateProjectPayload,
   IProjectService,
   IProjectTypeService,
+  ISampleService,
   ITokenService,
   IUserService,
   UpdateProjectPayload,
 } from '@src/services'
-import { PROJECT_PHASES, TYPES } from '@src/constants'
+import { PROJECT_PHASES, SAMPLE_STATUSES, TYPES } from '@src/constants'
 import {
   createAdminUser,
   createAnnotatingPhaseProject,
   createManagerUser,
   createOpenForJoiningPhaseProject,
+  createSettingUpPhaseProject,
   generateProject,
   generateProjectType,
   generateUser,
@@ -43,6 +45,7 @@ import {
 const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
 const projectService = container.get<IProjectService>(TYPES.PROJECT_SERVICE)
+const sampleService = container.get<ISampleService>(TYPES.SAMPLE_SERVICE)
 const projectTypeService = container.get<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE)
 const Sample = container.get<ISampleModel>(TYPES.SAMPLE_MODEL)
 const Project = container.get<IProjectModel>(TYPES.PROJECT_MODEL)
@@ -947,29 +950,18 @@ describe('Project routes', () => {
   })
 
   describe('PATCH /api/v1/projects/:projectId/phases - Turn project to next phase', () => {
-    let manager: UserDocument
-    let managerAccessToken: string
-
-    let project: ProjectDocument
-
-    beforeEach(async () => {
-      manager = await userService.createUser(generateUser({ role: ROLES.MANAGER }))
-      managerAccessToken = tokenService.generateAccessToken(manager)
-
-      project = await projectService.createProject(
-        generateProject({ manager: manager.id }),
-      )
-      await Sample.insertMany([
-        { texts: ['Text 1', 'Text 2'], project: project._id, number: 1 },
-        { texts: ['Text 1', 'Text 2'], project: project._id, number: 2 },
-        { texts: ['Text 1', 'Text 2'], project: project._id, number: 3 },
-        { texts: ['Text 1', 'Text 2'], project: project._id, number: 4 },
-      ])
-      project.numberOfSamples = 4
-      await project.save()
-    })
-
     describe("When project is in 'setting up' phase", () => {
+      let manager: UserDocument
+      let managerAccessToken: string
+      let project: ProjectDocument
+
+      beforeEach(async () => {
+        const result = await createSettingUpPhaseProject({ numberOfSamples: 3 })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        project = result.project
+      })
+
       it("should return 200 (ok) and turn project to 'open for joining phase'", async () => {
         const res = await request
           .patch(`/api/v1/projects/${project.id}/phases`)
@@ -982,9 +974,10 @@ describe('Project routes', () => {
       })
 
       it('should return 400 (bad request) if project has no samples', async () => {
-        await Sample.deleteMany()
-        project.numberOfSamples = 0
-        await project.save()
+        const result = await createSettingUpPhaseProject({ numberOfSamples: 0 })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        project = result.project
 
         await request
           .patch(`/api/v1/projects/${project.id}/phases`)
@@ -994,15 +987,18 @@ describe('Project routes', () => {
     })
 
     describe("When project's phase is 'open for joining'", () => {
-      let user1: UserDocument
-      let user2: UserDocument
+      let manager: UserDocument
+      let managerAccessToken: string
+      let project: ProjectDocument
 
       beforeEach(async () => {
-        project.phase = PROJECT_PHASES.OPEN_FOR_JOINING
-        user1 = await userService.createUser(generateUser({ role: ROLES.ANNOTATOR }))
-        user2 = await userService.createUser(generateUser({ role: ROLES.ANNOTATOR }))
-        await projectService.joinProject(project, user1.id)
-        await projectService.joinProject(project, user2.id)
+        const result = await createOpenForJoiningPhaseProject({
+          numberOfSamples: 7,
+          numberOfAnnotators: 4,
+        })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        project = result.project
       })
 
       it("should return 200 (ok) and turn project to 'annotating' phase", async () => {
@@ -1016,8 +1012,31 @@ describe('Project routes', () => {
         expect(dbProject?.phase).toBe(PROJECT_PHASES.ANNOTATING)
       })
 
+      it('should return 200 (ok) and establish divisions', async () => {
+        const res = await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.OK)
+
+        expect(res.body.currentPhase).toBe(PROJECT_PHASES.ANNOTATING)
+        const dbProject = await Project.findById(project.id)
+        expect(dbProject).not.toBeNull()
+        expect(dbProject!.taskDivisions.length > 0).toBeTruthy()
+        for (const division of dbProject!.taskDivisions) {
+          expect(typeof division.startSample === 'number').toBeTruthy()
+          expect(typeof division.endSample === 'number').toBeTruthy()
+        }
+      })
+
       it('should return 400 (bad request) if project has no division', async () => {
-        await project.updateOne({ $set: { taskDivisions: [] } })
+        const result = await createOpenForJoiningPhaseProject({
+          numberOfSamples: 7,
+          numberOfAnnotators: 0, // no divisions
+        })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        project = result.project
+
         await request
           .patch(`/api/v1/projects/${project.id}/phases`)
           .set('Authorization', managerAccessToken)
@@ -1025,31 +1044,137 @@ describe('Project routes', () => {
       })
     })
 
-    it('should return 401 (unauthorized) if access token is missing', async () => {
-      await request
-        .patch(`/api/v1/projects/${project.id}/phases`)
-        .expect(StatusCodes.UNAUTHORIZED)
+    describe("When project's phase is 'annotating'", () => {
+      let manager: UserDocument
+      let managerAccessToken: string
+      let samples: SampleDocument[]
+      let project: ProjectDocument
+
+      beforeEach(async () => {
+        const result = await createAnnotatingPhaseProject({
+          numberOfSamples: 7,
+          numberOfAnnotators: 4,
+          projectOverwrite: {
+            annotationConfig: {
+              hasLabelSets: false,
+              labelSets: [],
+              hasGeneratedTexts: true,
+              textConfigs: [],
+            },
+          },
+        })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        samples = result.samples
+        project = result.project
+      })
+
+      it("should return 200 (ok) and turn project's phase to 'done' if all sample is annotated", async () => {
+        await Promise.all(
+          samples.map((sample) => {
+            return sampleService.annotateSample(project, sample, {
+              labelings: null,
+              generatedTexts: [faker.lorem.paragraph()],
+              textAnnotations: [],
+            })
+          }),
+        )
+
+        const res = await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.OK)
+
+        expect(res.body.currentPhase).toBe(PROJECT_PHASES.DONE)
+        const dbProject = await Project.findById(project.id)
+        expect(dbProject?.phase).toBe(PROJECT_PHASES.DONE)
+      })
+
+      it('should update completion time', async () => {
+        await Promise.all(
+          samples.map((sample) => {
+            return sampleService.annotateSample(project, sample, {
+              labelings: null,
+              generatedTexts: [faker.lorem.paragraph()],
+              textAnnotations: [],
+            })
+          }),
+        )
+
+        const res = await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.OK)
+
+        expect(res.body.currentPhase).toBe(PROJECT_PHASES.DONE)
+        const dbProject = await Project.findById(project.id)
+        expect(dbProject?.completionTime).toBeInstanceOf(Date)
+      })
+
+      it('should return 400 (bad request) if samples are not annotated', async () => {
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.BAD_REQUEST)
+      })
+
+      it('should return 400 (bad request) if all samples is annotated but some of them are marked as a mistake', async () => {
+        await Promise.all(
+          samples.map((sample) => {
+            return sampleService.annotateSample(project, sample, {
+              labelings: null,
+              generatedTexts: [faker.lorem.paragraph()],
+              textAnnotations: [],
+            })
+          }),
+        )
+        await sampleService.markSampleAsAMistake(samples[0])
+
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.BAD_REQUEST)
+      })
     })
 
-    it('should return 401 (unauthorized) if access token is invalid', async () => {
-      await request
-        .patch(`/api/v1/projects/${project.id}/phases`)
-        .set('Authorization', 'invalid-access-token')
-        .expect(StatusCodes.UNAUTHORIZED)
-    })
+    describe('Overall tests', () => {
+      let manager: UserDocument
+      let managerAccessToken: string
+      let project: ProjectDocument
 
-    it('should return 404 (not found) if project id does not exist', async () => {
-      await request
-        .patch(`/api/v1/projects/${new mongoose.Types.ObjectId().toHexString()}/phases`)
-        .set('Authorization', managerAccessToken)
-        .expect(StatusCodes.NOT_FOUND)
-    })
+      beforeEach(async () => {
+        const result = await createSettingUpPhaseProject({ numberOfSamples: 3 })
+        manager = result.manager
+        managerAccessToken = tokenService.generateAccessToken(manager)
+        project = result.project
+      })
 
-    it('should return 400 (bad request) if project id is invalid mongo id', async () => {
-      await request
-        .patch(`/api/v1/projects/aaaaaabbbbbbb-invalid-mongo-oaj-id/phases`)
-        .set('Authorization', managerAccessToken)
-        .expect(StatusCodes.BAD_REQUEST)
+      it('should return 401 (unauthorized) if access token is missing', async () => {
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .expect(StatusCodes.UNAUTHORIZED)
+      })
+
+      it('should return 401 (unauthorized) if access token is invalid', async () => {
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', 'invalid-access-token')
+          .expect(StatusCodes.UNAUTHORIZED)
+      })
+
+      it('should return 404 (not found) if project id does not exist', async () => {
+        await request
+          .patch(`/api/v1/projects/${new mongoose.Types.ObjectId().toHexString()}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.NOT_FOUND)
+      })
+
+      it('should return 400 (bad request) if project id is invalid mongo id', async () => {
+        await request
+          .patch(`/api/v1/projects/aaaaaabbbbbbb-invalid-mongo-oaj-id/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.BAD_REQUEST)
+      })
     })
   })
 
@@ -2143,6 +2268,17 @@ describe('Project routes', () => {
           endAt: 10,
           label: 'Tigers',
         })
+      })
+
+      it("should update sample status to equal 'annotated'", async () => {
+        await request
+          .patch(`/api/v1/projects/${project.id}/samples/${sample1.id}/annotate`)
+          .set('Authorization', annotator1AccessToken)
+          .send(annotation)
+          .expect(StatusCodes.NO_CONTENT)
+
+        const dbSample = await Sample.findById(sample1.id)
+        expect(dbSample?.status).toBe(SAMPLE_STATUSES.ANNOTATED)
       })
 
       it('should return 403 (forbidden) if annotator is not assigned to the sample', async () => {

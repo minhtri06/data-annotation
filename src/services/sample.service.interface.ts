@@ -27,6 +27,8 @@ export interface ISampleService {
     sample: SampleDocument,
     annotation: AnnotateSampleAnnotation,
   ): Promise<void>
+
+  markSampleAsAMistake(sample: SampleDocument): Promise<void>
 }
 
 export type GetProjectSamplesOptions = Readonly<{

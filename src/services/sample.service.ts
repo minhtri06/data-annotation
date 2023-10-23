@@ -233,4 +233,12 @@ export class SampleService implements ISampleService {
 
     await sample.save()
   }
+
+  async markSampleAsAMistake(sample: SampleDocument) {
+    if (sample.status === SAMPLE_STATUSES.NEW) {
+      throw new NotAllowedException('Sample status is new, it does not have annotation')
+    }
+    sample.status = SAMPLE_STATUSES.MARKED_AS_A_MISTAKE
+    await sample.save()
+  }
 }

@@ -1,6 +1,6 @@
 import { IProjectModel, ISampleModel, ProjectDocument } from '@src/models'
 import { PaginateResult } from '@src/types'
-import { PROJECT_PHASES, TYPES } from '@src/constants'
+import { PROJECT_PHASES, SAMPLE_STATUSES, TYPES } from '@src/constants'
 import {
   CreateProjectPayload,
   GetProjectByIdOptions,
@@ -11,7 +11,7 @@ import {
 } from './project.service.interface'
 import { inject, injectable } from 'inversify'
 import { validateSortFields } from '@src/helpers'
-import { NotAllowedException } from './exceptions'
+import { Exception, NotAllowedException } from './exceptions'
 import { ISampleStorageService } from './sample-storage.service.interface'
 
 @injectable()
@@ -128,15 +128,25 @@ export class ProjectService implements IProjectService {
         await project.save()
 
         break
-      case PROJECT_PHASES.ANNOTATING:
-        // TODO: implement
-        throw new Error('Not implemented')
+      case PROJECT_PHASES.ANNOTATING: {
+        const notAnnotatedSampleCount = await this.Sample.countDocuments({
+          status: { $ne: SAMPLE_STATUSES.ANNOTATED },
+        })
+        if (notAnnotatedSampleCount !== 0) {
+          throw new NotAllowedException(
+            `There are ${notAnnotatedSampleCount} sample not in 'annotated' status`,
+          )
+        }
+        project.phase = PROJECT_PHASES.DONE
+        project.completionTime = new Date()
+        await project.save()
         break
+      }
       case PROJECT_PHASES.DONE:
-        // TODO: implement
-        throw new Error('Not implemented')
+        throw new NotAllowedException('Done is the final phase')
         break
       default:
+        throw new Exception('Project with wrong phase value')
         break
     }
   }

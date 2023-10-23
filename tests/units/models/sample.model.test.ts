@@ -1,7 +1,7 @@
 import { SAMPLE_STATUSES } from '@src/constants'
 import { Sample } from '@src/models'
 import { IRawSample } from '@src/models'
-import { generateSample, generateSampleComments } from '@tests/fixtures/sample.fixtures'
+import { generateSample } from '@tests/fixtures/sample.fixtures'
 
 let rawSample: Partial<IRawSample>
 beforeEach(() => {
@@ -41,11 +41,6 @@ describe('Sample model', () => {
           { labelings: null, inlineLabelings: [{ startAt: 0, endAt: 1, label: 'dogs' }] },
         ],
       })
-      await expect(new Sample(rawSample).validate()).rejects.toThrow()
-    })
-
-    test('should throw an error if a newly created sample has comments field', async () => {
-      rawSample.comments = generateSampleComments(4)
       await expect(new Sample(rawSample).validate()).rejects.toThrow()
     })
   })

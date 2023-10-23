@@ -28,12 +28,6 @@ export interface ISample {
     }> | null
   }>
 
-  comments: Types.DocumentArray<{
-    body: string
-    author: Types.ObjectId
-    createdAt: Date
-  }>
-
   updatedAt: Date
   createdAt: Date
 }
@@ -55,12 +49,6 @@ export interface IRawSample {
     labelings: string[][] | null
 
     inlineLabelings: { startAt: number; endAt: number; label: string }[] | null
-  }[]
-
-  comments: {
-    body: string
-    author: string
-    createdAt: Date
   }[]
 
   updatedAt: Date
@@ -183,24 +171,6 @@ const sampleSchema = new Schema<ISample>(
               }
             }
           }
-        }
-      },
-      required: true,
-    },
-
-    comments: {
-      type: [
-        {
-          body: { type: String, required: true },
-          author: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER, required: true },
-          createdAt: { type: Date, required: true },
-        },
-      ],
-      default: [],
-      validate: function (comments: []) {
-        const sample = this as unknown as SampleDocument
-        if (sample.isNew && comments.length > 0) {
-          throw new Error('Newly created sample cannot have comments')
         }
       },
       required: true,
