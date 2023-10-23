@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 
 import { ROLES } from '@src/configs/role.config'
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
-import { MODEL_NAMES, USER_WORK_STATUS } from '../constants'
+import { MODEL_NAMES, USER_WORK_STATUSES } from '../constants'
 import { Types } from 'mongoose'
 
 export interface IUser {
@@ -25,7 +25,7 @@ export interface IUser {
 
   address: string
 
-  workStatus: (typeof USER_WORK_STATUS)[keyof typeof USER_WORK_STATUS]
+  workStatus: (typeof USER_WORK_STATUSES)[keyof typeof USER_WORK_STATUSES]
 
   monthlyAnnotation: Types.DocumentArray<{
     month: number
@@ -102,8 +102,8 @@ const userSchema = new Schema<IUser>(
 
     workStatus: {
       type: String,
-      enum: Object.values(USER_WORK_STATUS),
-      default: USER_WORK_STATUS.ON,
+      enum: Object.values(USER_WORK_STATUSES),
+      default: USER_WORK_STATUSES.ON,
       required: true,
     },
 

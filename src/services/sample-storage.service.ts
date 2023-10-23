@@ -3,12 +3,15 @@ import { parse } from 'csv-parse'
 import { injectable } from 'inversify'
 import multer from 'multer'
 
-import { ISampleStorageService } from './sample-storage.service.interface'
+import {
+  ISampleStorageService,
+  streamSamplesOptions,
+} from './sample-storage.service.interface'
 import { ValidationException } from './exceptions'
 
 @injectable()
 export class SampleStorageService implements ISampleStorageService {
-  private basePath: string = '/app/temp/'
+  private basePath: string = __dirname + '/../../temp/'
 
   storageName = 'sample'
 
@@ -28,17 +31,7 @@ export class SampleStorageService implements ISampleStorageService {
     },
   })
 
-  streamSample({
-    filename,
-    maxLinePerBatch,
-    process,
-    final,
-  }: {
-    filename: string
-    maxLinePerBatch: number
-    process: (batch: string[][]) => Promise<void>
-    final: () => Promise<void>
-  }) {
+  streamSample({ filename, maxLinePerBatch, process, final }: streamSamplesOptions) {
     const parser = fs.createReadStream(this.basePath + filename).pipe(parse({}))
     let batch: string[][] = []
 
@@ -62,13 +55,19 @@ export class SampleStorageService implements ISampleStorageService {
           throw err
         })
       }
-      final().catch((err) => {
-        throw err
-      })
+      if (final) {
+        final().catch((err) => {
+          throw err
+        })
+      }
     })
   }
 
   async deleteFile(filename: string): Promise<void> {
     await fs.promises.unlink(this.basePath + filename)
+  }
+
+  async checkExist(filename: string) {
+    return Promise.resolve(fs.existsSync(this.basePath + filename))
   }
 }

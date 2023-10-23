@@ -49,7 +49,8 @@ export const paginatePlugin = (schema: Schema) => {
       ])
       return {
         totalPages: Math.ceil(totalRecords / limit),
-        data: data,
+        totalRecords,
+        data,
       }
     }
     const data = await query.exec()

@@ -5,7 +5,7 @@ import { IRawProject, ProjectDocument } from '@src/models'
 export interface IProjectService {
   getProjectById(
     projectId: string,
-    options?: { populate?: string },
+    options?: GetProjectByIdOptions,
   ): Promise<ProjectDocument | null>
 
   getProjects(
@@ -16,9 +16,19 @@ export interface IProjectService {
   createProject(payload: CreateProjectPayload): Promise<ProjectDocument>
 
   updateProject(project: ProjectDocument, payload: UpdateProjectPayload): Promise<void>
+
+  turnProjectToNextPhase(project: ProjectDocument): Promise<void>
+
+  joinProject(project: ProjectDocument, userId: string): Promise<void>
 }
 
 // * Parameter types
+export type GetProjectByIdOptions = {
+  includeProjectType?: boolean
+  includeManager?: boolean
+  includeAnnotators?: boolean
+}
+
 export type GetProjectsFilter = Readonly<
   Partial<Pick<IRawProject, 'name' | 'projectType'>>
 >

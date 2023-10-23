@@ -1,8 +1,8 @@
-import { PROJECT_STATUS } from '@src/constants'
+import { PROJECT_PHASES } from '@src/constants'
 import { IRawProject, Project } from '@src/models'
 import { IProject } from '@src/models'
 import {
-  generateAnnotationTaskDivision,
+  generateTaskDivisions,
   generateIndividualTextConfig,
   generateProject,
 } from '@tests/fixtures'
@@ -21,25 +21,25 @@ describe('Project model', () => {
       await expect(new Project(projectRaw).validate()).resolves.toBeUndefined()
     })
 
-    it('should correctly validate if status is setting up when project first created', async () => {
-      projectRaw.status = PROJECT_STATUS.SETTING_UP
+    it('should correctly validate if phase is setting up when project first created', async () => {
+      projectRaw.phase = PROJECT_PHASES.SETTING_UP
       await expect(new Project(projectRaw).validate()).resolves.toBeUndefined()
     })
 
-    it('should throw an error if update status with invalid value', async () => {
+    it('should throw an error if update phase with invalid value', async () => {
       const project = await Project.create(projectRaw)
-      project.status = 'invalid status' as IProject['status']
+      project.phase = 'invalid phase' as IProject['phase']
       await expect(project.save()).rejects.toThrow()
     })
 
-    it('should throw an error if status is not setting up when first created', async () => {
-      projectRaw.status = PROJECT_STATUS.ANNOTATING
+    it('should throw an error if phase is not setting up when first created', async () => {
+      projectRaw.phase = PROJECT_PHASES.ANNOTATING
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
-    it('should throw an error if update status to annotating when has 0 annotator', async () => {
+    it('should throw an error if update phase to annotating when has 0 annotator', async () => {
       const project = await Project.create(projectRaw)
-      project.status = PROJECT_STATUS.ANNOTATING
+      project.phase = PROJECT_PHASES.ANNOTATING
       await expect(project.save()).rejects.toThrow()
     })
 
@@ -51,13 +51,13 @@ describe('Project model', () => {
     it('should throw error if annotation task division length greater than maximum \
     of annotator', async () => {
       projectRaw.maximumOfAnnotators = 1
-      projectRaw.annotationTaskDivision = generateAnnotationTaskDivision(4)
+      projectRaw.taskDivisions = generateTaskDivisions(4)
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
     it('should throw an error if annotation task division length greater than 0 \
-    when project status is setting up', async () => {
-      projectRaw.annotationTaskDivision = generateAnnotationTaskDivision(1)
+    when project phase is setting up', async () => {
+      projectRaw.taskDivisions = generateTaskDivisions(1)
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
@@ -69,22 +69,22 @@ describe('Project model', () => {
     })
 
     it('should throw an error if at singleTextConfig, hasLabelSets equals to true but labelSets length equals to 0', async () => {
-      projectRaw.annotationConfig!.individualTextConfigs = generateIndividualTextConfig(1)
-      projectRaw.annotationConfig!.individualTextConfigs[0].hasLabelSets = true
-      projectRaw.annotationConfig!.individualTextConfigs[0].labelSets = []
+      projectRaw.annotationConfig!.textConfigs = generateIndividualTextConfig(1)
+      projectRaw.annotationConfig!.textConfigs[0].hasLabelSets = true
+      projectRaw.annotationConfig!.textConfigs[0].labelSets = []
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
     it('should throw an error if inlineLabels equals to true but provide no inlineLabels', async () => {
-      projectRaw.annotationConfig!.individualTextConfigs = generateIndividualTextConfig(1)
-      projectRaw.annotationConfig!.individualTextConfigs[0].hasInlineLabels = true
-      projectRaw.annotationConfig!.individualTextConfigs[0].inlineLabels = []
+      projectRaw.annotationConfig!.textConfigs = generateIndividualTextConfig(1)
+      projectRaw.annotationConfig!.textConfigs[0].hasInlineLabels = true
+      projectRaw.annotationConfig!.textConfigs[0].inlineLabels = []
       await expect(new Project(projectRaw).validate()).rejects.toThrow()
     })
 
-    it("should throw an error if status of project is 'done' but doesn't have completion time", async () => {
+    it("should throw an error if phase of project is 'done' but doesn't have completion time", async () => {
       const project = await Project.create(projectRaw)
-      project.status = PROJECT_STATUS.DONE
+      project.phase = PROJECT_PHASES.DONE
       await expect(project.save()).rejects.toThrow()
     })
   })

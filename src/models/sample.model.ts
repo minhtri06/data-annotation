@@ -1,35 +1,32 @@
 import { HydratedDocument, Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
-import { MODEL_NAMES, SAMPLE_STATUS } from '../constants'
+import { MODEL_NAMES, SAMPLE_STATUSES } from '../constants'
 
 export interface ISample {
   _id: Types.ObjectId
 
   texts: Types.Array<string>
 
-  status: (typeof SAMPLE_STATUS)[keyof typeof SAMPLE_STATUS]
+  status: (typeof SAMPLE_STATUSES)[keyof typeof SAMPLE_STATUSES]
+
+  number: number
 
   project: Types.ObjectId
 
-  annotation: {
-    labelSets: Types.DocumentArray<{
-      selectedLabels: Types.Array<string>
+  labelings: Types.Array<string[]> | null
+
+  generatedTexts: Types.Array<string> | null
+
+  textAnnotations: Types.DocumentArray<{
+    labelings: Types.Array<string[]> | null
+
+    inlineLabelings: Types.DocumentArray<{
+      startAt: number
+      endAt: number
+      label: string
     }> | null
-
-    generatedTexts: Types.Array<string> | null
-
-    singleTextAnnotation: Types.DocumentArray<{
-      labelSets: Types.DocumentArray<{
-        selectedLabels: Types.Array<string>
-      }> | null
-
-      inlineLabels: Types.DocumentArray<{
-        startAt: number
-        endAt: number
-      }> | null
-    }>
-  }
+  }>
 
   comments: Types.DocumentArray<{
     body: string
@@ -46,32 +43,19 @@ export interface IRawSample {
 
   status: string
 
+  number: number
+
   project: string
 
-  annotation: {
-    labelSets:
-      | {
-          selectedLabels: string[]
-        }[]
-      | null
+  labelings: string[][] | null
 
-    generatedTexts: string[] | null
+  generatedTexts: string[] | null
 
-    singleTextAnnotation: {
-      labelSets:
-        | {
-            selectedLabels: string[]
-          }[]
-        | null
+  textAnnotations: {
+    labelings: string[][] | null
 
-      inlineLabels:
-        | {
-            startAt: number
-            endAt: number
-          }[]
-        | null
-    }[]
-  }
+    inlineLabelings: { startAt: number; endAt: number; label: string }[] | null
+  }[]
 
   comments: {
     body: string
@@ -104,60 +88,104 @@ const sampleSchema = new Schema<ISample>(
       required: true,
     },
 
+    number: { type: Number, required: true, min: 1 },
+
     project: { type: Schema.Types.ObjectId, required: true },
 
     status: {
       type: String,
-      enum: Object.values(SAMPLE_STATUS),
-      default: SAMPLE_STATUS.NEW,
+      enum: Object.values(SAMPLE_STATUSES),
+      default: SAMPLE_STATUSES.NEW,
       validate: function (status: ISample['status']) {
         const sample = this as unknown as SampleDocument
-        if (sample.isNew && status !== SAMPLE_STATUS.NEW) {
+
+        if (sample.isNew && status !== SAMPLE_STATUSES.NEW) {
           throw new Error("Newly created sample's status must be 'new'")
         }
       },
       required: true,
     },
 
-    annotation: {
-      type: {
-        labelSets: {
-          type: [{ selectedLabels: { type: [String], required: true } }],
-          default: null,
-        },
-
-        generatedTexts: { type: [String], default: null },
-
-        singleTextAnnotation: {
-          type: [
-            {
-              labelSets: {
-                type: [{ selectedLabels: { type: [String], required: true } }],
-                default: null,
-              },
-
-              inlineLabels: {
-                type: [
-                  {
-                    startAt: { type: Number, required: true },
-                    endAt: { type: Number, required: true },
-                  },
-                ],
-                default: null,
-              },
-            },
-          ],
-          default: [],
-          required: true,
-        },
-      },
-      validate: function (annotation: ISample['annotation']) {
+    labelings: {
+      type: [[String]],
+      default: () => null,
+      validate: function (labelings: ISample['labelings']) {
         const sample = this as unknown as SampleDocument
-        if (sample.isNew && annotation) {
-          throw new Error('Newly created sample cannot have annotation')
+
+        if (sample.isNew && !!labelings) {
+          throw new Error('Newly created sample cannot have labelings')
         }
       },
-      default: null,
+    },
+
+    generatedTexts: {
+      type: [String],
+      default: () => null,
+      validate: function (generatedTexts: ISample['generatedTexts']) {
+        const sample = this as unknown as SampleDocument
+
+        if (sample.isNew && !!generatedTexts) {
+          throw new Error('Newly created sample cannot have generated texts')
+        }
+
+        if (generatedTexts && generatedTexts.length > 30) {
+          throw new Error('Cannot have more than 30 generated texts')
+        }
+      },
+    },
+
+    textAnnotations: {
+      type: [
+        {
+          labelings: { type: [[String]], default: () => null },
+
+          inlineLabelings: {
+            type: [
+              {
+                startAt: { type: Number, required: true, min: 0 },
+                endAt: { type: Number, required: true, min: 0 },
+                label: { type: String, required: true },
+              },
+            ],
+            default: () => null,
+          },
+        },
+      ],
+      default: [],
+      validate: function (textAnnotations: ISample['textAnnotations']) {
+        const sample = this as unknown as SampleDocument
+
+        if (sample.isNew && textAnnotations.length !== 0) {
+          throw new Error('Newly created sample cannot have text annotations')
+        }
+
+        if (textAnnotations.length > sample.texts.length) {
+          throw new Error(
+            'Number of text annotations can not greater than number of texts',
+          )
+        }
+
+        for (let i = 0; i < textAnnotations.length; i++) {
+          const text = sample.texts[i]
+
+          const inlineLabelings = textAnnotations[i].inlineLabelings
+          if (inlineLabelings) {
+            for (let j = 0; j < inlineLabelings.length; j++) {
+              if (inlineLabelings[j].endAt < inlineLabelings[j].startAt) {
+                throw new Error(
+                  `At textAnnotations[${i}].inlineLabelings[${j}], endAt < startAt`,
+                )
+              }
+              if (inlineLabelings[j].endAt > text.length) {
+                throw new Error(
+                  `At textAnnotations[${i}].inlineLabelings[${j}], endAt exceeds texts[${i}] length`,
+                )
+              }
+            }
+          }
+        }
+      },
+      required: true,
     },
 
     comments: {
@@ -183,6 +211,8 @@ const sampleSchema = new Schema<ISample>(
     optimisticConcurrency: true,
   },
 )
+
+sampleSchema.index({ project: 1, number: 1 }, { unique: true })
 
 sampleSchema.plugin(toJSONPlugin)
 sampleSchema.plugin(paginatePlugin)

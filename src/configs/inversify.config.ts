@@ -16,6 +16,8 @@ import {
   UserService,
   ISampleStorageService,
   SampleStorageService,
+  ISampleService,
+  SampleService,
 } from '@src/services'
 import {
   GeneralMiddleware,
@@ -47,8 +49,6 @@ import {
   IProjectMiddleware,
   ProjectMiddleware,
 } from '@src/middlewares/project.middleware'
-import { ISampleService } from '@src/services/sample.service.interface'
-import { SampleService } from '@src/services/sample.service'
 
 const container = new Container()
 
@@ -66,10 +66,10 @@ container
   .toConstantValue(new ImageStorageService())
 container.bind<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE).to(ProjectTypeService)
 container.bind<IProjectService>(TYPES.PROJECT_SERVICE).to(ProjectService)
-container.bind<ISampleService>(TYPES.SAMPLE_SERVICE).to(SampleService)
 container
   .bind<ISampleStorageService>(TYPES.SAMPLE_STORAGE_SERVICE)
   .to(SampleStorageService)
+container.bind<ISampleService>(TYPES.SAMPLE_SERVICE).to(SampleService)
 container.bind<ITokenService>(TYPES.TOKEN_SERVICE).to(TokenService)
 container.bind<IUserService>(TYPES.USER_SERVICE).to(UserService)
 

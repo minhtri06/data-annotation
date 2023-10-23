@@ -2,7 +2,7 @@ import { FilterQuery } from 'mongoose'
 import { inject, injectable } from 'inversify'
 import bcrypt from 'bcryptjs'
 
-import { TYPES, USER_WORK_STATUS } from '@src/constants'
+import { TYPES, USER_WORK_STATUSES } from '@src/constants'
 import { IRawUser, IUserModel, UserDocument } from '@src/models'
 import {
   CreateUserPayload,
@@ -34,7 +34,7 @@ export class UserService implements IUserService {
     queryOptions: GetUsersOptions = {},
   ): Promise<{ data: UserDocument[]; totalPage?: number }> {
     const filter: FilterQuery<IRawUser> = {
-      workStatus: USER_WORK_STATUS.ON,
+      workStatus: USER_WORK_STATUSES.ON,
       ...queryFilter,
     }
 

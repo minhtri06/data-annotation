@@ -2,7 +2,7 @@ import { Response } from 'express'
 import { Container, inject } from 'inversify'
 import { controller, httpGet, httpPatch, httpPost } from 'inversify-express-utils'
 
-import { TYPES } from '@src/constants'
+import { PROJECT_PHASES, TYPES } from '@src/constants'
 import { IGeneralMiddleware, IUploadMiddleware } from '@src/middlewares'
 import { IProjectService } from '@src/services'
 import { ROLES } from '@src/configs/role.config'
@@ -11,15 +11,16 @@ import { projectSchema as schema } from './schemas'
 import { StatusCodes } from 'http-status-codes'
 import { pickFields } from '@src/utils'
 import { IProjectMiddleware } from '@src/middlewares/project.middleware'
-import { Exception } from '@src/services/exceptions'
 import { ISampleService } from '@src/services/sample.service.interface'
 
 export const projectControllerFactory = (container: Container) => {
-  const { ADMIN, MANAGER } = ROLES
+  const { ADMIN, MANAGER, ANNOTATOR } = ROLES
 
-  const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
-  const uploadMiddleware = container.get<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE)
-  const projectMiddleware = container.get<IProjectMiddleware>(TYPES.PROJECT_MIDDLEWARE)
+  const { auth, validate } = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const { uploadSample } = container.get<IUploadMiddleware>(TYPES.UPLOAD_MIDDLEWARE)
+  const { getProjectById, requireToBeProjectManager } = container.get<IProjectMiddleware>(
+    TYPES.PROJECT_MIDDLEWARE,
+  )
 
   @controller('/projects')
   class ProjectController {
@@ -29,11 +30,7 @@ export const projectControllerFactory = (container: Container) => {
       @inject(TYPES.SAMPLE_SERVICE) private sampleService: ISampleService,
     ) {}
 
-    @httpGet(
-      '/',
-      generalMiddleware.auth(),
-      generalMiddleware.validate(schema.getProjects),
-    )
+    @httpGet('/', auth(), validate(schema.getProjects))
     async getProjects(req: CustomRequest<schema.GetProjects>, res: Response) {
       const filter = pickFields(req.query, 'name', 'projectType')
       const options = pickFields(req.query, 'checkPaginate', 'limit', 'page', 'sort')
@@ -43,8 +40,8 @@ export const projectControllerFactory = (container: Container) => {
 
     @httpPost(
       '/',
-      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
-      generalMiddleware.validate(schema.createProject),
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.createProject),
     )
     async createProject(req: CustomRequest<schema.CreateProject>, res: Response) {
       if (!req.user) {
@@ -60,14 +57,12 @@ export const projectControllerFactory = (container: Container) => {
       return res.status(StatusCodes.CREATED).json({ project })
     }
 
-    @httpGet(
-      '/:projectId',
-      generalMiddleware.auth(),
-      generalMiddleware.validate(schema.getProjectById),
-    )
+    @httpGet('/:projectId', auth(), validate(schema.getProjectById))
     async getProjectById(req: CustomRequest<schema.GetProjectById>, res: Response) {
       const project = await this.projectService.getProjectById(req.params.projectId, {
-        populate: 'projectType manager',
+        includeAnnotators: true,
+        includeManager: true,
+        includeProjectType: true,
       })
       if (!project) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
@@ -77,31 +72,151 @@ export const projectControllerFactory = (container: Container) => {
 
     @httpPatch(
       '/:projectId',
-      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
-      generalMiddleware.validate(schema.updateProjectById),
-      projectMiddleware.getProjectById,
-      projectMiddleware.requireToBeProjectManager(),
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.updateProjectById),
+      getProjectById,
+      requireToBeProjectManager(),
     )
     async updateProjectById(req: CustomRequest<schema.UpdateProjectById>, res: Response) {
-      if (!req.data?.project) {
-        throw new Exception('Project is required')
-      }
-      await this.projectService.updateProject(req.data.project, req.body)
+      const project = req.data!.project!
+      await this.projectService.updateProject(project, req.body)
       return res.status(StatusCodes.NO_CONTENT).send()
     }
 
     @httpPost(
       '/:projectId/samples/upload-samples',
-      generalMiddleware.auth({ requiredRoles: [ADMIN, MANAGER] }),
-      generalMiddleware.validate(schema.uploadSamples),
-      uploadMiddleware.uploadSample('sample:sample-data'),
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.loadSample),
+      getProjectById,
+      requireToBeProjectManager(),
+      uploadSample('sample:sample-data'),
     )
-    async uploadSamples(req: CustomRequest<schema.UploadSamples>, res: Response) {
+    async uploadSample(req: CustomRequest<schema.LoadSamples>, res: Response) {
       if (!req.file) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Data is required' })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Data file is required' })
       }
-      await this.sampleService.addSamplesFromFile(req.params.projectId, req.file.filename)
-      return res.status(StatusCodes.OK).json({ message: 'Upload successfully' })
+      const project = req.data!.project!
+      await this.sampleService.uploadSamplesToProject(project, req.file.filename)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPatch(
+      '/:projectId/phases',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.turnProjectToNextPhase),
+      getProjectById,
+      requireToBeProjectManager(),
+    )
+    async turnProjectToNextPhase(
+      req: CustomRequest<schema.TurnProjectToNextPhase>,
+      res: Response,
+    ) {
+      const project = req.data!.project!
+      await this.projectService.turnProjectToNextPhase(project)
+      return res.status(StatusCodes.OK).json({
+        message: 'Turn project to next phase successfully',
+        currentPhase: project.phase,
+      })
+    }
+
+    @httpPatch(
+      '/:projectId/join-project',
+      auth({ requiredRoles: [ANNOTATOR] }),
+      validate(schema.joinProject),
+      getProjectById,
+    )
+    async joinProject(req: CustomRequest<schema.JoinProject>, res: Response) {
+      const project = req.data!.project!
+      const user = req.user!
+      await this.projectService.joinProject(project, user.id)
+      return res.status(StatusCodes.OK).json({
+        message: 'Join project successfully',
+        divisions: project.taskDivisions,
+      })
+    }
+
+    @httpGet(
+      '/:projectId/samples',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.getProjectSamples),
+      getProjectById,
+      requireToBeProjectManager(),
+    )
+    async getProjectSamples(req: CustomRequest<schema.GetProjectSamples>, res: Response) {
+      const project = req.data!.project!
+      const options = pickFields(req.query, 'checkPaginate', 'limit', 'page')
+
+      const result = await this.sampleService.getProjectSamples(project, options)
+      return res.status(StatusCodes.OK).json(result)
+    }
+
+    @httpGet(
+      '/:projectId/divisions/:divisionId/samples',
+      auth(),
+      validate(schema.getDivisionSamples),
+      getProjectById,
+    )
+    async getDivisionSamples(
+      req: CustomRequest<schema.GetDivisionSample>,
+      res: Response,
+    ) {
+      const user = req.user!
+      const project = req.data!.project!
+      const division = project.taskDivisions.id(req.params.divisionId)
+      if (!division) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Division not found' })
+      }
+      if (
+        user.role !== ADMIN &&
+        !project.manager?.equals(user.id) &&
+        !division.annotator.equals(user.id)
+      ) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      const result = await this.sampleService.getDivisionSamples(
+        project,
+        division,
+        req.query,
+      )
+      return res.status(StatusCodes.OK).json(result)
+    }
+
+    @httpPatch(
+      '/:projectId/samples/:sampleId/annotate',
+      auth({ requiredRoles: [ANNOTATOR] }),
+      validate(schema.annotateSample),
+    )
+    async annotateSample(req: CustomRequest<schema.AnnotateSample>, res: Response) {
+      const user = req.user!
+      const [project, sample] = await Promise.all([
+        this.projectService.getProjectById(req.params.projectId),
+        this.sampleService.getSampleById(req.params.sampleId),
+      ])
+      if (!project) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
+      }
+      if (!sample) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Sample not found' })
+      }
+      const annotatorDivision = project.taskDivisions.find((d) =>
+        d.annotator.equals(user.id),
+      )
+      if (!annotatorDivision) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      const { startSample, endSample } = annotatorDivision
+      if (project.phase !== PROJECT_PHASES.ANNOTATING || !startSample || !endSample) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Project is not in annotating phase' })
+      }
+      if (sample.number < startSample || sample.number > endSample) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      await this.sampleService.annotateSample(project, sample, req.body)
+      return res.status(StatusCodes.NO_CONTENT).send()
     }
   }
 

@@ -5,12 +5,16 @@ export interface ISampleStorageService {
 
   storageName: string
 
-  streamSample(options: {
-    filename: string
-    maxLinePerBatch: number
-    process: (batch: string[][]) => Promise<void>
-    final: () => Promise<void>
-  }): void
+  streamSample(options: streamSamplesOptions): void
 
   deleteFile(filename: string): Promise<void>
+
+  checkExist(filename: string): Promise<boolean>
+}
+
+export type streamSamplesOptions = {
+  filename: string
+  maxLinePerBatch: number
+  process: (batch: string[][]) => Promise<void>
+  final?: () => Promise<void>
 }

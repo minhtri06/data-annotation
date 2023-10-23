@@ -1,7 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { USER_WORK_STATUS } from '@src/constants'
 
+import container from '@src/configs/inversify.config'
+import { ROLES } from '@src/configs/role.config'
+import { TYPES, USER_WORK_STATUSES } from '@src/constants'
 import { IUser } from '@src/models'
+import { IUserService } from '@src/services'
+
+const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 
 export const generateUser = (
   overwriteFields: Partial<IUser> = {},
@@ -14,7 +19,19 @@ export const generateUser = (
     phoneNumber: faker.string.numeric(10),
     role: 'annotator',
     address: faker.location.streetAddress(),
-    workStatus: USER_WORK_STATUS.ON,
+    workStatus: USER_WORK_STATUSES.ON,
     ...overwriteFields,
   }
+}
+
+export const createAdminUser = async (overwriteFields: Partial<IUser> = {}) => {
+  return await userService.createUser(
+    generateUser({ ...overwriteFields, role: ROLES.ADMIN }),
+  )
+}
+
+export const createManagerUser = async (overwriteFields: Partial<IUser> = {}) => {
+  return await userService.createUser(
+    generateUser({ ...overwriteFields, role: ROLES.MANAGER }),
+  )
 }

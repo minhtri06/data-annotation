@@ -1,7 +1,7 @@
 import { HydratedDocument, Model, Schema, Types, model } from 'mongoose'
 
 import { Paginate, paginatePlugin, toJSONPlugin, handleErrorPlugin } from './plugins'
-import { MODEL_NAMES, PROJECT_STATUS } from '@src/constants'
+import { MODEL_NAMES, PROJECT_PHASES } from '@src/constants'
 import { ValidationException } from '@src/services/exceptions'
 
 export interface IProject {
@@ -19,7 +19,7 @@ export interface IProject {
 
   maximumOfAnnotators: number
 
-  annotationTaskDivision: Types.DocumentArray<{
+  taskDivisions: Types.DocumentArray<{
     annotator: Types.ObjectId
     startSample?: number
     endSample?: number
@@ -27,7 +27,7 @@ export interface IProject {
 
   numberOfSamples: number
 
-  status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS]
+  phase: (typeof PROJECT_PHASES)[keyof typeof PROJECT_PHASES]
 
   completionTime?: Date
 
@@ -40,7 +40,7 @@ export interface IProject {
 
     hasGeneratedTexts: boolean
 
-    individualTextConfigs: Types.DocumentArray<{
+    textConfigs: Types.DocumentArray<{
       hasLabelSets: boolean
       labelSets: Types.DocumentArray<{
         isMultiSelected: boolean
@@ -69,7 +69,7 @@ export interface IRawProject {
 
   maximumOfAnnotators: number
 
-  annotationTaskDivision: {
+  taskDivisions: {
     annotator: string
     startSample?: number
     endSample?: number
@@ -77,20 +77,17 @@ export interface IRawProject {
 
   numberOfSamples: number
 
-  status: string
+  phase: string
 
   completionTime?: Date
 
   annotationConfig: {
     hasLabelSets: boolean
-    labelSets: {
-      isMultiSelected: boolean
-      labels: string[]
-    }[]
+    labelSets: { isMultiSelected: boolean; labels: string[] }[]
 
     hasGeneratedTexts: boolean
 
-    individualTextConfigs: {
+    textConfigs: {
       hasLabelSets: boolean
       labelSets: {
         isMultiSelected: boolean
@@ -125,21 +122,47 @@ const projectSchema = new Schema<IProject>(
 
     manager: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
 
-    status: {
+    phase: {
       type: String,
-      enum: Object.values(PROJECT_STATUS),
-      default: PROJECT_STATUS.SETTING_UP,
-      validate: function (value: string) {
+      enum: Object.values(PROJECT_PHASES),
+      default: PROJECT_PHASES.SETTING_UP,
+      validate: function (phase: string) {
         const project = this as unknown as ProjectDocument
 
-        if (project.isNew && value !== PROJECT_STATUS.SETTING_UP) {
-          throw new Error('Invalid project status')
+        if (project.isNew && phase !== PROJECT_PHASES.SETTING_UP) {
+          throw new Error('Invalid project phase')
         }
-        if (
-          value === PROJECT_STATUS.ANNOTATING &&
-          project.annotationTaskDivision.length === 0
-        ) {
-          throw new Error('Cannot start annotating with 0 annotator')
+
+        if (phase === PROJECT_PHASES.SETTING_UP) {
+          if (project.taskDivisions.length !== 0) {
+            throw new Error("'setting up' project cannot have division")
+          }
+        }
+
+        if (phase === PROJECT_PHASES.OPEN_FOR_JOINING) {
+          if (project.numberOfSamples === 0) {
+            throw new Error('Project has no samples')
+          }
+        }
+
+        if (phase === PROJECT_PHASES.ANNOTATING || phase === PROJECT_PHASES.DONE) {
+          if (project.numberOfSamples === 0) {
+            throw new Error('Project has no samples')
+          }
+          if (project.taskDivisions.length === 0) {
+            throw new Error('Cannot start annotating with 0 annotator')
+          }
+          if (project.numberOfSamples < project.taskDivisions.length) {
+            throw new Error('Number of samples is less than number of divisions')
+          }
+          for (const annotationTask of project.taskDivisions) {
+            if (!annotationTask.endSample || !annotationTask.startSample) {
+              throw new Error('Missing end sample or start sample in annotation task')
+            }
+            if (annotationTask.endSample < annotationTask.startSample) {
+              throw new Error('endSample cannot less than startSample')
+            }
+          }
         }
       },
       required: true,
@@ -148,13 +171,13 @@ const projectSchema = new Schema<IProject>(
     completionTime: {
       type: Date,
       required: function () {
-        return (this as IProject).status === PROJECT_STATUS.DONE
+        return (this as IProject).phase === PROJECT_PHASES.DONE
       },
     },
 
     maximumOfAnnotators: { type: Number, required: true, min: 1 },
 
-    annotationTaskDivision: {
+    taskDivisions: {
       type: [
         {
           annotator: {
@@ -167,30 +190,11 @@ const projectSchema = new Schema<IProject>(
         },
       ],
       default: [],
-      validate: function (annotationTaskDivision: IProject['annotationTaskDivision']) {
+      validate: function (taskDivisions: IProject['taskDivisions']) {
         const project = this as unknown as IProject
 
-        if (annotationTaskDivision.length > project.maximumOfAnnotators) {
-          throw new Error(
-            `Cannot have more than ${project.maximumOfAnnotators} annotators`,
-          )
-        }
-
-        if (
-          project.status === PROJECT_STATUS.SETTING_UP &&
-          annotationTaskDivision.length !== 0
-        ) {
-          throw new Error('Annotator cannot join when project is setting up')
-        }
-        if (
-          project.status === PROJECT_STATUS.ANNOTATING ||
-          project.status === PROJECT_STATUS.DONE
-        ) {
-          for (const annotationTask of annotationTaskDivision) {
-            if (!annotationTask.endSample || !annotationTask.startSample) {
-              throw new Error('Missing end sample or start sample in annotation task')
-            }
-          }
+        if (taskDivisions.length > project.maximumOfAnnotators) {
+          throw new Error(`taskDivisions.length > maximumOfAnnotators`)
         }
       },
       required: true,
@@ -214,7 +218,7 @@ const projectSchema = new Schema<IProject>(
 
         hasGeneratedTexts: { type: Boolean, default: false, required: true },
 
-        individualTextConfigs: [
+        textConfigs: [
           {
             hasLabelSets: { type: Boolean, default: false, required: true },
             labelSets: {
@@ -240,9 +244,8 @@ const projectSchema = new Schema<IProject>(
         if (
           !annotationConfig.hasLabelSets &&
           !annotationConfig.hasGeneratedTexts &&
-          annotationConfig.individualTextConfigs.every(
-            (individualTextConfig) =>
-              !individualTextConfig.hasLabelSets && !individualTextConfig.hasInlineLabels,
+          annotationConfig.textConfigs.every(
+            (textConfig) => !textConfig.hasLabelSets && !textConfig.hasInlineLabels,
           )
         ) {
           throw new ValidationException('Project has no annotation config', {
@@ -266,30 +269,24 @@ const projectSchema = new Schema<IProject>(
           })
         }
 
-        // check conflict config in each individualTextConfigs
-        for (let i = 0; i < annotationConfig.individualTextConfigs.length; i++) {
-          const individualTextConfig = annotationConfig.individualTextConfigs[i]
-          if (
-            individualTextConfig.hasLabelSets &&
-            individualTextConfig.labelSets.length === 0
-          ) {
+        // check conflict config in each textConfigs
+        for (let i = 0; i < annotationConfig.textConfigs.length; i++) {
+          const textConfig = annotationConfig.textConfigs[i]
+          if (textConfig.hasLabelSets && textConfig.labelSets.length === 0) {
             throw new Error(
-              `hasLabelSets (individualTextConfig[${i}]) is true but labelSets is empty`,
+              `hasLabelSets (textConfig[${i}]) is true but labelSets is empty`,
             )
           }
-          if (
-            individualTextConfig.inlineLabels &&
-            individualTextConfig.inlineLabels.length === 0
-          ) {
+          if (textConfig.hasInlineLabels && textConfig.inlineLabels.length === 0) {
             throw new Error(
-              `inlineLabels (individualTextConfig[${i}]) is true but inlineLabels is empty`,
+              `annotationConfig.textConfig[${i}].hasInlineLabels is true but annotationConfig.textConfig[${i}].inlineLabels is empty`,
             )
           }
         }
 
-        // check number of individualTextConfigs
-        if (annotationConfig.individualTextConfigs.length > 50) {
-          throw new Error("Number of 'individualTextConfigs' must less than or equal 50")
+        // check number of textConfigs
+        if (annotationConfig.textConfigs.length > 50) {
+          throw new Error("Number of 'textConfigs' must less than or equal 50")
         }
       },
     },

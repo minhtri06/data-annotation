@@ -16,4 +16,5 @@ export type QueryOptions<DocType = { [key: string]: unknown }> = {
 export type PaginateResult<T> = {
   data: T[]
   totalPages?: number
+  totalRecords?: number
 }

@@ -4,7 +4,7 @@ import { Application } from 'express'
 import superTest, { SuperTest, Test } from 'supertest'
 import { StatusCodes } from 'http-status-codes'
 
-import { TYPES, USER_WORK_STATUS } from '@src/constants'
+import { TYPES, USER_WORK_STATUSES } from '@src/constants'
 import container from '@src/configs/inversify.config'
 import { ROLES } from '@src/configs/role.config'
 import { ITokenService, IUserService } from '@src/services'
@@ -277,7 +277,7 @@ describe('Users routes', () => {
       address: faker.location.streetAddress(),
       dateOfBirth: faker.date.between({ from: '1980-01-01', to: '2000-12-31' }),
       password: 'password123',
-      workStatus: USER_WORK_STATUS.OFF,
+      workStatus: USER_WORK_STATUSES.OFF,
     }
     beforeEach(async () => {
       admin = await userService.createUser(generateUser({ role: ROLES.ADMIN }))

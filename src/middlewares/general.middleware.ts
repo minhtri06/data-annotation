@@ -23,9 +23,9 @@ export interface IGeneralMiddleware {
 
   handleException: ErrorRequestHandler
 
-  auth(options?: { requiredRoles?: Role[]; isRequired?: boolean }): RequestHandler
+  auth: (options?: { requiredRoles?: Role[]; isRequired?: boolean }) => RequestHandler
 
-  validate(requestSchemaMap: CustomSchemaMap<RequestSchema>): RequestHandler
+  validate: (requestSchemaMap: CustomSchemaMap<RequestSchema>) => RequestHandler
 }
 
 @injectable()
@@ -168,15 +168,20 @@ export class GeneralMiddleware implements IGeneralMiddleware {
         errors: { wrap: { label: "'" }, label: 'path' },
         abortEarly: false,
       })
+
       if (validation.error) {
         return next(
-          new ValidationException(validation.error.message, {
+          new ValidationException('Validation failed', {
             details: validation.error.details.map((detail) => ({
               message: detail.message,
               path: detail.context?.label as string,
             })),
           }),
         )
+      }
+
+      for (const field of ['body', 'query', 'params'] as const) {
+        req[field] = validation.value[field]
       }
 
       return next()

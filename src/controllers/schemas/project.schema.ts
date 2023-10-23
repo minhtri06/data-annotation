@@ -46,7 +46,7 @@ export type CreateProject = {
 
       hasGeneratedTexts: boolean
 
-      individualTextConfigs: {
+      textConfigs: {
         hasLabelSets: boolean
         labelSets: {
           isMultiSelected: boolean
@@ -82,7 +82,7 @@ export const createProject: CustomSchemaMap<CreateProject> = {
 
       hasGeneratedTexts: Joi.boolean().required(),
 
-      individualTextConfigs: Joi.array()
+      textConfigs: Joi.array()
         .items({
           hasLabelSets: Joi.boolean().required(),
           labelSets: Joi.array()
@@ -153,7 +153,7 @@ export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
 
       hasGeneratedTexts: Joi.boolean().required(),
 
-      individualTextConfigs: Joi.array()
+      textConfigs: Joi.array()
         .items({
           hasLabelSets: Joi.boolean().required(),
           labelSets: Joi.array()
@@ -171,13 +171,126 @@ export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
   },
 }
 
-export type UploadSamples = {
+export type JoinProject = {
   params: {
     projectId: string
   }
 }
-export const uploadSamples: CustomSchemaMap<UploadSamples> = {
+export const joinProject: CustomSchemaMap<JoinProject> = {
   params: {
     projectId: stringId.required(),
+  },
+}
+
+export type GetProjectSamples = {
+  params: {
+    projectId: string
+  }
+  query: {
+    limit?: number
+    page?: number
+    checkPaginate?: boolean
+  }
+}
+export const getProjectSamples: CustomSchemaMap<GetProjectSamples> = {
+  params: {
+    projectId: stringId.required(),
+  },
+  query: {
+    limit: querySchema.limit,
+    page: querySchema.page,
+    checkPaginate: querySchema.checkPaginate,
+  },
+}
+
+export type TurnProjectToNextPhase = {
+  params: {
+    projectId: string
+  }
+}
+export const turnProjectToNextPhase: CustomSchemaMap<TurnProjectToNextPhase> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
+export type LoadSamples = {
+  params: {
+    projectId: string
+  }
+}
+export const loadSample: CustomSchemaMap<LoadSamples> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
+export type GetDivisionSample = {
+  params: {
+    projectId: string
+    divisionId: string
+  }
+  query: {
+    limit?: number
+    page?: number
+    checkPaginate?: boolean
+  }
+}
+export const getDivisionSamples: CustomSchemaMap<GetDivisionSample> = {
+  params: {
+    projectId: stringId.required(),
+    divisionId: stringId.required(),
+  },
+  query: {
+    limit: querySchema.limit,
+    page: querySchema.page,
+    checkPaginate: querySchema.checkPaginate,
+  },
+}
+
+export type AnnotateSample = {
+  params: {
+    projectId: string
+    sampleId: string
+  }
+  body: {
+    labelings: string[][] | null
+
+    generatedTexts: string[] | null
+
+    textAnnotations: {
+      labelings: string[][] | null
+
+      inlineLabelings: { startAt: number; endAt: number; label: string }[] | null
+    }[]
+  }
+}
+export const annotateSample: CustomSchemaMap<AnnotateSample> = {
+  params: {
+    projectId: stringId.required(),
+    sampleId: stringId.required(),
+  },
+  body: {
+    labelings: Joi.array().items(Joi.array().items(Joi.string())).default(null),
+
+    generatedTexts: Joi.array().items(Joi.string()).default(null),
+
+    textAnnotations: Joi.array()
+      .items(
+        Joi.object({
+          labelings: Joi.array().items(Joi.array().items(Joi.string())).default(null),
+
+          inlineLabelings: Joi.array()
+            .items(
+              Joi.object({
+                startAt: Joi.number().integer().required(),
+                endAt: Joi.number().integer().required(),
+                label: Joi.string().required().required(),
+              }),
+            )
+            .default(null),
+        }),
+      )
+      .default([]),
   },
 }

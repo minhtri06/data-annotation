@@ -9,7 +9,7 @@ export const handleErrorPlugin = (schema: Schema) => {
       // mongoose validation error
       if (error instanceof Error.ValidationError) {
         return next(
-          new ValidationException(error.errors[Object.keys(error.errors)[0]].message, {
+          new ValidationException('Validation failed', {
             details: Object.keys(error.errors).map((key) => ({
               path: error.errors[key].path,
               message: error.errors[key].message,

@@ -4,7 +4,7 @@ export class DuplicateKeyException extends Exception {
   public path?: string
 
   constructor(
-    message: string,
+    message: string = 'Duplicate key',
     {
       type,
       isOperational = true,

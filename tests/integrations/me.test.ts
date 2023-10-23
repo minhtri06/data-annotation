@@ -72,7 +72,7 @@ describe('Me routes', () => {
     })
 
     it('should return 200 (ok) and avatar', async () => {
-      const avatarPath = __dirname + '/../fixtures/images/avatar.png'
+      const avatarPath = __dirname + '/../fixtures/files/avatar.png'
       const res = await request
         .put('/api/v1/me/avatar')
         .set('Authorization', accessToken)
@@ -84,7 +84,7 @@ describe('Me routes', () => {
     }, 20000)
 
     it('should remove old avatar', async () => {
-      const avatarPath = __dirname + '/../fixtures/images/avatar.png'
+      const avatarPath = __dirname + '/../fixtures/files/avatar.png'
       const res = await request
         .put('/api/v1/me/avatar')
         .set('Authorization', accessToken)
