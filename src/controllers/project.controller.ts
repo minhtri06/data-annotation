@@ -218,6 +218,33 @@ export const projectControllerFactory = (container: Container) => {
       await this.sampleService.annotateSample(project, sample, req.body)
       return res.status(StatusCodes.NO_CONTENT).send()
     }
+
+    @httpPatch(
+      '/:projectId/samples/:sampleId/mark-as-a-mistake',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.markSampleAsAMistake),
+    )
+    async markSampleAsAMistake(
+      req: CustomRequest<schema.MarkSampleAsAMistake>,
+      res: Response,
+    ) {
+      const user = req.user!
+      const [project, sample] = await Promise.all([
+        this.projectService.getProjectById(req.params.projectId),
+        this.sampleService.getSampleById(req.params.sampleId),
+      ])
+      if (!project) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
+      }
+      if (!sample) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Sample not found' })
+      }
+      if (user.role === MANAGER && !project.manager?.equals(user.id)) {
+        return res.json(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      await this.sampleService.markSampleAsAMistake(sample)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
   }
 
   return ProjectController

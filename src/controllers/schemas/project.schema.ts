@@ -294,3 +294,16 @@ export const annotateSample: CustomSchemaMap<AnnotateSample> = {
       .default([]),
   },
 }
+
+export type MarkSampleAsAMistake = {
+  params: {
+    projectId: string
+    sampleId: string
+  }
+}
+export const markSampleAsAMistake: CustomSchemaMap<MarkSampleAsAMistake> = {
+  params: {
+    projectId: stringId.required(),
+    sampleId: stringId.required(),
+  },
+}
