@@ -27,7 +27,7 @@ export interface IUser {
 
   workStatus: (typeof USER_WORK_STATUSES)[keyof typeof USER_WORK_STATUSES]
 
-  monthlyAnnotation: Types.DocumentArray<{
+  monthlyAnnotations: Types.DocumentArray<{
     month: number
     year: number
     annotationTotal: number
@@ -56,7 +56,7 @@ export interface IRawUser {
 
   workStatus: string
 
-  monthlyAnnotation: {
+  monthlyAnnotations: {
     month: number
     year: number
     annotationTotal: number
@@ -107,7 +107,7 @@ const userSchema = new Schema<IUser>(
       required: true,
     },
 
-    monthlyAnnotation: {
+    monthlyAnnotations: {
       type: [
         {
           month: { type: Number, required: true },

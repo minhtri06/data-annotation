@@ -1,4 +1,4 @@
-import { IProjectModel, ISampleModel, ProjectDocument } from '@src/models'
+import { IProjectModel, ISampleModel, IUserModel, ProjectDocument } from '@src/models'
 import { PaginateResult } from '@src/types'
 import { PROJECT_PHASES, SAMPLE_STATUSES, TYPES } from '@src/constants'
 import {
@@ -18,9 +18,10 @@ import { ISampleStorageService } from './sample-storage.service.interface'
 export class ProjectService implements IProjectService {
   constructor(
     @inject(TYPES.PROJECT_MODEL) private Project: IProjectModel,
+    @inject(TYPES.SAMPLE_MODEL) private Sample: ISampleModel,
+    @inject(TYPES.USER_MODEL) private User: IUserModel,
     @inject(TYPES.SAMPLE_STORAGE_SERVICE)
     private sampleStorageService: ISampleStorageService,
-    @inject(TYPES.SAMPLE_MODEL) private Sample: ISampleModel,
   ) {}
 
   async getProjectById(
@@ -79,34 +80,6 @@ export class ProjectService implements IProjectService {
     await project.save()
   }
 
-  private divideAnnotationTask(project: ProjectDocument) {
-    /**
-     * * suppose numberOfSample = 50, numberOfAnnotator = 3.
-     * * => quotient = 16, remainder = 2
-     * * => 2 (remainder) first annotators do 16 + 1 samples, 1 left annotator does 16 samples
-     * * => sampleDivision = [17, 17, 12]
-     */
-    const division = project.taskDivisions
-    const numberOfSamples = project.numberOfSamples
-
-    const numberOfAnnotators = division.length
-
-    const quotient = Math.floor(numberOfSamples / numberOfAnnotators)
-    const remainder = numberOfSamples % numberOfAnnotators
-
-    const sampleDivision = Array(numberOfAnnotators).fill(quotient) as number[]
-    for (let i = 0; i < remainder; i++) {
-      sampleDivision[i]++
-    }
-
-    let startSample = 1
-    for (let i = 0; i < numberOfAnnotators; i++) {
-      project.taskDivisions[i].startSample = startSample
-      project.taskDivisions[i].endSample = startSample + sampleDivision[i] - 1
-      startSample += sampleDivision[i]
-    }
-  }
-
   async turnProjectToNextPhase(project: ProjectDocument) {
     switch (project.phase) {
       case PROJECT_PHASES.SETTING_UP:
@@ -132,14 +105,51 @@ export class ProjectService implements IProjectService {
         const notAnnotatedSampleCount = await this.Sample.countDocuments({
           status: { $ne: SAMPLE_STATUSES.ANNOTATED },
         })
+
         if (notAnnotatedSampleCount !== 0) {
           throw new NotAllowedException(
             `There are ${notAnnotatedSampleCount} sample not in 'annotated' status`,
           )
         }
+
         project.phase = PROJECT_PHASES.DONE
         project.completionTime = new Date()
         await project.save()
+
+        await project.populate('taskDivisions.annotator')
+
+        const now = new Date()
+        const thisMonth = now.getMonth() + 1
+        const thisYear = now.getFullYear()
+
+        await Promise.all(
+          project.taskDivisions.map((division) => {
+            const annotator = division.annotator
+            if (annotator instanceof this.User) {
+              let lastMonthAnnotation = annotator.monthlyAnnotations.at(-1)
+              if (
+                !lastMonthAnnotation ||
+                lastMonthAnnotation.month !== thisMonth ||
+                lastMonthAnnotation.year !== thisYear
+              ) {
+                annotator.monthlyAnnotations.push({
+                  month: thisMonth,
+                  year: thisYear,
+                  annotationTotal: 0,
+                })
+                lastMonthAnnotation = annotator.monthlyAnnotations.at(-1)
+              }
+              lastMonthAnnotation!.annotationTotal +=
+                division.endSample! - division.startSample! + 1
+              return annotator.save()
+            } else {
+              throw new Exception("Division's annotator doesn't exist")
+            }
+          }),
+        )
+
+        project.depopulate()
+
         break
       }
       case PROJECT_PHASES.DONE:
@@ -148,6 +158,34 @@ export class ProjectService implements IProjectService {
       default:
         throw new Exception('Project with wrong phase value')
         break
+    }
+  }
+
+  private divideAnnotationTask(project: ProjectDocument) {
+    /**
+     * * suppose numberOfSample = 50, numberOfAnnotator = 3.
+     * * => quotient = 16, remainder = 2
+     * * => 2 (remainder) first annotators do 16 + 1 samples, 1 left annotator does 16 samples
+     * * => sampleDivision = [17, 17, 12]
+     */
+    const division = project.taskDivisions
+    const numberOfSamples = project.numberOfSamples
+
+    const numberOfAnnotators = division.length
+
+    const quotient = Math.floor(numberOfSamples / numberOfAnnotators)
+    const remainder = numberOfSamples % numberOfAnnotators
+
+    const sampleDivision = Array(numberOfAnnotators).fill(quotient) as number[]
+    for (let i = 0; i < remainder; i++) {
+      sampleDivision[i]++
+    }
+
+    let startSample = 1
+    for (let i = 0; i < numberOfAnnotators; i++) {
+      project.taskDivisions[i].startSample = startSample
+      project.taskDivisions[i].endSample = startSample + sampleDivision[i] - 1
+      startSample += sampleDivision[i]
     }
   }
 
