@@ -10,7 +10,7 @@ const userService = container.get<IUserService>(TYPES.USER_SERVICE)
 
 export const generateUser = (
   overwriteFields: Partial<IUser> = {},
-): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotation' | 'avatar'> => {
+): Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'monthlyAnnotations' | 'avatar'> => {
   return {
     username: faker.internet.userName(),
     password: 'ValidPassword123',

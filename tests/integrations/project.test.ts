@@ -36,6 +36,7 @@ import {
   IProjectModel,
   IRawSample,
   ISampleModel,
+  IUserModel,
   ProjectDocument,
   ProjectTypeDocument,
   SampleDocument,
@@ -47,6 +48,7 @@ const tokenService = container.get<ITokenService>(TYPES.TOKEN_SERVICE)
 const projectService = container.get<IProjectService>(TYPES.PROJECT_SERVICE)
 const sampleService = container.get<ISampleService>(TYPES.SAMPLE_SERVICE)
 const projectTypeService = container.get<IProjectTypeService>(TYPES.PROJECT_TYPE_SERVICE)
+const User = container.get<IUserModel>(TYPES.USER_MODEL)
 const Sample = container.get<ISampleModel>(TYPES.SAMPLE_MODEL)
 const Project = container.get<IProjectModel>(TYPES.PROJECT_MODEL)
 
@@ -986,7 +988,7 @@ describe('Project routes', () => {
       })
     })
 
-    describe("When project's phase is 'open for joining'", () => {
+    describe("When project is in 'open for joining' phase", () => {
       let manager: UserDocument
       let managerAccessToken: string
       let project: ProjectDocument
@@ -1044,11 +1046,12 @@ describe('Project routes', () => {
       })
     })
 
-    describe("When project's phase is 'annotating'", () => {
+    describe("When project is in 'annotating' phase", () => {
       let manager: UserDocument
       let managerAccessToken: string
       let samples: SampleDocument[]
       let project: ProjectDocument
+      let annotators: UserDocument[]
 
       beforeEach(async () => {
         const result = await createAnnotatingPhaseProject({
@@ -1067,6 +1070,7 @@ describe('Project routes', () => {
         managerAccessToken = tokenService.generateAccessToken(manager)
         samples = result.samples
         project = result.project
+        annotators = result.annotators
       })
 
       it("should return 200 (ok) and turn project's phase to 'done' if all sample is annotated", async () => {
@@ -1134,6 +1138,102 @@ describe('Project routes', () => {
           .patch(`/api/v1/projects/${project.id}/phases`)
           .set('Authorization', managerAccessToken)
           .expect(StatusCodes.BAD_REQUEST)
+      })
+
+      it('should correctly update monthly annotations of user', async () => {
+        await Promise.all(
+          samples.map((sample) => {
+            return sampleService.annotateSample(project, sample, {
+              labelings: null,
+              generatedTexts: [faker.lorem.paragraph()],
+              textAnnotations: [],
+            })
+          }),
+        )
+
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.OK)
+
+        const annotator1 = await User.findById(annotators[0].id)
+        const annotator2 = await User.findById(annotators[1].id)
+        const annotator3 = await User.findById(annotators[2].id)
+        const annotator4 = await User.findById(annotators[3].id)
+
+        const now = new Date()
+        const thisMonth = now.getMonth() + 1
+        const thisYear = now.getFullYear()
+
+        expect(annotator1?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator1?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator1?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(2)
+
+        expect(annotator2?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator2?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator2?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(2)
+
+        expect(annotator3?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator3?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator3?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(2)
+
+        expect(annotator4?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator4?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator4?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(1)
+      })
+
+      it('should correctly update monthly annotations of user if user already has month annotation', async () => {
+        await Promise.all(
+          samples.map((sample) => {
+            return sampleService.annotateSample(project, sample, {
+              labelings: null,
+              generatedTexts: [faker.lorem.paragraph()],
+              textAnnotations: [],
+            })
+          }),
+        )
+        const now = new Date()
+        const thisMonth = now.getMonth() + 1
+        const thisYear = now.getFullYear()
+
+        annotators[0].monthlyAnnotations.push({
+          month: thisMonth - 1,
+          year: thisYear,
+          annotationTotal: 123,
+        })
+        await annotators[0].save()
+        annotators[1].monthlyAnnotations.push({
+          month: thisMonth,
+          year: thisYear,
+          annotationTotal: 123,
+        })
+        await annotators[1].save()
+
+        await request
+          .patch(`/api/v1/projects/${project.id}/phases`)
+          .set('Authorization', managerAccessToken)
+          .expect(StatusCodes.OK)
+
+        const annotator1 = await User.findById(annotators[0].id)
+        const annotator2 = await User.findById(annotators[1].id)
+        const annotator3 = await User.findById(annotators[2].id)
+        const annotator4 = await User.findById(annotators[3].id)
+
+        expect(annotator1?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator1?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator1?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(2)
+
+        expect(annotator2?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator2?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator2?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(125)
+
+        expect(annotator3?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator3?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator3?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(2)
+
+        expect(annotator4?.monthlyAnnotations.at(-1)?.month).toBe(thisMonth)
+        expect(annotator4?.monthlyAnnotations.at(-1)?.year).toBe(thisYear)
+        expect(annotator4?.monthlyAnnotations.at(-1)?.annotationTotal).toBe(1)
       })
     })
 

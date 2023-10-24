@@ -207,7 +207,7 @@ describe('Users routes', () => {
 
     it('should return 400 (bad request) if provide invalid fields', async () => {
       const invalidData = {
-        monthlyAnnotation: [{ month: 1, total: 123 }],
+        monthlyAnnotations: [{ month: 1, total: 123 }],
         avatar: 'some-link',
         otherInvalidField: 'hello world',
       } as const
@@ -335,7 +335,7 @@ describe('Users routes', () => {
       const unAllowedUpdatePayloads = [
         { username: faker.internet.userName() },
         { avatar: 'avatar' },
-        { monthlyAnnotation: [] },
+        { monthlyAnnotations: [] },
       ]
       for (const payload of unAllowedUpdatePayloads) {
         await request
