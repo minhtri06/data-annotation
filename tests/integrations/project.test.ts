@@ -1312,8 +1312,8 @@ describe('Project routes', () => {
         .expect(StatusCodes.OK)
 
       const dbProject = await Project.findById(project.id)
-      const division = dbProject?.taskDivisions.find((d) =>
-        d.annotator.equals(annotator.id),
+      const division = dbProject?.taskDivisions.find(
+        (d) => d.annotator?.equals(annotator.id),
       )
       expect(division).not.toBeUndefined()
     })
@@ -1328,7 +1328,7 @@ describe('Project routes', () => {
       const dbProject = await Project.findById(project.id)
       expect(res.body.divisions.length).toEqual(dbProject?.taskDivisions.length)
       dbProject?.taskDivisions.forEach((division, i) => {
-        expect(division.annotator.toHexString()).toBe(res.body.divisions[i].annotator)
+        expect(division.annotator?.toHexString()).toBe(res.body.divisions[i].annotator)
       })
     })
 

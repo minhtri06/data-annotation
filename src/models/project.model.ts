@@ -20,7 +20,7 @@ export interface IProject {
   maximumOfAnnotators: number
 
   taskDivisions: Types.DocumentArray<{
-    annotator: Types.ObjectId
+    annotator: Types.ObjectId | null
     startSample?: number
     endSample?: number
   }>
@@ -70,7 +70,7 @@ export interface IRawProject {
   maximumOfAnnotators: number
 
   taskDivisions: {
-    annotator: string
+    annotator: string | null
     startSample?: number
     endSample?: number
   }[]
@@ -120,7 +120,13 @@ const projectSchema = new Schema<IProject>(
 
     requirement: { type: String, trim: true, required: true },
 
-    manager: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
+    manager: {
+      type: Schema.Types.ObjectId,
+      ref: MODEL_NAMES.USER,
+      required: function () {
+        return (this as IProject).phase === PROJECT_PHASES.DONE
+      },
+    },
 
     phase: {
       type: String,
@@ -180,11 +186,7 @@ const projectSchema = new Schema<IProject>(
     taskDivisions: {
       type: [
         {
-          annotator: {
-            type: Schema.Types.ObjectId,
-            ref: MODEL_NAMES.USER,
-            required: true,
-          },
+          annotator: { type: Schema.Types.ObjectId, ref: MODEL_NAMES.USER },
           startSample: { type: Number },
           endSample: { type: Number },
         },
@@ -195,6 +197,14 @@ const projectSchema = new Schema<IProject>(
 
         if (taskDivisions.length > project.maximumOfAnnotators) {
           throw new Error(`taskDivisions.length > maximumOfAnnotators`)
+        }
+
+        if (project.phase !== PROJECT_PHASES.ANNOTATING) {
+          taskDivisions.forEach((division, index) => {
+            if (!division.annotator) {
+              throw new Error(`taskDivisions[${index}].annotator is required`)
+            }
+          })
         }
       },
       required: true,

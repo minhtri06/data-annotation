@@ -1,4 +1,10 @@
-import { IProjectModel, ISampleModel, IUserModel, ProjectDocument } from '@src/models'
+import {
+  IProjectModel,
+  ISampleModel,
+  IUserModel,
+  ProjectDocument,
+  UserDocument,
+} from '@src/models'
 import { PaginateResult } from '@src/types'
 import { PROJECT_PHASES, SAMPLE_STATUSES, TYPES } from '@src/constants'
 import {
@@ -11,8 +17,9 @@ import {
 } from './project.service.interface'
 import { inject, injectable } from 'inversify'
 import { validateSortFields } from '@src/helpers'
-import { Exception, NotAllowedException } from './exceptions'
+import { Exception, NotAllowedException, NotfoundException } from './exceptions'
 import { ISampleStorageService } from './sample-storage.service.interface'
+import { ROLES } from '@src/configs/role.config'
 
 @injectable()
 export class ProjectService implements IProjectService {
@@ -200,13 +207,72 @@ export class ProjectService implements IProjectService {
         type: 'division-is-full',
       })
     }
-    const division = project.taskDivisions.find((d) => d.annotator.equals(userId))
+    const division = project.taskDivisions.find((d) => d.annotator?.equals(userId))
     if (division) {
       throw new NotAllowedException('You are already in the project', {
         type: 'already-in-project',
       })
     }
     project.taskDivisions.push({ annotator: userId })
+    await project.save()
+  }
+
+  async removeManagerFromProject(project: ProjectDocument) {
+    if (project.phase === PROJECT_PHASES.DONE) {
+      throw new NotAllowedException("Cannot remove manager from project that is 'done'")
+    }
+    project.manager = undefined
+    await project.save()
+  }
+
+  async assignManagerToProject(project: ProjectDocument, user: UserDocument) {
+    if (user.role !== ROLES.MANAGER) {
+      throw new NotAllowedException('User is not a manager')
+    }
+    const hasManager = !!project.manager
+    if (hasManager) {
+      throw new NotAllowedException('Project already has a manager')
+    }
+    project.manager = user._id
+    await project.save()
+  }
+
+  async removeAnnotatorFromProject(project: ProjectDocument, annotatorId: string) {
+    if (project.phase === PROJECT_PHASES.DONE) {
+      throw new NotAllowedException("Cannot remove annotator from project that is 'done'")
+    }
+    const division = project.taskDivisions.find(
+      (division) => division.annotator?.equals(annotatorId),
+    )
+    if (!division) {
+      throw new NotAllowedException('Annotator is not in project')
+    }
+    if (project.phase === PROJECT_PHASES.OPEN_FOR_JOINING) {
+      // remove the division entirely
+      project.taskDivisions.pull(division._id)
+    } else if (project.phase === PROJECT_PHASES.ANNOTATING) {
+      // if project is in anno set annotator to null
+      division.annotator = null
+    }
+    await project.save()
+  }
+
+  async assignAnnotatorToDivision(
+    project: ProjectDocument,
+    divisionId: string,
+    user: UserDocument,
+  ) {
+    if (user.role !== ROLES.ANNOTATOR) {
+      throw new NotAllowedException('User is not an annotator')
+    }
+    const division = project.taskDivisions.id(divisionId)
+    if (!division) {
+      throw new NotfoundException('Division not found')
+    }
+    if (division.annotator) {
+      throw new NotAllowedException('Division already has an annotator')
+    }
+    division.annotator = user._id
     await project.save()
   }
 }

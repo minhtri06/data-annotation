@@ -4,7 +4,7 @@ import { controller, httpGet, httpPatch, httpPost } from 'inversify-express-util
 
 import { PROJECT_PHASES, TYPES } from '@src/constants'
 import { IGeneralMiddleware, IUploadMiddleware } from '@src/middlewares'
-import { IProjectService } from '@src/services'
+import { IProjectService, IUserService } from '@src/services'
 import { ROLES } from '@src/configs/role.config'
 import { CustomRequest } from '@src/types'
 import { projectSchema as schema } from './schemas'
@@ -28,6 +28,7 @@ export const projectControllerFactory = (container: Container) => {
       @inject(TYPES.PROJECT_SERVICE)
       private projectService: IProjectService,
       @inject(TYPES.SAMPLE_SERVICE) private sampleService: ISampleService,
+      @inject(TYPES.USER_SERVICE) private userService: IUserService,
     ) {}
 
     @httpGet('/', auth(), validate(schema.getProjects))
@@ -171,7 +172,7 @@ export const projectControllerFactory = (container: Container) => {
       if (
         user.role !== ADMIN &&
         !project.manager?.equals(user.id) &&
-        !division.annotator.equals(user.id)
+        !division.annotator?.equals(user.id)
       ) {
         return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
       }
@@ -200,8 +201,8 @@ export const projectControllerFactory = (container: Container) => {
       if (!sample) {
         return res.status(StatusCodes.NOT_FOUND).json({ message: 'Sample not found' })
       }
-      const annotatorDivision = project.taskDivisions.find((d) =>
-        d.annotator.equals(user.id),
+      const annotatorDivision = project.taskDivisions.find(
+        (d) => d.annotator?.equals(user.id),
       )
       if (!annotatorDivision) {
         return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
@@ -243,6 +244,93 @@ export const projectControllerFactory = (container: Container) => {
         return res.json(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
       }
       await this.sampleService.markSampleAsAMistake(sample)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPatch(
+      '/:projectId/manager/remove',
+      auth({ requiredRoles: [ADMIN] }),
+      validate(schema.removeManagerFromProject),
+      getProjectById,
+    )
+    async removeManagerFromProject(
+      req: CustomRequest<schema.RemoveManagerFromProject>,
+      res: Response,
+    ) {
+      const project = req.data!.project!
+      await this.projectService.removeManagerFromProject(project)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPatch(
+      '/:projectId/manager/assign',
+      auth({ requiredRoles: [ADMIN] }),
+      validate(schema.assignManagerToProject),
+    )
+    async assignManagerToProject(
+      req: CustomRequest<schema.AssignManagerToProject>,
+      res: Response,
+    ) {
+      const [project, user] = await Promise.all([
+        this.projectService.getProjectById(req.params.projectId),
+        this.userService.getUserById(req.body.userId),
+      ])
+      if (!project) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
+      }
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
+      }
+      await this.projectService.assignManagerToProject(project, user)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPatch(
+      '/:projectId/annotators/:annotatorId/remove',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.removeAnnotatorFromProject),
+      getProjectById,
+    )
+    async removeAnnotatorFromProject(
+      req: CustomRequest<schema.RemoveAnnotatorFromProject>,
+      res: Response,
+    ) {
+      const user = req.user!
+      const project = req.data!.project!
+      if (user.role === MANAGER && !project.manager?.equals(user.id)) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      await this.projectService.removeAnnotatorFromProject(
+        project,
+        req.params.annotatorId,
+      )
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpPatch(
+      '/:projectId/divisions/:divisionId/assign',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.assignAnnotatorToDivision),
+    )
+    async assignAnnotatorToDivision(
+      req: CustomRequest<schema.AssignAnnotatorToDivision>,
+      res: Response,
+    ) {
+      const [project, user] = await Promise.all([
+        this.projectService.getProjectById(req.params.projectId),
+        this.userService.getUserById(req.body.userId),
+      ])
+      if (!project) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Project not found' })
+      }
+      if (!user) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
+      }
+      await this.projectService.assignAnnotatorToDivision(
+        project,
+        req.params.divisionId,
+        user,
+      )
       return res.status(StatusCodes.NO_CONTENT).send()
     }
   }

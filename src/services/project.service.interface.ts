@@ -1,6 +1,6 @@
 import { PaginateResult } from '@src/types'
 
-import { IRawProject, ProjectDocument } from '@src/models'
+import { IRawProject, ProjectDocument, UserDocument } from '@src/models'
 
 export interface IProjectService {
   getProjectById(
@@ -20,6 +20,18 @@ export interface IProjectService {
   turnProjectToNextPhase(project: ProjectDocument): Promise<void>
 
   joinProject(project: ProjectDocument, userId: string): Promise<void>
+
+  removeManagerFromProject(project: ProjectDocument): Promise<void>
+
+  assignManagerToProject(project: ProjectDocument, user: UserDocument): Promise<void>
+
+  removeAnnotatorFromProject(project: ProjectDocument, annotatorId: string): Promise<void>
+
+  assignAnnotatorToDivision(
+    project: ProjectDocument,
+    divisionId: string,
+    user: UserDocument,
+  ): Promise<void>
 }
 
 // * Parameter types

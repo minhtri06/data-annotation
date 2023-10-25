@@ -307,3 +307,63 @@ export const markSampleAsAMistake: CustomSchemaMap<MarkSampleAsAMistake> = {
     sampleId: stringId.required(),
   },
 }
+
+export type RemoveManagerFromProject = {
+  params: {
+    projectId: string
+  }
+}
+export const removeManagerFromProject: CustomSchemaMap<RemoveManagerFromProject> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
+export type AssignManagerToProject = {
+  params: {
+    projectId: string
+  }
+  body: {
+    userId: string
+  }
+}
+export const assignManagerToProject: CustomSchemaMap<AssignManagerToProject> = {
+  params: {
+    projectId: stringId.required(),
+  },
+  body: {
+    userId: stringId.required(),
+  },
+}
+
+export type RemoveAnnotatorFromProject = {
+  params: {
+    projectId: string
+    annotatorId: string
+  }
+}
+export const removeAnnotatorFromProject: CustomSchemaMap<RemoveAnnotatorFromProject> = {
+  params: {
+    projectId: stringId.required(),
+    annotatorId: stringId.required(),
+  },
+}
+
+export type AssignAnnotatorToDivision = {
+  params: {
+    projectId: string
+    divisionId: string
+  }
+  body: {
+    userId: string
+  }
+}
+export const assignAnnotatorToDivision: CustomSchemaMap<AssignAnnotatorToDivision> = {
+  params: {
+    projectId: stringId.required(),
+    divisionId: stringId.required(),
+  },
+  body: {
+    userId: stringId.required(),
+  },
+}
