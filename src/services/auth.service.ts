@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify'
 import moment from 'moment'
 
 import { TOKEN_TYPES, TYPES } from '@src/constants'
-import { IAuthService } from './auth.service.interface'
+import { IAuthService, RegisterPayload } from './auth.service.interface'
 import { ITokenService } from './token.service.interface'
 import { IUserService } from './user.service.interface'
 import { UnauthorizedException } from './exceptions/unauthorized.exception'
@@ -108,5 +108,9 @@ export class AuthService implements IAuthService {
     refreshTokenDocument.isUsed = true
     await refreshTokenDocument.save()
     return await this.tokenService.createAuthTokens(user)
+  }
+
+  async register(payload: RegisterPayload) {
+    return await this.userService.createUser(payload)
   }
 }

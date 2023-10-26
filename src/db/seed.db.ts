@@ -58,7 +58,7 @@ const seed = async () => {
     ),
   )
   await seedUser()
-  await mongoose.disconnect()
+  // await mongoose.disconnect()
   console.log('🍂 seed done')
 }
 

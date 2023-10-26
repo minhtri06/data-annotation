@@ -38,3 +38,28 @@ export const refreshTokens: CustomSchemaMap<RefreshTokens> = {
     refreshToken: Joi.string().required(),
   },
 }
+
+export type Register = {
+  body: {
+    name: string
+    username: string
+    password: string
+    role: string
+    dateOfBirth: Date
+    phoneNumber: string
+    address: string
+    workStatus: string
+  }
+}
+export const register: CustomSchemaMap<Register> = {
+  body: {
+    name: Joi.string().required(),
+    username: Joi.string().required(),
+    password: Joi.string().required(),
+    role: Joi.string().required(),
+    dateOfBirth: Joi.date().iso().required(),
+    phoneNumber: Joi.string().required(),
+    address: Joi.string().required(),
+    workStatus: Joi.string(),
+  },
+}

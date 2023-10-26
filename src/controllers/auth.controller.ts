@@ -10,7 +10,7 @@ import { authSchema as schema } from './schemas'
 import { TYPES } from '@src/constants'
 
 export const authControllerFactory = (container: Container) => {
-  const generalMiddleware = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
+  const { validate } = container.get<IGeneralMiddleware>(TYPES.GENERAL_MIDDLEWARE)
 
   @controller('/auth')
   class AuthController {
@@ -20,7 +20,7 @@ export const authControllerFactory = (container: Container) => {
       @inject(TYPES.TOKEN_SERVICE) private tokenService: ITokenService,
     ) {}
 
-    @httpPost('/login', generalMiddleware.validate(schema.login))
+    @httpPost('/login', validate(schema.login))
     async login(req: CustomRequest<schema.Login>, res: Response) {
       const { username, password } = req.body
       const { user, authTokens } = await this.authService.login(username, password)
@@ -29,14 +29,14 @@ export const authControllerFactory = (container: Container) => {
         .json({ message: 'Login successfully', user, authTokens })
     }
 
-    @httpPost('/logout', generalMiddleware.validate(schema.logout))
+    @httpPost('/logout', validate(schema.logout))
     async logout(req: CustomRequest<schema.Logout>, res: Response) {
       const { refreshToken } = req.body
       await this.authService.logout(refreshToken)
       return res.status(StatusCodes.NO_CONTENT).send()
     }
 
-    @httpPost('/refresh-tokens', generalMiddleware.validate(schema.refreshTokens))
+    @httpPost('/refresh-tokens', validate(schema.refreshTokens))
     async refreshTokens(req: CustomRequest<schema.RefreshTokens>, res: Response) {
       const { accessToken, refreshToken } = req.body
       const authTokens = await this.authService.refreshAuthTokens(
@@ -44,6 +44,12 @@ export const authControllerFactory = (container: Container) => {
         refreshToken,
       )
       return res.status(StatusCodes.OK).json({ authTokens })
+    }
+
+    @httpPost('/register', validate(schema.register))
+    async register(req: CustomRequest<schema.Register>, res: Response) {
+      const user = await this.authService.register(req.body)
+      return res.status(StatusCodes.CREATED).json({ user })
     }
   }
 
