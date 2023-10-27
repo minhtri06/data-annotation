@@ -17,6 +17,8 @@ export interface IProjectService {
 
   updateProject(project: ProjectDocument, payload: UpdateProjectPayload): Promise<void>
 
+  deleteProject(project: ProjectDocument): Promise<void>
+
   turnProjectToNextPhase(project: ProjectDocument): Promise<void>
 
   joinProject(project: ProjectDocument, userId: string): Promise<void>

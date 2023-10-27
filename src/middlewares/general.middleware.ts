@@ -139,6 +139,8 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           return next(new UnauthorizedException('Unauthorized'))
         }
       }
+      console.log(payload)
+      console.log(requiredRoles)
 
       if (requiredRoles && !requiredRoles.includes(payload.role)) {
         next(new ForbiddenException('Forbidden'))

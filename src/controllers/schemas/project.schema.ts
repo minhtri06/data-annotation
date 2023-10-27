@@ -171,6 +171,17 @@ export const updateProjectById: CustomSchemaMap<UpdateProjectById> = {
   },
 }
 
+export type DeleteProjectById = {
+  params: {
+    projectId: string
+  }
+}
+export const deleteProjectById: CustomSchemaMap<DeleteProjectById> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
 export type JoinProject = {
   params: {
     projectId: string

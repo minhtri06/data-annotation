@@ -1,6 +1,12 @@
 import { Response } from 'express'
 import { Container, inject } from 'inversify'
-import { controller, httpGet, httpPatch, httpPost } from 'inversify-express-utils'
+import {
+  controller,
+  httpDelete,
+  httpGet,
+  httpPatch,
+  httpPost,
+} from 'inversify-express-utils'
 
 import { PROJECT_PHASES, TYPES } from '@src/constants'
 import { IGeneralMiddleware, IUploadMiddleware } from '@src/middlewares'
@@ -81,6 +87,22 @@ export const projectControllerFactory = (container: Container) => {
     async updateProjectById(req: CustomRequest<schema.UpdateProjectById>, res: Response) {
       const project = req.data!.project!
       await this.projectService.updateProject(project, req.body)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
+    @httpDelete(
+      '/:projectId',
+      auth({ requiredRoles: [ADMIN, MANAGER] }),
+      validate(schema.deleteProjectById),
+      getProjectById,
+    )
+    async deleteProjectById(req: CustomRequest<schema.DeleteProjectById>, res: Response) {
+      const caller = req.user!
+      const project = req.data!.project!
+      if (caller.role === MANAGER && !project.manager?.equals(caller.id)) {
+        return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden' })
+      }
+      await this.projectService.deleteProject(project)
       return res.status(StatusCodes.NO_CONTENT).send()
     }
 

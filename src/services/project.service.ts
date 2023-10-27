@@ -87,6 +87,11 @@ export class ProjectService implements IProjectService {
     await project.save()
   }
 
+  async deleteProject(project: ProjectDocument) {
+    await this.Sample.deleteMany({ project: project._id })
+    await project.deleteOne()
+  }
+
   async turnProjectToNextPhase(project: ProjectDocument) {
     switch (project.phase) {
       case PROJECT_PHASES.SETTING_UP:
