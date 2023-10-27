@@ -193,6 +193,17 @@ export const joinProject: CustomSchemaMap<JoinProject> = {
   },
 }
 
+export type LeaveProject = {
+  params: {
+    projectId: string
+  }
+}
+export const leaveProject: CustomSchemaMap<JoinProject> = {
+  params: {
+    projectId: stringId.required(),
+  },
+}
+
 export type GetProjectSamples = {
   params: {
     projectId: string

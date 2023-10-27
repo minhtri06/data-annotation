@@ -51,7 +51,6 @@ export class GeneralMiddleware implements IGeneralMiddleware {
     const isOnProduction = ENV_CONFIG.NODE_ENV === 'prod'
 
     if (req.file) {
-      console.log('delete file')
       const [storageName] = req.file.fieldname.split(':')
       if (storageName === this.imageStorageService.storageName) {
         await this.imageStorageService.deleteFile(req.file.filename)
@@ -139,8 +138,6 @@ export class GeneralMiddleware implements IGeneralMiddleware {
           return next(new UnauthorizedException('Unauthorized'))
         }
       }
-      console.log(payload)
-      console.log(requiredRoles)
 
       if (requiredRoles && !requiredRoles.includes(payload.role)) {
         next(new ForbiddenException('Forbidden'))

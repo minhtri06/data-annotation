@@ -160,6 +160,18 @@ export const projectControllerFactory = (container: Container) => {
       })
     }
 
+    @httpPatch(
+      '/:projectId/leave-project',
+      auth({ requiredRoles: [ANNOTATOR] }),
+      validate(schema.leaveProject),
+      getProjectById,
+    )
+    async leaveProject(req: CustomRequest<schema.LeaveProject>, res: Response) {
+      const project = req.data!.project!
+      await this.projectService.leaveProject(project, req.user!.id)
+      return res.status(StatusCodes.NO_CONTENT).send()
+    }
+
     @httpGet(
       '/:projectId/samples',
       auth({ requiredRoles: [ADMIN, MANAGER] }),

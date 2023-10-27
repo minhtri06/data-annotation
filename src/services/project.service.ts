@@ -220,6 +220,19 @@ export class ProjectService implements IProjectService {
     }
     project.taskDivisions.push({ annotator: userId })
     await project.save()
+    await project.populate({
+      path: 'taskDivisions.annotator',
+      select: 'name avatar _id',
+    })
+  }
+
+  async leaveProject(project: ProjectDocument, userId: string) {
+    if (project.phase !== PROJECT_PHASES.OPEN_FOR_JOINING) {
+      throw new NotAllowedException(
+        `Cannot leave a project that's in '${project.phase}' phase`,
+      )
+    }
+    await this.removeAnnotatorFromProject(project, userId)
   }
 
   async removeManagerFromProject(project: ProjectDocument) {

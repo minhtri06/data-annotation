@@ -23,6 +23,8 @@ export interface IProjectService {
 
   joinProject(project: ProjectDocument, userId: string): Promise<void>
 
+  leaveProject(project: ProjectDocument, userId: string): Promise<void>
+
   removeManagerFromProject(project: ProjectDocument): Promise<void>
 
   assignManagerToProject(project: ProjectDocument, user: UserDocument): Promise<void>
