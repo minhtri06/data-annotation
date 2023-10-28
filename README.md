@@ -4,6 +4,14 @@
 
 A text annotation tool for machine learning and natural language processing tasks. It allows users to annotate various types of text data, such as documents, articles, and other textual information, with labels and entities.
 
+The app has 3 roles:
+
+- Admin: has the highest privileges, they can do almost everything
+
+- Manager: has the privileges to create and manage projects
+
+- Annotator: can join projects and annotate their samples
+
 This project helped me learn how to apply IoC (Inversion of Control) and OOP to Express, implement docker and practice with test-driven development.
 
 You can access the api documentation in [here](https://documenter.getpostman.com/view/24479002/2s9YRGwTsR)
